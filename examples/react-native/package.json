@@ -19,6 +19,7 @@
     "@ap0nia/eden-react-query": "workspace:^",
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/native": "^6.0.2",
+    "@sinclair/typebox": "^0.34.28",
     "@tanstack/react-query": "^5.51.16",
     "elysia": "^1.1.19",
     "expo": "~51.0.28",

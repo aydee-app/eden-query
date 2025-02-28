@@ -112,7 +112,7 @@ importers:
         version: link:../packages/rspress-plugin-twoslash
       '@elysiajs/eden':
         specifier: 1.1.0
-        version: 1.1.0(elysia@1.2.15(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.7.3))
+        version: 1.1.0(elysia@1.2.15(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.7.3))
       '@radix-ui/react-slot':
         specifier: ^1.1.2
         version: 1.1.2(@types/react@18.3.18)(react@18.3.1)
@@ -139,7 +139,7 @@ importers:
         version: 5.1.1
       elysia:
         specifier: ^1.2.15
-        version: 1.2.15(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.7.3)
+        version: 1.2.15(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.7.3)
       motion:
         specifier: ^12.4.2
         version: 12.4.2(react-dom@19.0.0(react@18.3.1))(react@18.3.1)
@@ -245,13 +245,16 @@ importers:
         version: link:../../packages/eden-react-query
       '@elysiajs/cors':
         specifier: ^1.1.0
-        version: 1.1.0(elysia@1.1.19(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3))
+        version: 1.1.0(elysia@1.1.19(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3))
+      '@sinclair/typebox':
+        specifier: ^0.34.28
+        version: 0.34.28
       '@tanstack/react-query':
         specifier: ^5.51.16
         version: 5.51.21(react@18.3.1)
       elysia:
         specifier: 1.1.19
-        version: 1.1.19(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3)
+        version: 1.1.19(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -289,12 +292,15 @@ importers:
       '@ap0nia/eden-svelte-query':
         specifier: workspace:^
         version: link:../../packages/eden-svelte-query
+      '@sinclair/typebox':
+        specifier: 0.34.28
+        version: 0.34.28
       '@tanstack/svelte-query':
         specifier: ^5.51.15
         version: 5.51.21(svelte@4.2.18)
       elysia:
-        specifier: 1.1.19
-        version: 1.1.19(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3)
+        specifier: 1.2.15
+        version: 1.2.15(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3)
       superjson:
         specifier: ^2.2.1
         version: 2.2.1
@@ -335,12 +341,15 @@ importers:
       '@react-navigation/native':
         specifier: ^6.0.2
         version: 6.1.18(react-native@0.74.5(@babel/core@7.25.8)(@babel/preset-env@7.25.8(@babel/core@7.25.8))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
+      '@sinclair/typebox':
+        specifier: ^0.34.28
+        version: 0.34.28
       '@tanstack/react-query':
         specifier: ^5.51.16
         version: 5.51.21(react@18.2.0)
       elysia:
         specifier: ^1.1.19
-        version: 1.1.19(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.3.3)
+        version: 1.1.19(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.3.3)
       expo:
         specifier: ~51.0.28
         version: 51.0.38(@babel/core@7.25.8)(@babel/preset-env@7.25.8(@babel/core@7.25.8))
@@ -456,7 +465,7 @@ importers:
     dependencies:
       elysia:
         specifier: 1.2.15
-        version: 1.2.15(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3)
+        version: 1.2.15(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3)
     devDependencies:
       '@types/bun':
         specifier: ^1.1.6
@@ -484,7 +493,7 @@ importers:
         version: 5.51.21(react@18.3.1)
       elysia:
         specifier: ^1.2.12
-        version: 1.2.12(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3)
+        version: 1.2.12(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -509,7 +518,7 @@ importers:
         version: 5.66.0(react@18.3.1)
       elysia:
         specifier: ^1.2.15
-        version: 1.2.15(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3)
+        version: 1.2.15(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3)
       react:
         specifier: ^18.0.0
         version: 18.3.1
@@ -534,7 +543,7 @@ importers:
         version: 5.51.21(svelte@5.2.3)
       elysia:
         specifier: ^1.2.15
-        version: 1.2.15(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3)
+        version: 1.2.15(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3)
     devDependencies:
       tsup:
         specifier: ^8.2.4
@@ -3604,8 +3613,8 @@ packages:
   '@sinclair/typebox@0.27.8':
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
 
-  '@sinclair/typebox@0.33.0':
-    resolution: {integrity: sha512-y4wDeA3hHRpUtHlTDpWEtAnU8wTVzOuDJfn1Q7t42TXXHBrhHOK+Ij7y1zJAyXnDuIrEBVw8sLW1Uzl2WCyz+A==}
+  '@sinclair/typebox@0.34.28':
+    resolution: {integrity: sha512-e2B9vmvaa5ym5hWgCHw5CstP54au6AOLXrhZErLsOyyRzuWJtXl/8TszKtc5x8rw/b+oY7HKS9m9iRI53RK0WQ==}
 
   '@sinonjs/commons@3.0.1':
     resolution: {integrity: sha512-K3mCHKQ9sVh8o1C9cxkwxaOmXoAMlDxC1mYyHrjqOWEcBjYr76t96zL2zlj5dUGZ3HSw240X1qgH3Mjf1yJWpQ==}
@@ -12657,13 +12666,13 @@ snapshots:
     dependencies:
       '@types/hammerjs': 2.0.46
 
-  '@elysiajs/cors@1.1.0(elysia@1.1.19(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3))':
+  '@elysiajs/cors@1.1.0(elysia@1.1.19(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3))':
     dependencies:
-      elysia: 1.1.19(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3)
+      elysia: 1.1.19(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3)
 
-  '@elysiajs/eden@1.1.0(elysia@1.2.15(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.7.3))':
+  '@elysiajs/eden@1.1.0(elysia@1.2.15(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.7.3))':
     dependencies:
-      elysia: 1.2.15(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.7.3)
+      elysia: 1.2.15(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.7.3)
 
   '@emnapi/core@1.2.0':
     dependencies:
@@ -14896,7 +14905,7 @@ snapshots:
 
   '@sinclair/typebox@0.27.8': {}
 
-  '@sinclair/typebox@0.33.0': {}
+  '@sinclair/typebox@0.34.28': {}
 
   '@sinonjs/commons@3.0.1':
     dependencies:
@@ -16825,45 +16834,45 @@ snapshots:
 
   electron-to-chromium@1.5.97: {}
 
-  elysia@1.1.19(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.3.3):
+  elysia@1.1.19(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.3.3):
     dependencies:
-      '@sinclair/typebox': 0.33.0
+      '@sinclair/typebox': 0.34.28
       cookie: 0.6.0
       fast-decode-uri-component: 1.0.1
     optionalDependencies:
       openapi-types: 12.1.3
       typescript: 5.3.3
 
-  elysia@1.1.19(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3):
+  elysia@1.1.19(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3):
     dependencies:
-      '@sinclair/typebox': 0.33.0
+      '@sinclair/typebox': 0.34.28
       cookie: 0.6.0
       fast-decode-uri-component: 1.0.1
     optionalDependencies:
       openapi-types: 12.1.3
       typescript: 5.6.3
 
-  elysia@1.2.12(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3):
+  elysia@1.2.12(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3):
     dependencies:
-      '@sinclair/typebox': 0.33.0
+      '@sinclair/typebox': 0.34.28
       cookie: 1.0.2
       memoirist: 0.3.0
     optionalDependencies:
       openapi-types: 12.1.3
       typescript: 5.6.3
 
-  elysia@1.2.15(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.6.3):
+  elysia@1.2.15(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.6.3):
     dependencies:
-      '@sinclair/typebox': 0.33.0
+      '@sinclair/typebox': 0.34.28
       cookie: 1.0.2
       memoirist: 0.3.0
     optionalDependencies:
       openapi-types: 12.1.3
       typescript: 5.6.3
 
-  elysia@1.2.15(@sinclair/typebox@0.33.0)(openapi-types@12.1.3)(typescript@5.7.3):
+  elysia@1.2.15(@sinclair/typebox@0.34.28)(openapi-types@12.1.3)(typescript@5.7.3):
     dependencies:
-      '@sinclair/typebox': 0.33.0
+      '@sinclair/typebox': 0.34.28
       cookie: 1.0.2
       memoirist: 0.3.0
     optionalDependencies:
