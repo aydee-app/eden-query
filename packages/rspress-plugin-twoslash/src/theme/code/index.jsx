@@ -14,9 +14,9 @@ import { PrismSyntaxHighlighter } from './prism-syntax-highlighter'
  * @param {import('./types').CodeProps} props
  */
 export function Code(props) {
-  const { siteData } = usePageData()
-  const codeHighlighter = props.codeHighlighter ?? siteData.markdown.codeHighlighter
-  const { defaultWrapCode } = siteData.markdown
+  const { siteData } = usePageData() ?? {}
+  const codeHighlighter = props.codeHighlighter ?? siteData?.markdown?.codeHighlighter
+  const { defaultWrapCode } = siteData?.markdown ?? {}
   const [codeWrap, setCodeWrap] = useState(defaultWrapCode)
 
   /**
