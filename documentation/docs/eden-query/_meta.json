@@ -1,13 +1,24 @@
 [
   {
     "type": "file",
-    "name": "index",
-    "label": "Overview"
+    "name": "batching",
+    "label": "Batching"
   },
-  "batching",
-  "transformers",
-  "headers",
-  "cors",
+  {
+    "type": "file",
+    "name": "transformers",
+    "label": "Transformers"
+  },
+  {
+    "type": "file",
+    "name": "headers",
+    "label": "Headers"
+  },
+  {
+    "type": "file",
+    "name": "cors",
+    "label": "CORS"
+  },
   {
     "type": "dir",
     "name": "links",
@@ -16,11 +27,11 @@
   {
     "type": "dir",
     "name": "react",
-    "label": "React Query"
+    "label": "Eden-React-Query"
   },
   {
     "type": "dir",
     "name": "svelte",
-    "label": "Svelte Query"
+    "label": "Eden-Svelte-Query"
   }
 ]

@@ -1,1 +1,22 @@
-["http-link", "http-batch-link", "split-link", "logger-link"]
+[
+  {
+    "type": "file",
+    "name": "http-link",
+    "label": "HTTP Link"
+  },
+  {
+    "type": "file",
+    "name": "http-batch-link",
+    "label": "HTTP Batch Link"
+  },
+  {
+    "type": "file",
+    "name": "split-link",
+    "label": "Split Link"
+  },
+  {
+    "type": "file",
+    "name": "logger-link",
+    "label": "Logger Link"
+  }
+]
