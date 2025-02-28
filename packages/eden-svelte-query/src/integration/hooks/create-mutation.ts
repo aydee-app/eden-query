@@ -152,7 +152,7 @@ export function createEdenMutation<
 export function edenCreateMutationOptions(
   parsedPathsAndMethod: ParsedPathAndMethod,
   context: EdenContextState<any, any>,
-  options: EdenCreateMutationOptions<any, any, any> = {},
+  options: EdenCreateMutationOptions<any, any, any> & InferRouteOptions = {},
   config?: any,
 ): CreateMutationOptions {
   const { client, queryClient = useQueryClient() } = context
@@ -165,16 +165,41 @@ export function edenCreateMutationOptions(
 
   const defaultOptions = queryClient.defaultMutationOptions(mutationDefaults)
 
-  const { eden, ...mutationOptions } = options
+  const {
+    eden,
+
+    //
+    params: baseParams,
+    query: baseQuery,
+    headers: baseHeaders,
+    //
+
+    ...mutationOptions
+  } = options
 
   const resolvedMutationOptions: CreateMutationOptions = {
     mutationKey,
     mutationFn: async (variables: any = {}) => {
-      const { body, options } = variables as EdenCreateMutationVariables
+      const { body, options } = variables as EdenCreateMutationVariables<any, InferRouteOptions>
+
+      const resolvedOptions: InferRouteOptions = {
+        headers: {
+          ...baseHeaders,
+          ...options?.headers,
+        },
+        query: {
+          ...baseQuery,
+          ...options?.query,
+        },
+        params: {
+          ...baseParams,
+          ...options?.params,
+        },
+      }
 
       const params = {
         ...config,
-        options,
+        options: resolvedOptions,
         body,
         path,
         method,
