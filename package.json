@@ -32,7 +32,8 @@
   "scripts": {
     "postinstall": "changeset init && lefthook install",
     "build": "turbo build",
-    "test:coverage": "nx run-many -t test:coverage"
+    "test": "turbo test",
+    "test:coverage": "turbo test:coverage"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.7",

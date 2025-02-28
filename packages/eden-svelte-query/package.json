@@ -10,7 +10,8 @@
   },
   "scripts": {
     "build": "tsup && tsc --emitDeclarationOnly --declaration",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "type": "module",
   "main": "./dist/index.js",
