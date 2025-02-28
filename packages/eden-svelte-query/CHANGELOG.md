@@ -1,5 +1,15 @@
 # @ap0nia/eden-svelte-query
 
+## 1.7.0
+
+### Minor Changes
+
+- cf9f75b: feat: createMutation accepts context as second argument
+
+### Patch Changes
+
+- e654546: feat: internal createMutation options includes route options
+
 ## 1.6.1
 
 ### Patch Changes
