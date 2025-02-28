@@ -56,6 +56,7 @@ export type EdenCreateMutation<
   TError = InferRouteError<TRoute>,
 > = <TContext = unknown>(
   options?: EdenCreateMutationOptions<TVariables, TError, TData, TContext>,
+  context?: EdenContextState,
 ) => EdenCreateMutationResult<TData, TError, TVariables, TContext, TInput>
 
 export type EdenAsyncMutationFunction<TData, TError, TVariables, TInput> = <TContext = TData>(
