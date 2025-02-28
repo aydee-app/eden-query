@@ -94,7 +94,7 @@ export const load = async (event: RequestEvent) => {
 ### 5. Initialize Eden-Query Providers.
 
 ```svelte twoslash title=src/routes/+layout.svelte
-<script lang="ts" module>
+<script lang="ts" context="module">
 // @filename: $types.ts
 export type PageData = any
 
@@ -129,7 +129,7 @@ If you only use client side rendering, then you can move all the code to `+layou
 You can now use the eden-treaty React Query integration to call queries and mutations on your API.
 
 ```svelte twoslash title=src/routes/+page.svelte
-<script lang="ts" module>
+<script lang="ts" context="module">
 // @include: apps-svelte-client-1
 
 // @filename: src/routes/+page.ts

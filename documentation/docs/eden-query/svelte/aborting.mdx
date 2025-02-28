@@ -66,7 +66,7 @@ export const eden = createEdenTreatySvelteQuery<App>({
 You may also override this behaviour at the query level.
 
 ```svelte twoslash title=src/routes/+page.svelte
-<script lang="ts" module>
+<script lang="ts" context="module">
 // @filename: $types.ts
 export type PageData = any
 

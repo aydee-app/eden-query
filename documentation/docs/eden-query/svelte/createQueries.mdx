@@ -59,7 +59,7 @@ Additionally, if the underlying procedure is using something like Prisma's `find
 ### Svelte
 
 ```svelte twoslash title=src/routes/+page.svelte
-<script lang="ts" module>
+<script lang="ts" context="module">
 // @include: apps-svelte-client-1
 
 // @filename: +layout.ts
@@ -88,7 +88,7 @@ For a complete overview of all the available options,
 see the [tanstack useQuery](https://tanstack.com/query/v5/docs/framework/react/reference/useQuery) documentation.
 
 ```svelte twoslash title=src/routes/+page.svelte
-<script lang="ts" module>
+<script lang="ts" context="module">
 // @include: apps-svelte-client-1
 
 // @filename: +layout.ts
@@ -129,7 +129,7 @@ I don't think this is a real API.
 :::
 
 ```svelte twoslash title=src/routes/+page.svelte
-<script lang="ts" module>
+<script lang="ts" context="module">
 // @include: apps-svelte-client-1
 
 // @filename: +layout.ts

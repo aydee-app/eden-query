@@ -52,7 +52,7 @@ In our component, when we navigate the object `useUtils` gives us and reach the 
 we'll get access to our query helpers!
 
 ```svelte twoslash title=src/routes/+page.svelte
-<script lang="ts" module>
+<script lang="ts" context="module">
 // @noErrors
 
 // @include: apps-svelte-client-1
@@ -146,7 +146,7 @@ on the input passed to it to prevent unnecessary calls to the back end.
 #### Example code
 
 ```svelte twoslash title=src/routes/+page.svelte
-<script lang="ts" module>
+<script lang="ts" context="module">
 // @include: apps-svelte-client-1
 
 // @filename: src/routes/+page.ts
@@ -173,7 +173,7 @@ It is also possible to invalidate queries across an entire router rather then
 just one query.
 
 ```svelte twoslash title=src/routes/+page.svelte
-<script lang="ts" module>
+<script lang="ts" context="module">
 // @include: apps-svelte-client-1
 
 // @filename: src/routes/+page.ts
