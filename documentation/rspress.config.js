@@ -16,6 +16,8 @@ const repositoryName = repository.url.split('/').pop() ?? ''
 
 const base = ci.GITHUB_ACTIONS ? `/${repositoryName.replace('.git', '')}/` : ''
 
+console.log({ base })
+
 const description =
   'Ergonomic Framework for Humans. TypeScript framework supercharged by Bun with End - to - End Type Safety, unified type system and outstanding developer experience'
 

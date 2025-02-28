@@ -2,6 +2,8 @@
 pageType: custom
 ---
 
+import { normalizeImagePath } from 'rspress/runtime'
+
 import { Hero } from '@/components/hero'
 import { Note } from '@/components/note'
 import { Motivation } from '@/components/motivation'
@@ -12,7 +14,7 @@ import { Benchmarks } from '@/components/benchmarks'
 import { Community } from '@/components/community'
 import { BuiltWithLove } from '@/components/built-with-love'
 
-<link rel="preload" as="image" href="/assets/elysia_v.webp" />
+<link rel="preload" as="image" href={normalizeImagePath("/assets/elysia_v.webp")} />
 
 <div className="flex flex-col gap-16 text-gray-500/80 dark:text-gray-400/90 leading-normal text-lg">
   <Hero>

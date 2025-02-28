@@ -14,6 +14,8 @@ head:
       content: HTTP Split Link for Eden and Tanstack-Query integration.
 ---
 
+import { normalizeImagePath } from 'rspress/runtime'
+
 # Split Link
 
 `splitLink` is a link that allows you to branch your link chain's execution depending on a given condition.
@@ -28,8 +30,9 @@ if you provide multiple links to be executed on a branch.
 
 Here's a visual representation of how `splitLink` works:
 
-<div align="center" style="marginBottom: 12px">
-  <img src="/assets/split-link-diagram.png" alt="Eden Split Link Diagram"/>
+<div align="center" style={{ marginBottom: "12px" }}>
+  <img src={normalizeImagePath("/assets/split-link-diagram.png")} alt="Eden Split Link Diagram"/>
+
   <small>
     <span>Eden Split Link Diagram. Based on </span>
     <a href="https://trpc.io/docs/client/links/splitLink" target="_blank">tRPC's </a>,

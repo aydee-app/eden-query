@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { normalizeImagePath } from 'rspress/runtime'
 
 import { Ray } from '@/components/ray'
 import { cn } from '@/utils/cn'
@@ -46,7 +47,7 @@ export function Hero(props: HeroProps) {
         ></div>
 
         <img
-          src="/assets/elysia_v.webp"
+          src={normalizeImagePath('/assets/elysia_v.webp')}
           alt="Curved text logo saying 'Elysia JS'"
           className="aspect-3/2 w-full max-w-md object-contain"
         />
