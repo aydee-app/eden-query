@@ -55,10 +55,12 @@ export type EdenContextProps<TRouter extends AnyElysia, TSSRContext> = EdenConte
   queryClient: QueryClient
 }
 
-export type EdenContextState<TRouter extends AnyElysia, TSSRContext = undefined> = Required<
-  EdenContextProps<TRouter, TSSRContext>
+export type EdenContextState<TRouter extends AnyElysia = any, TSSRContext = undefined> = Required<
+  Omit<EdenContextProps<TRouter, TSSRContext>, 'abortOnUnmount'>
 > &
-  EdenQueryUtils<TRouter>
+  EdenQueryUtils<TRouter> & {
+    abortOnUnmount?: boolean
+  }
 
 export type EdenQueryUtils<TRouter extends AnyElysia> = {
   /**
@@ -244,7 +246,7 @@ export function createUtilityFunctions<T extends AnyElysia>(
       const edenQueryOptions: FetchQueryOptions<unknown, any, unknown, QueryKey, never> = {
         queryKey,
         queryFn: async (queryFunctionContext) => {
-          let options: any = queryKey[1]?.input
+          const options: any = queryKey[1]?.input
 
           const params: EdenRequestParams = {
             ...config,
@@ -398,7 +400,7 @@ export function createUtilityFunctions<T extends AnyElysia>(
       return await queryClient.ensureQueryData({
         queryKey,
         queryFn: async () => {
-          let options: any = queryKey[1]?.input
+          const options: any = queryKey[1]?.input
 
           const params = {
             ...config,
