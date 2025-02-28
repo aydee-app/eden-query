@@ -1,0 +1,14 @@
+[
+  "setup",
+  "inferring-types",
+  "createQuery",
+  "createMutation",
+  "createInfiniteQuery",
+  "getUtils",
+  "createUtils",
+  "createQueries",
+  "reactiveQueries",
+  "getQueryKey",
+  "aborting",
+  "disabling"
+]

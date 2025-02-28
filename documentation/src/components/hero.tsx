@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { normalizeImagePath } from 'rspress/runtime'
+import { normalizeImagePath, withBase } from 'rspress/runtime'
 
 import { Ray } from '@/components/ray'
 import { cn } from '@/utils/cn'
@@ -71,7 +71,10 @@ export function Hero(props: HeroProps) {
         </h3>
 
         <section className="flex flex-wrap items-center gap-4 md:justify-center">
-          <a className="btn btn-primary rounded-full px-6 text-lg" href="/eden-query/index">
+          <a
+            className="btn btn-primary rounded-full px-6 text-lg"
+            href={withBase('/eden-query/index')}
+          >
             Get Started
           </a>
 

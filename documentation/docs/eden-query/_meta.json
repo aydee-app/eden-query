@@ -1,0 +1,26 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Overview"
+  },
+  "batching",
+  "transformers",
+  "headers",
+  "cors",
+  {
+    "type": "dir",
+    "name": "links",
+    "label": "Links"
+  },
+  {
+    "type": "dir",
+    "name": "react",
+    "label": "React Query"
+  },
+  {
+    "type": "dir",
+    "name": "svelte",
+    "label": "Svelte Query"
+  }
+]
