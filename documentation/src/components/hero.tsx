@@ -73,7 +73,7 @@ export function Hero(props: HeroProps) {
         <section className="flex flex-wrap items-center gap-4 md:justify-center">
           <a
             className="btn btn-primary rounded-full px-6 text-lg"
-            href={withBase('/eden-query/index')}
+            href={withBase('/guide/eden-query/index')}
           >
             Get Started
           </a>

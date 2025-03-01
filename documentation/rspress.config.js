@@ -14,7 +14,7 @@ import { repository } from '../package.json'
 
 const repositoryName = repository.url.split('/').pop() ?? ''
 
-const base = true ? `/bruh/` : ''
+const base = ci.GITHUB_ACTIONS ? `/${repositoryName}/` : ''
 
 const description =
   'Ergonomic Framework for Humans. TypeScript framework supercharged by Bun with End - to - End Type Safety, unified type system and outstanding developer experience'
