@@ -13,5 +13,5 @@
     "@ap0nia/eden-svelte-query": "1.7.0",
     "@ap0nia/rspress-plugin-twoslash": "0.1.0"
   },
-  "changesets": []
+  "changesets": ["early-actors-film", "loud-pandas-behave", "spicy-chicken-mate"]
 }

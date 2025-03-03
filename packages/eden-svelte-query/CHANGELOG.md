@@ -1,5 +1,13 @@
 # @ap0nia/eden-svelte-query
 
+## 1.7.1-canary.0
+
+### Patch Changes
+
+- 89e756d: feat: allow root-hooks to be provided during client initialization
+- fe7f87a: fix: remove TData from mutation options
+- dfa9480: perf: increase laziness when converting options to readables
+
 ## 1.7.0
 
 ### Minor Changes
