@@ -1,0 +1,17 @@
+{
+  "mode": "pre",
+  "tag": "canary",
+  "initialVersions": {
+    "@elysiajs/documentation": "0.1.2",
+    "eden-react-query-basic": "0.0.35",
+    "eden-svelte-query-basic": "0.0.40",
+    "@examples/react-native": "1.0.5",
+    "twoslash-playground": "1.0.0",
+    "@ap0nia/eden": "1.6.1",
+    "@ap0nia/eden-next-query": "1.4.4",
+    "@ap0nia/eden-react-query": "1.6.1",
+    "@ap0nia/eden-svelte-query": "1.7.0",
+    "@ap0nia/rspress-plugin-twoslash": "0.1.0"
+  },
+  "changesets": []
+}
