@@ -168,7 +168,6 @@ export function edenCreateMutationOptions(
 
     ...mutationOptions
   } = options
-
   const resolvedMutationOptions: CreateMutationOptions = {
     mutationKey,
     mutationFn: async (variables: any = {}) => {
