@@ -58,40 +58,59 @@ const hooksToMutateArgs: (keyof EdenTreatyQueryRootHooks | LiteralUnion<string> 
  * Directly mutate the arguments passed to the root hooks.
  *
  * Make sure that the interpretation of args matches up with the implementation of root hooks.
+ *
+ * For now, only tanstack-query hooks should be transformed.
+ *
+ * createMutation has to be handled differently from any query-related hooks...
  */
 export function mutateArgs(
   hook: keyof EdenTreatyQueryRootHooks | LiteralUnion<string> | symbol,
   args: unknown[],
   params: StoreOrVal<Record<string, any>>[],
 ) {
-  const input = args[0]
+  if (!hooksToMutateArgs.includes(hook)) return
 
-  if (input == null && params.length === 0 && !hooksToMutateArgs.includes(hook)) {
+  const firstArg = args[0]
+
+  // Nothing to convert.
+  if (firstArg == null && params.length === 0) {
     return args
   }
 
-  const isInputStore = isStore(input)
-
-  if (!isInputStore && !params.length) {
-    return args
-  }
-
-  const queryStore = isInputStore ? input : readable(input)
+  const isFirstArgReadable = isStore(firstArg)
 
   const paramsStores: Readable<Record<string, any>>[] = []
 
-  const staticParams: Record<string, any>[] = []
+  const staticParams: Record<string, any> = {}
 
   for (const param of params) {
     if (isStore(param)) {
       paramsStores.push(param)
-    } else {
-      staticParams.push(param)
+      continue
+    }
+
+    for (const key in param) {
+      staticParams[key] = param[key as any]
     }
   }
 
+  // Try to preserve everything as JSON unless absolutely necessary.
+  if (!isFirstArgReadable && !paramsStores.length) {
+    if (hook === 'createMutation') {
+      args[0] = { ...(firstArg ?? {}), params: staticParams }
+
+      return
+    }
+
+    args[0] = { query: firstArg, params: staticParams }
+
+    return
+  }
+
+  const queryOrOptionsStore = isFirstArgReadable ? firstArg : readable(firstArg)
+
   const paramsStore = derived(paramsStores, ($paramsStores) => {
-    const resolvedParams: Record<string, any> = {}
+    const resolvedParams = { ...staticParams }
 
     for (const param of $paramsStores) {
       for (const key in param) {
@@ -102,16 +121,17 @@ export function mutateArgs(
     return resolvedParams
   })
 
-  const inputStore = derived([queryStore, paramsStore], ([query, params]) => {
-    for (const param of staticParams) {
-      for (const key in param) {
-        params[key] = param[key]
-      }
+  const optionsStores = [queryOrOptionsStore, paramsStore]
+
+  const resolvedOptionsStore = derived(optionsStores, ([$queryOrOtions, $params]) => {
+    if (hook === 'createMutation') {
+      return { ...($queryOrOtions ?? {}), params: $params }
     }
-    return { query, params }
+
+    return { query: $queryOrOtions, params: $params }
   })
 
-  args[0] = inputStore
+  args[0] = resolvedOptionsStore
 
   return args
 }
