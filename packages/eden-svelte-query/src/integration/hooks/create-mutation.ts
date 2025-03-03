@@ -55,30 +55,22 @@ export type EdenCreateMutation<
   TData = InferRouteOutput<TRoute>,
   TError = InferRouteError<TRoute>,
 > = <TContext = unknown>(
-  options?: EdenCreateMutationOptions<TVariables, TError, TData, TContext>,
+  options?: StoreOrVal<void | EdenCreateMutationOptions<TVariables, TError, TData, TContext>>,
   context?: EdenContextState,
 ) => EdenCreateMutationResult<TData, TError, TVariables, TContext, TInput>
 
-export type EdenAsyncMutationFunction<TData, TError, TVariables, TInput> = <TContext = TData>(
-  variables: TVariables,
+export type EdenAsyncMutationFunction<TData, TError, TVariables, TInput> = <TContext = unknown>(
+  variables: {} extends TVariables ? void | TVariables : TVariables,
   options: {} extends TInput
-    ?
-        | void
-        | (TData &
-            MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>)
-    : TData &
-        MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>,
-) => Promise<TContext>
+    ? void | MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>
+    : MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>,
+) => Promise<TData>
 
 export type EdenMutationFunction<TData, TError, TVariables, TInput> = <TContext = unknown>(
-  variables: TContext,
+  variables: {} extends TVariables ? void | TVariables : TVariables,
   options: {} extends TInput
-    ?
-        | void
-        | (TData &
-            MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>)
-    : TData &
-        MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>,
+    ? void | MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>
+    : MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>,
 ) => void
 
 /**
