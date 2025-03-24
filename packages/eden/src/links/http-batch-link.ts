@@ -218,10 +218,13 @@ export function generatePostBatchRequestInformation(
 
     const transformer = getDataTransformer(rawTransformer)
 
-    if (operation.params.body instanceof FormData) {
+    // Intermediary variable so TypeScript can coerce the type properly.
+    const paramsBody = operation.params.body
+
+    if (paramsBody instanceof FormData) {
       body.append(`${index}.body_type`, 'formdata')
 
-      operation.params.body.forEach((value, key) => {
+      paramsBody.forEach((value, key) => {
         const serialized = transformer.input.serialize(value)
 
         // FormData is special and can handle additional data types, like Files.

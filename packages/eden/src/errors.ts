@@ -1,6 +1,8 @@
-import type { AnyElysia } from 'elysia'
+import type { AnyElysia, StatusMap } from 'elysia'
 
 import type { Range } from './utils/types'
+
+export type ELYSIA_ERROR_CODE = keyof StatusMap | (string & {})
 
 export class EdenFetchError<Status extends number = number, Value = unknown> extends Error {
   constructor(

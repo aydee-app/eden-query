@@ -1,5 +1,6 @@
 import type { AnyElysia } from 'elysia'
 
+import type { EdenRequestParams } from '../../resolve'
 import { Observable } from './observable'
 import {
   type Operation,
@@ -8,14 +9,20 @@ import {
   type OperationResultObservable,
 } from './operation'
 
-export type ChainOptions<TElysia extends AnyElysia, TInput = unknown, TOutput = unknown> = {
+export type ChainOptions<
+  TElysia extends AnyElysia,
+  TInput extends EdenRequestParams = any,
+  TOutput = unknown,
+> = {
   links: OperationLink<TElysia, TInput, TOutput>[]
-  operation: Operation<TElysia>
+  operation: Operation<TInput>
 }
 
-export function createChain<TElysia extends AnyElysia, TInput = unknown, TOutput = unknown>(
-  options: ChainOptions<TElysia, TInput, TOutput>,
-): OperationResultObservable<TElysia, TOutput> {
+export function createChain<
+  TElysia extends AnyElysia,
+  TInput extends EdenRequestParams = any,
+  TOutput = unknown,
+>(options: ChainOptions<TElysia, TInput, TOutput>): OperationResultObservable<TElysia, TOutput> {
   const observable = new Observable((observer) => {
     const execute = (index = 0, operation = options.operation) => {
       const next = options.links[index]
