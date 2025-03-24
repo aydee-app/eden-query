@@ -486,7 +486,7 @@ describe('httpBatchLink', () => {
       const { promise } = promisifyObservable(observable)
 
       // No valid requests to batch, so it should reject with a batch error.
-      expect(promise).rejects.toEqual(expect.any(BatchError))
+      await expect(promise).rejects.toEqual(expect.any(BatchError))
     })
 
     test('fails to resolves request if invalid url', async () => {
@@ -514,7 +514,7 @@ describe('httpBatchLink', () => {
       const { promise } = promisifyObservable(observable)
 
       // Invalid request that has not been handled by msw.
-      expect(promise).rejects.toThrowError()
+      await expect(promise).rejects.toThrowError()
     })
   })
 })

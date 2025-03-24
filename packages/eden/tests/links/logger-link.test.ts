@@ -20,8 +20,10 @@ describe('loggerLink', () => {
       context: {},
     }
 
-    const result: OperationResultEnvelope = {
-      data: '',
+    const result: OperationResultEnvelope<any, any> = {
+      result: {
+        data: '',
+      },
     }
 
     const observable = new Observable((observer) => {
@@ -39,7 +41,7 @@ describe('loggerLink', () => {
 
     const { promise } = promisifyObservable(observable)
 
-    expect(promise).resolves.toBe(result)
+    await expect(promise).resolves.toBe(result)
 
     expect(log).toHaveBeenCalledTimes(2)
     expect(error).not.toHaveBeenCalled()
@@ -56,7 +58,7 @@ describe('loggerLink', () => {
   /**
    * TODO: how to test vitest ansi color strings?
    */
-  test('no color mode', () => {
+  test('no color mode', async () => {
     const log = vi.fn()
     const error = vi.fn()
 
@@ -74,8 +76,10 @@ describe('loggerLink', () => {
       context: {},
     }
 
-    const result: OperationResultEnvelope = {
-      data: '',
+    const result: OperationResultEnvelope<any, any> = {
+      result: {
+        data: '',
+      },
     }
 
     const observable = new Observable((observer) => {
@@ -93,7 +97,7 @@ describe('loggerLink', () => {
 
     const { promise } = promisifyObservable(observable)
 
-    expect(promise).resolves.toBe(result)
+    await expect(promise).resolves.toBe(result)
 
     expect(log).toHaveBeenCalledTimes(2)
     expect(error).not.toHaveBeenCalled()
@@ -110,7 +114,7 @@ describe('loggerLink', () => {
   /**
    * TODO: how to test vitest css strings?
    */
-  test('css color mode', () => {
+  test('css color mode', async () => {
     const log = vi.fn()
     const error = vi.fn()
 
@@ -130,8 +134,10 @@ describe('loggerLink', () => {
       context: {},
     }
 
-    const result: OperationResultEnvelope = {
-      data: '',
+    const result: OperationResultEnvelope<any, any> = {
+      result: {
+        data: '',
+      },
     }
 
     const observable = new Observable((observer) => {
@@ -149,7 +155,7 @@ describe('loggerLink', () => {
 
     const { promise } = promisifyObservable(observable)
 
-    expect(promise).resolves.toBe(result)
+    await expect(promise).resolves.toBe(result)
 
     expect(log).toHaveBeenCalledTimes(2)
 
@@ -158,7 +164,7 @@ describe('loggerLink', () => {
     // expect(log).toHaveBeenNthCalledWith(2, expect.stringContaining('<<'))
   })
 
-  test('uses error log if rejected with error', () => {
+  test('uses error log if rejected with error', async () => {
     const log = vi.fn()
     const error = vi.fn()
 
@@ -195,7 +201,7 @@ describe('loggerLink', () => {
 
     const { promise } = promisifyObservable(observable)
 
-    expect(promise).rejects.toBe(result)
+    await expect(promise).rejects.toBe(result)
 
     // log is called during upstream.
     // error may be called during downstream if an error was returned.
