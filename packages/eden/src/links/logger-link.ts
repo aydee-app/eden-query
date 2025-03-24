@@ -2,33 +2,50 @@ import type { AnyElysia } from 'elysia'
 
 import { constNoop } from '../utils/noop'
 import { Observable } from './internal/observable'
-import type { EdenLink, Operation, OperationResultEnvelope } from './internal/operation'
+import type {
+  EdenClientError,
+  EdenLink,
+  Operation,
+  OperationResultEnvelope,
+} from './internal/operation'
 import { tap } from './internal/operators'
 
+/**
+ * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L16
+ */
 type ConsoleEsque = {
   log: (...args: any[]) => void
   error: (...args: any[]) => void
 }
 
-type EnableFnOptions =
+/**
+ * @se https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L21
+ */
+type EnableFnOptions<T extends AnyElysia> =
   | {
       direction: 'down'
-      result: OperationResultEnvelope<unknown>
+      result: OperationResultEnvelope<unknown, EdenClientError<T>> | EdenClientError<T>
     }
   | (Operation & {
       direction: 'up'
     })
 
-type EnabledFn = (opts: EnableFnOptions) => boolean
+/**
+ * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L31
+ */
+type EnabledFn<T extends AnyElysia> = (opts: EnableFnOptions<T>) => boolean
 
-type LoggerLinkFnOptions = Operation &
+/**
+ * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L35
+ */
+type LoggerLinkFnOptions<T extends AnyElysia> = Operation &
   (
     | {
         /**
          * Request result
          */
         direction: 'down'
-        result: OperationResultEnvelope<unknown>
+        result: OperationResultEnvelope<unknown, EdenClientError<T>> | EdenClientError<T>
         elapsedMs: number
       }
     | {
@@ -39,14 +56,17 @@ type LoggerLinkFnOptions = Operation &
       }
   )
 
-type LoggerLinkFn = (opts: LoggerLinkFnOptions) => void
+type LoggerLinkFn<T extends AnyElysia> = (opts: LoggerLinkFnOptions<T>) => void
 
 type ColorMode = 'ansi' | 'css' | 'none'
 
-export interface LoggerLinkOptions {
-  logger?: LoggerLinkFn
+/**
+ * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L61
+ */
+export interface LoggerLinkOptions<T extends AnyElysia> {
+  logger?: LoggerLinkFn<T>
 
-  enabled?: EnabledFn
+  enabled?: EnabledFn<T>
 
   /**
    * Used in the built-in defaultLogger
@@ -90,7 +110,10 @@ const palettes = {
   },
 } as const
 
-export type ExtendedLoggerFnOptions = LoggerLinkFnOptions & {
+/**
+ * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L112-L115
+ */
+export type ExtendedLoggerFnOptions = LoggerLinkFnOptions<any> & {
   colorMode: ColorMode
   withContext?: boolean
 }
@@ -99,48 +122,69 @@ function constructPartsAndArgs(opts: ExtendedLoggerFnOptions) {
   const { direction, type, withContext, id, params } = opts
 
   const parts: string[] = []
+
   const args: any[] = []
 
   const path = params.path ?? ''
 
-  if (opts.colorMode === 'none') {
-    parts.push(direction === 'up' ? '>>' : '<<', type, `#${id}`, path)
-  } else if (opts.colorMode === 'ansi') {
-    const [lightRegular, darkRegular] = palettes.ansi.regular[type]
-    const [lightBold, darkBold] = palettes.ansi.bold[type]
-    const reset = '\x1b[0m'
+  switch (opts.colorMode) {
+    case 'none': {
+      parts.push(direction === 'up' ? '>>' : '<<', type, `#${id}`, path)
 
-    parts.push(
-      direction === 'up' ? lightRegular : darkRegular,
-      direction === 'up' ? '>>' : '<<',
-      type,
-      direction === 'up' ? lightBold : darkBold,
-      `#${id}`,
-      path,
-      reset,
-    )
-  } else {
-    // css color mode
-    const [light, dark] = palettes.css[type]
-    const css = `
+      break
+    }
+
+    case 'ansi': {
+      const [lightRegular, darkRegular] = palettes.ansi.regular[type]
+      const [lightBold, darkBold] = palettes.ansi.bold[type]
+      const reset = '\x1b[0m'
+
+      parts.push(
+        direction === 'up' ? lightRegular : darkRegular,
+        direction === 'up' ? '>>' : '<<',
+        type,
+        direction === 'up' ? lightBold : darkBold,
+        `#${id}`,
+        path,
+        reset,
+      )
+
+      break
+    }
+
+    case 'css':
+    // falls through
+
+    default: {
+      const [light, dark] = palettes.css[type]
+      const css = `
     background-color: #${direction === 'up' ? light : dark};
     color: ${direction === 'up' ? 'black' : 'white'};
     padding: 2px;
   `
 
-    parts.push('%c', direction === 'up' ? '>>' : '<<', type, `#${id}`, `%c${path}%c`, '%O')
-    args.push(css, `${css}; font-weight: bold;`, `${css}; font-weight: normal;`)
+      parts.push('%c', direction === 'up' ? '>>' : '<<', type, `#${id}`, `%c${path}%c`, '%O')
+      args.push(css, `${css}; font-weight: bold;`, `${css}; font-weight: normal;`)
+    }
   }
 
-  if (direction === 'up') {
-    args.push(withContext ? { params, context: opts.context } : { params })
-  } else {
-    args.push({
-      params,
-      result: opts.result,
-      elapsedMs: opts.elapsedMs,
-      ...(withContext && { context: opts.context }),
-    })
+  switch (direction) {
+    case 'up': {
+      args.push(withContext ? { params, context: opts.context } : { params })
+      break
+    }
+
+    case 'down':
+    // falls through
+
+    default: {
+      args.push({
+        params,
+        result: opts.result,
+        elapsedMs: opts.elapsedMs,
+        ...(withContext && { context: opts.context }),
+      })
+    }
   }
 
   return { parts, args }
@@ -155,7 +199,7 @@ export type LoggerOptions = {
 /**
  * Maybe this should be moved to it's own package?
  */
-function defaultLogger(options: LoggerOptions): LoggerLinkFn {
+function defaultLogger<T extends AnyElysia>(options: LoggerOptions): LoggerLinkFn<T> {
   const { c = console, colorMode = 'css', withContext } = options
 
   return (props) => {
@@ -177,7 +221,7 @@ function defaultLogger(options: LoggerOptions): LoggerLinkFn {
 /**
  * @see https://trpc.io/docs/v11/client/links/loggerLink
  */
-export function loggerLink<T extends AnyElysia>(options?: LoggerLinkOptions): EdenLink<T> {
+export function loggerLink<T extends AnyElysia>(options?: LoggerLinkOptions<T>): EdenLink<T> {
   const enabled = options?.enabled ?? constNoop(true)
 
   const colorMode = options?.colorMode ?? (typeof window === 'undefined' ? 'ansi' : 'css')
@@ -195,7 +239,9 @@ export function loggerLink<T extends AnyElysia>(options?: LoggerLinkOptions): Ed
 
         const requestStartTime = Date.now()
 
-        function logResult(result: OperationResultEnvelope<unknown>) {
+        function logResult(
+          result: OperationResultEnvelope<unknown, EdenClientError<T>> | EdenClientError<T>,
+        ) {
           const elapsedMs = Date.now() - requestStartTime
 
           if (enabled({ ...operation, direction: 'down', result })) {
