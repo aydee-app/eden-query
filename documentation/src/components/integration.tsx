@@ -1,3 +1,5 @@
+import { normalizeImagePath } from 'rspress/runtime'
+
 /**
  * Two connected cards with Elysia.js and Tanstack Query, representing
  * the integration between the two libraries.
@@ -12,7 +14,7 @@ export function Integration() {
       >
         <p className="text-xl font-bold">Elysia.js</p>
         <img
-          src="/assets/elysia_v.webp"
+          src={normalizeImagePath('/assets/elysia_v.webp')}
           alt="Curved text logo saying 'Elysia JS'"
           className="h-20 object-contain"
         />
@@ -25,7 +27,7 @@ export function Integration() {
       >
         <p className="text-xl font-bold">Tanstack Query</p>
         <img
-          src="/images/react-query-logo.svg"
+          src={normalizeImagePath('/images/react-query-logo.svg')}
           alt="React Query logo"
           className="h-20 object-contain"
         />

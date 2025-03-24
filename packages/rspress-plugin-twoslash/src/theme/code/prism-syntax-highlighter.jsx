@@ -22,9 +22,9 @@ function registerLanguages() {
  * @param {import('./types').CodeProps & { language: string; codeWrap: boolean }} props
  */
 export function PrismSyntaxHighlighter(props) {
-  const { siteData } = usePageData()
+  const { siteData } = usePageData() ?? {}
   const { meta, language, codeWrap } = props
-  const { showLineNumbers } = siteData.markdown
+  const { showLineNumbers } = siteData?.markdown ?? {}
 
   let highlightMeta = ''
 

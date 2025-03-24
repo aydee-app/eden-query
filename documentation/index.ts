@@ -16,6 +16,7 @@ postSchema.static
 const data: Record<string, unknown> = {}
 
 const app = new Elysia()
+  .use(batchPlugin())
   .get('/posts', async () => {
     return data
   })
@@ -110,6 +111,7 @@ const a = eden.createQueries((e) => {
 a.subscribe((s) => s[0].refetch)
 
 import { createQueries, skipToken, useIsFetching, useQueryClient } from '@tanstack/svelte-query'
+import { batchPlugin } from '@ap0nia/eden/plugins/batch'
 const b = createQueries()
 b.subscribe((s) => s[0]?.refetch)
 

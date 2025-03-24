@@ -1,0 +1,62 @@
+[
+  {
+    "type": "file",
+    "name": "setup",
+    "label": "Setup"
+  },
+  {
+    "type": "file",
+    "name": "inferring-types",
+    "label": "Inferring Types"
+  },
+  {
+    "type": "file",
+    "name": "useQuery",
+    "label": "useQuery"
+  },
+  {
+    "type": "file",
+    "name": "useMutation",
+    "label": "useMutation"
+  },
+  {
+    "type": "file",
+    "name": "useInfiniteQuery",
+    "label": "useInfiniteQuery"
+  },
+  {
+    "type": "file",
+    "name": "useUtils",
+    "label": "useUtils"
+  },
+  {
+    "type": "file",
+    "name": "createUtils",
+    "label": "createUtils"
+  },
+  {
+    "type": "file",
+    "name": "useQueries",
+    "label": "useQueries"
+  },
+  {
+    "type": "file",
+    "name": "suspense",
+    "label": "Suspense"
+  },
+  {
+    "type": "file",
+    "name": "getQueryKey",
+    "label": "getQueryKey"
+  },
+  {
+    "type": "file",
+    "name": "aborting",
+    "label": "Aborting Requests"
+  },
+  {
+    "type": "file",
+    "name": "disabling",
+    "label": "Disabling Queries"
+  }
+]

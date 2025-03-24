@@ -4,9 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "rspress build",
-    "dev": "rspress dev",
-    "preview": "rspress preview"
+    "dev": "rspress dev"
   },
   "dependencies": {
     "rspress": "^1.40.2"

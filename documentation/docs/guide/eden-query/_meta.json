@@ -1,0 +1,37 @@
+[
+  {
+    "type": "file",
+    "name": "batching",
+    "label": "Batching"
+  },
+  {
+    "type": "file",
+    "name": "transformers",
+    "label": "Transformers"
+  },
+  {
+    "type": "file",
+    "name": "headers",
+    "label": "Headers"
+  },
+  {
+    "type": "file",
+    "name": "cors",
+    "label": "CORS"
+  },
+  {
+    "type": "dir",
+    "name": "links",
+    "label": "Links"
+  },
+  {
+    "type": "dir",
+    "name": "react",
+    "label": "Eden-React-Query"
+  },
+  {
+    "type": "dir",
+    "name": "svelte",
+    "label": "Eden-Svelte-Query"
+  }
+]

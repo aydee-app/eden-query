@@ -227,9 +227,8 @@ export function createEdenTreatyQueryRootHooks<
   const createMutation = (
     originalPaths: readonly string[],
     options?: StoreOrVal<EdenCreateMutationOptions<unknown, TError, unknown, unknown>>,
+    context = getRawContext(),
   ): EdenCreateMutationResult<unknown, TError, unknown, unknown, unknown> => {
-    const context = getRawContext()
-
     const parsed = parsePathsAndMethod(originalPaths)
 
     const queryClient = context.queryClient ?? useQueryClient()

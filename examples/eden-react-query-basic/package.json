@@ -10,6 +10,7 @@
   "dependencies": {
     "@ap0nia/eden-react-query": "workspace:^",
     "@elysiajs/cors": "^1.1.0",
+    "@sinclair/typebox": "^0.34.28",
     "@tanstack/react-query": "^5.51.16",
     "elysia": "1.1.19",
     "react": "^18.3.1",

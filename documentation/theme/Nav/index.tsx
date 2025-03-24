@@ -92,7 +92,7 @@ export function Nav(props: NavProps) {
 
   const { pathname } = useLocation()
 
-  const [isMobile, setIsMobile] = useState(isMobileDevice())
+  const [isMobile, setIsMobile] = useState(false)
 
   const hiddenNav = useHiddenNav()
 
@@ -113,6 +113,8 @@ export function Nav(props: NavProps) {
   }
 
   useEffect(() => {
+    setIsMobile(isMobileDevice())
+
     window.addEventListener('resize', updateIsMobile)
 
     return () => {

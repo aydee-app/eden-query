@@ -275,13 +275,13 @@ export type EdenTreatySvelteQueryUnknownLeaf<
  */
 export function createEdenTreatySvelteQuery<TElysia extends AnyElysia, TSSRContext = unknown>(
   config?: EdenQueryConfig<TElysia>,
-): EdenTreatySvelteQuery<TElysia, TSSRContext> {
+
   /**
    * Root hooks are invoked by leaf nodes in the proxy.
    * Create the utility functions once at the beginning, and have all leaves use the same one.
    */
-  const rootHooks = createEdenTreatyQueryRootHooks(config)
-
+  rootHooks = createEdenTreatyQueryRootHooks(config),
+): EdenTreatySvelteQuery<TElysia, TSSRContext> {
   /**
    * The actual proxy.
    */

@@ -55,29 +55,22 @@ export type EdenCreateMutation<
   TData = InferRouteOutput<TRoute>,
   TError = InferRouteError<TRoute>,
 > = <TContext = unknown>(
-  options?: EdenCreateMutationOptions<TVariables, TError, TData, TContext>,
+  options?: StoreOrVal<void | EdenCreateMutationOptions<TVariables, TError, TData, TContext>>,
+  context?: EdenContextState,
 ) => EdenCreateMutationResult<TData, TError, TVariables, TContext, TInput>
 
-export type EdenAsyncMutationFunction<TData, TError, TVariables, TInput> = <TContext = TData>(
-  variables: TVariables,
+export type EdenAsyncMutationFunction<TData, TError, TVariables, TInput> = <TContext = unknown>(
+  variables: {} extends TVariables ? void | TVariables : TVariables,
   options: {} extends TInput
-    ?
-        | void
-        | (TData &
-            MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>)
-    : TData &
-        MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>,
-) => Promise<TContext>
+    ? void | MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>
+    : MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>,
+) => Promise<TData>
 
 export type EdenMutationFunction<TData, TError, TVariables, TInput> = <TContext = unknown>(
-  variables: TContext,
+  variables: {} extends TVariables ? void | TVariables : TVariables,
   options: {} extends TInput
-    ?
-        | void
-        | (TData &
-            MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>)
-    : TData &
-        MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>,
+    ? void | MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>
+    : MutateOptions<TData, TError, EdenCreateMutationVariables<TVariables, TInput>, TContext>,
 ) => void
 
 /**
@@ -151,7 +144,7 @@ export function createEdenMutation<
 export function edenCreateMutationOptions(
   parsedPathsAndMethod: ParsedPathAndMethod,
   context: EdenContextState<any, any>,
-  options: EdenCreateMutationOptions<any, any, any> = {},
+  options: EdenCreateMutationOptions<any, any, any> & InferRouteOptions = {},
   config?: any,
 ): CreateMutationOptions {
   const { client, queryClient = useQueryClient() } = context
@@ -164,16 +157,40 @@ export function edenCreateMutationOptions(
 
   const defaultOptions = queryClient.defaultMutationOptions(mutationDefaults)
 
-  const { eden, ...mutationOptions } = options
+  const {
+    eden,
 
+    //
+    params: baseParams,
+    query: baseQuery,
+    headers: baseHeaders,
+    //
+
+    ...mutationOptions
+  } = options
   const resolvedMutationOptions: CreateMutationOptions = {
     mutationKey,
     mutationFn: async (variables: any = {}) => {
-      const { body, options } = variables as EdenCreateMutationVariables
+      const { body, options } = variables as EdenCreateMutationVariables<any, InferRouteOptions>
+
+      const resolvedOptions: InferRouteOptions = {
+        headers: {
+          ...baseHeaders,
+          ...options?.headers,
+        },
+        query: {
+          ...baseQuery,
+          ...options?.query,
+        },
+        params: {
+          ...baseParams,
+          ...options?.params,
+        },
+      }
 
       const params = {
         ...config,
-        options,
+        options: resolvedOptions,
         body,
         path,
         method,
