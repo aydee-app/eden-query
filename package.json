@@ -31,8 +31,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "changeset init && lefthook install",
-    "build": "turbo build",
-    "test:coverage": "nx run-many -t test:coverage"
+    "build": "turbo build"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
@@ -55,7 +54,6 @@
     "eslint-plugin-svelte": "^2.43.0",
     "globals": "^15.8.0",
     "lefthook": "^1.8.4",
-    "nx": "^19.5.7",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "svelte": "^4.2.18",
