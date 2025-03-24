@@ -4,6 +4,5 @@
     "declarationMap": true,
     "outDir": "dist",
     "jsx": "react-jsx"
-  },
-  "include": ["src"]
+  }
 }
