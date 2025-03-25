@@ -77,7 +77,7 @@ export type TreatyResponse<Res extends Record<number, unknown>> =
       error: null
       response: Response
       status: number
-      headers: FetchRequestInit['headers']
+      headers: RequestInit['headers']
     }
   | {
       data: null
@@ -94,7 +94,7 @@ export type TreatyResponse<Res extends Record<number, unknown>> =
           }[Exclude<keyof Res, 200>]
       response: Response
       status: number
-      headers: FetchRequestInit['headers']
+      headers: RequestInit['headers']
     }
 
 /**
