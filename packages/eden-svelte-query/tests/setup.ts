@@ -1,3 +1,8 @@
+/// <reference types="@testing-library/jest-dom" />
+
+import '@testing-library/jest-dom/vitest'
+
+import { cleanup } from '@testing-library/svelte'
 import { http } from 'msw'
 import { setupServer } from 'msw/node'
 import { afterAll, afterEach, beforeAll } from 'vitest'
@@ -24,3 +29,5 @@ afterAll(() => server.close())
 
 // Reset handlers after each test for test isolation
 afterEach(() => server.resetHandlers())
+
+afterEach(cleanup)

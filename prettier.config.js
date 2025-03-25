@@ -1,14 +1,24 @@
 // @ts-check
-import * as tailwind from 'prettier-plugin-tailwindcss'
+
+import prettierPluginSvelte from 'prettier-plugin-svelte'
+import * as prettierPluginTailwindCSS from 'prettier-plugin-tailwindcss'
 
 /**
- * @type{import('prettier').Config}
+ * @type import('prettier').Config
  */
 const config = {
   semi: false,
   printWidth: 100,
   singleQuote: true,
-  plugins: [tailwind],
+  plugins: [prettierPluginSvelte, prettierPluginTailwindCSS],
+  overrides: [
+    {
+      files: '*.svelte',
+      options: {
+        parser: 'svelte',
+      },
+    },
+  ],
 }
 
 export default config

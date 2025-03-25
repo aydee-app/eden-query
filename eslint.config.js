@@ -4,7 +4,6 @@ import prettier from 'eslint-config-prettier'
 import simpleImport from 'eslint-plugin-simple-import-sort'
 import svelte from 'eslint-plugin-svelte'
 import globals from 'globals'
-import svelteParser from 'svelte-eslint-parser'
 import tsEslint from 'typescript-eslint'
 
 import eslint from '@eslint/js'
@@ -16,20 +15,12 @@ import eslint from '@eslint/js'
  * @see https://github.com/isaacs/minimatch?tab=readme-ov-file#features
  */
 const FILE_PATTERNS = {
-  // Source code.
-  TYPESCRIPT: '**/*.ts',
   JAVASCRIPT: '**/*.js',
-  JAVASCRIPT_XML: '**/*.jsx',
-  TYPESCRIPT_XML: '**/*.tsx',
-  SVELTE: '**/*.svelte',
-
-  // Project files.
-  NODE_MODULES: '**/node_modules/**',
-  BUILD_OUTPUT: 'build/**',
-  SVELTEKIT_OUTPUT: '**/.svelte-kit/**',
-  CONFIG_JS: '**/*.config.js',
-  CONFIG_COMMON_JS: '**/*.config.cjs',
-  CONFIG_ECMASCRIPT_JS: '**/*.config.mjs',
+  TYPESCRIPT: '**/*.ts',
+  SVELTE: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
+  NODE_MODULES: '/node_modules/',
+  WEB_BUILD_OUTPUT: 'apps/web/build/',
+  WEB_SVELTEKIT_OUTPUT: 'apps/web/.svelte-kit/',
 }
 
 /**
@@ -39,13 +30,7 @@ const FILE_PATTERNS = {
  * For example `eslint --fix` will automatically sort all imports/exports.
  */
 const importSortConfigs = tsEslint.config({
-  files: [
-    FILE_PATTERNS.TYPESCRIPT,
-    FILE_PATTERNS.TYPESCRIPT_XML,
-    FILE_PATTERNS.JAVASCRIPT,
-    FILE_PATTERNS.JAVASCRIPT_XML,
-    FILE_PATTERNS.SVELTE,
-  ],
+  files: [FILE_PATTERNS.TYPESCRIPT, FILE_PATTERNS.SVELTE],
   plugins: {
     'simple-import-sort': simpleImport,
   },
@@ -55,6 +40,57 @@ const importSortConfigs = tsEslint.config({
   },
 })
 
+const svelteConfigs = tsEslint.config(
+  eslint.configs.recommended,
+  ...tsEslint.configs.recommended,
+  svelte.configs.base,
+  ...svelte.configs.recommended,
+  {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+  },
+  {
+    files: FILE_PATTERNS.SVELTE,
+
+    /**
+     * @see https://typescript-eslint.io/packages/parser/
+     */
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+
+        // Add support for additional file extensions, such as .svelte
+        extraFileExtensions: ['.svelte'],
+
+        parser: tsEslint.parser,
+
+        // Specify a parser for each language, if needed:
+        // parser: {
+        //   ts: ts.parser,
+        //   js: espree,    // Use espree for .js files (add: import espree from 'espree')
+        //   typescript: ts.parser
+        // },
+
+        // We recommend importing and specifying svelte.config.js.
+        // By doing so, some rules in eslint-plugin-svelte will automatically read the configuration and adjust their behavior accordingly.
+        // While certain Svelte settings may be statically loaded from svelte.config.js even if you don’t specify it,
+        // explicitly specifying it ensures better compatibility and functionality.
+      },
+    },
+  },
+  {
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      // Override or add rule settings here, such as:
+      // 'svelte/rule-name': 'error'
+    },
+  },
+)
+
 /**
  * Configuration that applies to all TypeScript files.
  */
@@ -62,25 +98,23 @@ const typescriptConfigs = tsEslint.config(
   tsEslint.configs['base'],
   ...tsEslint.configs['recommended'],
   {
-    files: [
-      FILE_PATTERNS.TYPESCRIPT,
-      FILE_PATTERNS.TYPESCRIPT_XML,
-      FILE_PATTERNS.JAVASCRIPT,
-      FILE_PATTERNS.JAVASCRIPT_XML,
-      FILE_PATTERNS.SVELTE,
-    ],
+    files: [FILE_PATTERNS.JAVASCRIPT, FILE_PATTERNS.TYPESCRIPT, FILE_PATTERNS.SVELTE],
     languageOptions: {
       globals: {
-        ...globals.builtin,
         ...globals.browser,
         ...globals.node,
+
+        /**
+         * Sometimes the NodeJS namespace might be referenced, e.g. {@link NodeJS.Timeout}
+         */
+        NodeJS: false,
       },
     },
     rules: {
-      '@typescript-eslint/no-empty-object-type': 'off',
-      '@typescript-eslint/ban-types': 'off',
+      // Allow specifying a type as `any`.
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-namespace': 'off',
+
+      // Allow unused variables if they start with "_". For example: let _unusedVar = 'hello'
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -94,46 +128,13 @@ const typescriptConfigs = tsEslint.config(
 )
 
 /**
- */
-const svelteConfigs = tsEslint.config({
-  files: [FILE_PATTERNS.SVELTE],
-  plugins: { svelte },
-  processor: svelte.processors.svelte,
-  languageOptions: {
-    parser: svelteParser,
-    parserOptions: {
-      project: ['./tsconfig.json'],
-      parser: '@typescript-eslint/parser',
-      extraFileExtensions: ['.svelte'],
-    },
-    globals: {
-      /**
-       * Generic type recognized by Svelte.
-       */
-      $$Generic: false,
-    },
-  },
-  rules: {
-    ...svelte.configs.base.rules,
-    ...svelte.configs.recommended.rules,
-    'no-inner-declarations': 'off',
-
-    // Sometimes, a variable is assigned to itself in a Svelte file to update state.
-    'no-self-assign': 'off',
-  },
-})
-
-/**
  * File patterns to ignore.
  */
 const ignoresConfig = tsEslint.config({
   ignores: [
-    FILE_PATTERNS.CONFIG_JS,
-    FILE_PATTERNS.CONFIG_COMMON_JS,
-    FILE_PATTERNS.CONFIG_ECMASCRIPT_JS,
     FILE_PATTERNS.NODE_MODULES,
-    FILE_PATTERNS.SVELTEKIT_OUTPUT,
-    FILE_PATTERNS.BUILD_OUTPUT,
+    FILE_PATTERNS.WEB_SVELTEKIT_OUTPUT,
+    FILE_PATTERNS.WEB_BUILD_OUTPUT,
   ],
 })
 
