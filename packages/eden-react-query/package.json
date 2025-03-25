@@ -43,6 +43,8 @@
     "@ap0nia/eden": "workspace:^"
   },
   "devDependencies": {
+    "@happy-dom/global-registrator": "^17.4.4",
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@types/react": "^19.0.12",
