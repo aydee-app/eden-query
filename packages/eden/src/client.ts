@@ -98,24 +98,6 @@ export class EdenClient<TElysia extends AnyElysia = AnyElysia> {
     const { promise } = promisifyObservable<TOutput>(req$ as any)
 
     return promise
-
-    // if (options.signal != null) {
-    //   options.params.fetch ??= {}
-    //   options.params.fetch.signal = options.signal
-    // }
-
-    // const signal = options.params.fetch?.signal
-
-    // const req$ = this.$request<TInput, TOutput>(options)
-
-    // const { promise, abort } = promisifyObservable<TOutput>(req$ as any)
-
-    // const abortablePromise = new Promise<TOutput>((resolve, reject) => {
-    //   signal?.addEventListener('abort', abort)
-    //   promise.then(resolve).catch(reject)
-    // })
-
-    // return abortablePromise
   }
 
   public query(params: EdenRequestParams, options?: EdenClientRequestOptions) {

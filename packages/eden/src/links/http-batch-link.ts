@@ -7,7 +7,6 @@ import type { HTTPHeaders } from '../http'
 import type { BatchPluginOptions } from '../plugins'
 import { type EdenRequestOptions, type EdenResponse } from '../request'
 import { type EdenRequestParams, resolveEdenRequest } from '../resolve'
-import { notNull } from '../utils/null'
 import type { NonEmptyArray } from '../utils/types'
 import { httpLinkFactory } from './http-link'
 import { batchedDataLoader, type BatchLoader } from './internal/batched-data-loader'
@@ -297,20 +296,6 @@ function createBatchRequester(options: HttpBatchLinkOptions = {}): Requester {
           }
         }
 
-        const signals = batchOps.map((b) => b.params.fetch?.signal).filter(notNull)
-
-        const abortController = signals.length ? new AbortController() : null
-
-        signals.forEach((signal) => {
-          signal.addEventListener('abort', () => {
-            abortController?.abort()
-          })
-        })
-
-        const cancel = () => {
-          abortController?.abort()
-        }
-
         const defaultBatchMethod: BatchMethod = method ?? 'POST'
 
         /**
@@ -359,11 +344,6 @@ function createBatchRequester(options: HttpBatchLinkOptions = {}): Requester {
             headers: information.headers,
             ...requestOptions,
             raw: true,
-          }
-
-          if (signals.length) {
-            resolvedParams.fetch ??= {}
-            resolvedParams.fetch.signal = abortController?.signal
           }
 
           const result = await resolveEdenRequest(resolvedParams)
@@ -452,7 +432,7 @@ function createBatchRequester(options: HttpBatchLinkOptions = {}): Requester {
           return transformedResponses
         })
 
-        return { promise, cancel }
+        return { promise, cancel: () => {} }
       },
     }
   }
