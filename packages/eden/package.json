@@ -9,7 +9,8 @@
     "directory": "packages/eden"
   },
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly --declaration",
+    "build": "tsup",
+    "build:all": "tsup && tsc --emitDeclarationOnly --declaration",
     "test": "vitest",
     "test:coverage": "vitest run --coverage"
   },

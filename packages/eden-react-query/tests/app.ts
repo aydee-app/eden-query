@@ -1,7 +1,8 @@
 import { Elysia, t } from 'elysia'
 
 export const app = new Elysia()
-  .get('/posts', () => {
+  .get('/posts', async () => {
+    await new Promise((resolve) => setTimeout(resolve, 500))
     return ['A', 'B', 'C']
   })
   .post(

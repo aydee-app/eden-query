@@ -13,4 +13,5 @@ export function createEden(...args: Parameters<typeof createEdenTreatyReactQuery
 
 export const eden = createEdenTreatyReactQuery<App>({
   domain: 'http://localhost:3001',
+  abortOnUnmount: true,
 })

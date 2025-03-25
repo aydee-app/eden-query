@@ -3,6 +3,8 @@
 > @elysiajs/eden + @tanstack/react-query integration
 
 ## Project Structure
+
+```
  src
 ├──  index.ts -> entry point for library
 ├──  implementation -> the library's core
@@ -30,3 +32,9 @@
     ├──  is-object.ts
     ├──  is-store.ts
     └──  types.ts
+```
+
+## Testing reference
+
+- https://github.com/TanStack/query/issues/6994#issuecomment-2032347194
+- https://github.com/TanStack/query/blob/7a901939e60cc672fa41d07f3bd1a1ee7e6d83b5/packages/react-query/src/__tests__/useSuspenseQueries.test.tsx#L174-L176
