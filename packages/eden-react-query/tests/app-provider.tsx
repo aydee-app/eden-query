@@ -1,6 +1,6 @@
 import { httpBatchLink } from '@ap0nia/eden-react-query'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { eden } from './eden'
 

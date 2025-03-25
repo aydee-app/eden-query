@@ -1,13 +1,13 @@
 // @ts-check
 
-import { defineProject } from 'vitest/config'
+import { defineConfig } from 'vitest/config'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { svelteTesting } from '@testing-library/svelte/vite'
 
-const project = defineProject({
+const project = defineConfig({
   test: {
     setupFiles: ['tests/setup.ts'],
-    environment: 'jsdom',
+    environment: 'happy-dom',
   },
   plugins: [svelte(), svelteTesting()],
 })

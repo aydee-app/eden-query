@@ -6,6 +6,7 @@ import {
 } from '@ap0nia/eden'
 import type {
   CancelOptions,
+  DefaultError,
   FetchQueryOptions,
   InfiniteData,
   InvalidateOptions,
@@ -108,7 +109,7 @@ export type EdenQueryUtils<TRouter extends AnyElysia> = {
    */
   invalidateQueries: (
     queryKey: EdenQueryKey,
-    filters?: InvalidateQueryFilters,
+    filters?: InvalidateQueryFilters<unknown, DefaultError, unknown, EdenQueryKey>,
     options?: InvalidateOptions,
   ) => Promise<void>
 
@@ -117,7 +118,7 @@ export type EdenQueryUtils<TRouter extends AnyElysia> = {
    */
   resetQueries: (
     queryKey: EdenQueryKey,
-    filters?: QueryFilters,
+    filters?: QueryFilters<unknown, DefaultError, unknown, EdenQueryKey>,
     options?: ResetOptions,
   ) => Promise<void>
 
@@ -126,7 +127,7 @@ export type EdenQueryUtils<TRouter extends AnyElysia> = {
    */
   refetchQueries: (
     queryKey: EdenQueryKey,
-    filters?: RefetchQueryFilters,
+    filters?: RefetchQueryFilters<unknown, DefaultError, unknown, EdenQueryKey>,
     options?: RefetchOptions,
   ) => Promise<void>
 

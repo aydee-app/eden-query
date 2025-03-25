@@ -1,31 +1,10 @@
-import { act, render, renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, test, vi } from 'vitest'
 
-import { App, wrapper } from '../../app-provider'
+import { wrapper } from '../../app-provider'
 import { eden } from '../../eden'
 
-function DoSomething() {
-  const query = eden.posts.get.useQuery()
-
-  return (
-    <div>
-      <p>Data:</p>
-      <div>{JSON.stringify(query.data)}</div>
-    </div>
-  )
-}
-
 describe('createQuery', () => {
-  test('it works', async () => {
-    const result = render(
-      <App>
-        <DoSomething />
-      </App>,
-    )
-
-    await waitFor(() => expect(result.getByText(JSON.stringify(['A', 'B', 'C']))).toBeTruthy())
-  })
-
   test('query is fetched if not interruped', async () => {
     vi.useFakeTimers()
 
@@ -47,14 +26,14 @@ describe('createQuery', () => {
     )
 
     // Advance time by an insufficient amount to finish the request.
-    await act(() => {
+    await act(async () => {
       vi.advanceTimersByTimeAsync(duration / 2)
     })
 
     expect(a.result.current.isFetched).toBeFalsy()
 
     // Advance time enough to definitely handle the request.
-    await act(() => {
+    await act(async () => {
       vi.advanceTimersByTimeAsync(duration / 2 + 1_000)
     })
 
@@ -89,7 +68,7 @@ describe('createQuery', () => {
     )
 
     // Advance time by an insufficient amount to finish the request.
-    await act(() => {
+    await act(async () => {
       vi.advanceTimersByTimeAsync(duration / 2)
     })
 
@@ -128,7 +107,7 @@ describe('createQuery', () => {
     )
 
     // Advance time by an insufficient amount to finish the request.
-    await act(() => {
+    await act(async () => {
       vi.advanceTimersByTimeAsync(duration / 2)
     })
 

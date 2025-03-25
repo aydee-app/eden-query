@@ -13,4 +13,5 @@ export function createEden(...args: Parameters<typeof createEdenTreatySvelteQuer
 
 export const eden = createEdenTreatySvelteQuery<App>({
   domain: 'http://localhost:3001',
+  abortOnUnmount: true,
 })

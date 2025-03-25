@@ -15,8 +15,8 @@ import eslint from '@eslint/js'
  * @see https://github.com/isaacs/minimatch?tab=readme-ov-file#features
  */
 const FILE_PATTERNS = {
-  JAVASCRIPT: '**/*.js',
-  TYPESCRIPT: '**/*.ts',
+  JAVASCRIPT: ['**/*.js', '**/*.jsx'],
+  TYPESCRIPT: ['**/*.ts', '**/*.tsx'],
   SVELTE: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
   NODE_MODULES: '/node_modules/',
   WEB_BUILD_OUTPUT: 'apps/web/build/',
@@ -30,10 +30,12 @@ const FILE_PATTERNS = {
  * For example `eslint --fix` will automatically sort all imports/exports.
  */
 const importSortConfigs = tsEslint.config({
-  files: [FILE_PATTERNS.TYPESCRIPT, FILE_PATTERNS.SVELTE],
+  files: [...FILE_PATTERNS.TYPESCRIPT, ...FILE_PATTERNS.SVELTE],
+
   plugins: {
     'simple-import-sort': simpleImport,
   },
+
   rules: {
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
@@ -41,8 +43,6 @@ const importSortConfigs = tsEslint.config({
 })
 
 const svelteConfigs = tsEslint.config(
-  eslint.configs.recommended,
-  ...tsEslint.configs.recommended,
   svelte.configs.base,
   ...svelte.configs.recommended,
   {
@@ -82,13 +82,6 @@ const svelteConfigs = tsEslint.config(
       },
     },
   },
-  {
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      // Override or add rule settings here, such as:
-      // 'svelte/rule-name': 'error'
-    },
-  },
 )
 
 /**
@@ -98,7 +91,7 @@ const typescriptConfigs = tsEslint.config(
   tsEslint.configs['base'],
   ...tsEslint.configs['recommended'],
   {
-    files: [FILE_PATTERNS.JAVASCRIPT, FILE_PATTERNS.TYPESCRIPT, FILE_PATTERNS.SVELTE],
+    files: [...FILE_PATTERNS.JAVASCRIPT, ...FILE_PATTERNS.TYPESCRIPT, ...FILE_PATTERNS.SVELTE],
     languageOptions: {
       globals: {
         ...globals.browser,
