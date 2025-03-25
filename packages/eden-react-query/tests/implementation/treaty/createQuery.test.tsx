@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import { describe, expect,test } from 'vitest'
+import { render, renderHook, waitFor } from '@testing-library/react'
+import { describe, expect, test } from 'vitest'
 
-import { App } from '../../app-provider'
+import { App, wrapper } from '../../app-provider'
 import { eden } from '../../eden'
 
 function DoSomething() {
@@ -24,7 +24,9 @@ describe('createQuery', () => {
     )
 
     await waitFor(() => expect(result.getByText(JSON.stringify(['A', 'B', 'C']))).toBeTruthy())
+  })
 
-    screen.debug()
+  test('hook works', async () => {
+    renderHook(() => eden.posts.get.useQuery(), { wrapper })
   })
 })

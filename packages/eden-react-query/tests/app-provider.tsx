@@ -35,4 +35,6 @@ export function App(props: { children?: React.ReactNode }) {
   )
 }
 
+export const wrapper = App
+
 export default App
