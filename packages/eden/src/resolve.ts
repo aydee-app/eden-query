@@ -277,7 +277,7 @@ export async function resolveEdenRequest<
 
   const headers = await processHeaders(params.headers, path, params.options?.headers)
 
-  const q = buildQueryString(params.options?.query)
+  const query = buildQueryString(params.options?.query)
 
   if (params.method === 'subscribe') {
     const domain = typeof params.domain === 'string' ? params.domain : DEMO_DOMAIN
@@ -292,7 +292,7 @@ export async function resolveEdenRequest<
 
     const origin = domain.replace(/^([^]+):\/\//, protocol)
 
-    const url = origin + path + q
+    const url = origin + path + query
 
     return new EdenWS(url)
   }
@@ -415,7 +415,7 @@ export async function resolveEdenRequest<
 
   const domain = typeof params.domain === 'string' ? params.domain : ''
 
-  const url = domain + path + q
+  const url = domain + path + query
 
   const elysia = typeof params.domain === 'string' ? undefined : params.domain
 
