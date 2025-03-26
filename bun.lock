@@ -213,12 +213,7 @@
     "packages/eden2": {
       "name": "@ap0nia/eden2",
       "version": "1.6.1",
-      "dependencies": {
-        "elysia": "1.2.15",
-      },
       "devDependencies": {
-        "msw": "^2.4.4",
-        "tsup": "^8.2.3",
         "typescript": "^5.6.3",
       },
       "peerDependencies": {
