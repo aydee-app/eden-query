@@ -210,6 +210,21 @@
         "elysia": "^1.2.15",
       },
     },
+    "packages/eden2": {
+      "name": "@ap0nia/eden2",
+      "version": "1.6.1",
+      "dependencies": {
+        "elysia": "1.2.15",
+      },
+      "devDependencies": {
+        "msw": "^2.4.4",
+        "tsup": "^8.2.3",
+        "typescript": "^5.6.3",
+      },
+      "peerDependencies": {
+        "elysia": "^1.2.15",
+      },
+    },
     "packages/rspress-plugin-twoslash": {
       "name": "@ap0nia/rspress-plugin-twoslash",
       "version": "0.1.0",
@@ -264,6 +279,8 @@
     "@ap0nia/eden-react-query": ["@ap0nia/eden-react-query@workspace:packages/eden-react-query"],
 
     "@ap0nia/eden-svelte-query": ["@ap0nia/eden-svelte-query@workspace:packages/eden-svelte-query"],
+
+    "@ap0nia/eden2": ["@ap0nia/eden2@workspace:packages/eden2"],
 
     "@ap0nia/rspress-plugin-twoslash": ["@ap0nia/rspress-plugin-twoslash@workspace:packages/rspress-plugin-twoslash"],
 

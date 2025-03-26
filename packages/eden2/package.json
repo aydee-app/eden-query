@@ -1,0 +1,56 @@
+{
+  "name": "@ap0nia/eden2",
+  "private": true,
+  "version": "1.6.1",
+  "description": "Fully type-safe Elysia.js client",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ap0nia/eden-query",
+    "directory": "packages/eden2"
+  },
+  "scripts": {
+    "build": "tsup",
+    "build:all": "tsup && tsc --emitDeclarationOnly --declaration",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js",
+      "require": "./dist/*.cjs",
+      "default": "./dist/*.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "./*": [
+        "./dist/*.d.ts"
+      ]
+    }
+  },
+  "dependencies": {
+    "elysia": "1.2.15"
+  },
+  "devDependencies": {
+    "msw": "^2.4.4",
+    "tsup": "^8.2.3",
+    "typescript": "^5.6.3"
+  },
+  "peerDependencies": {
+    "elysia": "^1.2.15"
+  }
+}
