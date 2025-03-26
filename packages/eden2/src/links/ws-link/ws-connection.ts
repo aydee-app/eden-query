@@ -158,10 +158,12 @@ export class WsConnection {
    * @returns A promise that resolves once the WebSocket connection is successfully opened.
    */
   private openPromise: Promise<void> | null = null
+
   public async open() {
     if (this.openPromise) return this.openPromise
 
     this.id = ++WsConnection.connectCount
+
     const wsPromise = prepareUrl(this.urlOptions).then((url) => new this.WebSocketPonyfill(url))
 
     this.openPromise = wsPromise.then(async (ws) => {
