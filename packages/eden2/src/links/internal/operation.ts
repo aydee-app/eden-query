@@ -2,7 +2,7 @@ import type { AnyElysia } from 'elysia'
 
 import type { EdenClientError } from '../../core/errors'
 import type { EdenRequestParams } from '../../core/request'
-import type { EdenSuccessResponse } from '../../core/response'
+import type { JSONRPC2 } from '../../trpc/envelope'
 import type { Nullish } from '../../utils/types'
 import type { Observer } from './observable'
 import type { EdenConnectionState } from './subscription'
@@ -18,10 +18,24 @@ export interface EdenResult<TData = unknown> {
   id?: string
 }
 
-export type EdenResultMessage =
-  | { type: 'started'; data?: never }
-  | { type: 'stopped'; data?: never }
-  | EdenResult
+export interface EdenResultMessage<T>
+  extends JSONRPC2.ResultResponse<
+    { type: 'started'; data?: never } | { type: 'stopped'; data?: never } | EdenResult<T>
+  > {}
+
+export interface EdenResult<TData = unknown> {
+  data: TData
+  type?: 'data'
+  /**
+   * The id of the message to keep track of in case of a reconnect
+   */
+  id?: string
+}
+
+/**
+ */
+export interface EdenSuccessResultResponse<TData>
+  extends JSONRPC2.ResultResponse<EdenResult<TData>> {}
 
 /**
  * @internal
@@ -29,7 +43,10 @@ export type EdenResultMessage =
  */
 export interface OperationResultEnvelope<TOutput, TError> {
   context?: OperationContext
-  result: EdenSuccessResponse<TOutput> | EdenConnectionState<TError> | EdenResultMessage
+  result:
+    | EdenConnectionState<TError>
+    | EdenResultMessage<TOutput>['result']
+    | EdenSuccessResultResponse<TOutput>['result']
 }
 
 /**
