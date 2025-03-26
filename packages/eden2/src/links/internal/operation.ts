@@ -1,11 +1,17 @@
 import type { AnyElysia } from 'elysia'
 
-import type { EdenClientError } from '../../core/errors'
+import type { EdenClientError, EdenFetchError } from '../../core/errors'
 import type { EdenRequestParams } from '../../core/request'
 import type { JSONRPC2 } from '../../trpc/envelope'
 import type { Nullish } from '../../utils/types'
 import type { Observer } from './observable'
 import type { EdenConnectionState } from './subscription'
+
+export const procedureTypes = ['query', 'mutation', 'subscription'] as const
+/**
+ * @public
+ */
+export type ProcedureType = (typeof procedureTypes)[number]
 
 export interface EdenResult<TData = unknown> {
   data: TData
@@ -32,10 +38,17 @@ export interface EdenResult<TData = unknown> {
   id?: string
 }
 
+export interface EdenErrorResponse<TError extends EdenFetchError = EdenFetchError>
+  extends JSONRPC2.ErrorResponse<TError> {}
+
 /**
  */
 export interface EdenSuccessResultResponse<TData>
   extends JSONRPC2.ResultResponse<EdenResult<TData>> {}
+
+export type EdenResponseMessage<TData = unknown, TError extends EdenFetchError = EdenFetchError> = {
+  id: JSONRPC2.RequestId
+} & (EdenErrorResponse<TError> | EdenResultMessage<TData>)
 
 /**
  * @internal
@@ -80,3 +93,72 @@ export type Operation<T extends EdenRequestParams = any> = {
   // like query, params, body, etc.
   /* input: TInput */
 }
+
+/**
+ * The client's outgoing request types
+ */
+export type EdenClientOutgoingRequest = EdenSubscriptionStopNotification
+
+/**
+ * The client asked the server to unsubscribe
+ */
+export interface EdenSubscriptionStopNotification
+  extends JSONRPC2.BaseRequest<'subscription.stop'> {
+  id: null
+}
+
+export interface EdenRequest
+  extends JSONRPC2.Request<
+    ProcedureType,
+    {
+      path: string
+      input: unknown
+      /**
+       * The last event id that the client received
+       */
+      lastEventId?: string
+    }
+  > {}
+
+export type EdenRequestMessage = EdenRequest & {
+  id: JSONRPC2.RequestId
+}
+
+/**
+ * The client's sent messages shape
+ */
+export type EdenClientOutgoingMessage =
+  | EdenRequestMessage
+  | (JSONRPC2.BaseRequest<'subscription.stop'> & { id: JSONRPC2.RequestId })
+
+/**
+ * The client sends connection params - always sent as the first message
+ */
+export interface EdenConnectionParamsMessage extends JSONRPC2.BaseRequest<'connectionParams'> {
+  data: EdenConnectionParams
+}
+
+/**
+ * Connection params when using `httpSubscriptionLink` or `createWSClient`
+ */
+export type EdenConnectionParams = Dict<string> | null
+
+/**
+ * The server asked the client to reconnect - useful when restarting/redeploying service
+ */
+export interface EdenReconnectNotification extends JSONRPC2.BaseRequest<'reconnect'> {
+  id: JSONRPC2.RequestId
+}
+
+/**
+ * The client's incoming request types
+ */
+export type EdenClientIncomingRequest = EdenReconnectNotification
+
+/**
+ * The client's received messages shape
+ */
+export type EdenClientIncomingMessage<
+  TResult = unknown,
+  TError extends EdenFetchError = EdenFetchError,
+> = EdenClientIncomingRequest | EdenResponseMessage<TResult, TError>

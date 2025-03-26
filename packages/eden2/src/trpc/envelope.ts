@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 
+import type { EdenFetchError } from '../core/errors'
+
 /**
  * JSON-RPC 2.0 Specification
  */
@@ -27,8 +29,8 @@ export namespace JSONRPC2 {
     result: TResult
   }
 
-  // export interface ErrorResponse<TError extends TRPCErrorShape = TRPCErrorShape>
-  //   extends BaseEnvelope {
-  //   error: TError;
-  // }
+  export interface ErrorResponse<TError extends EdenFetchError = EdenFetchError>
+    extends BaseEnvelope {
+    error: TError
+  }
 }
