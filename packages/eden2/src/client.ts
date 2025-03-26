@@ -11,26 +11,50 @@ import { share } from './links/internal/operators'
 import type { EdenConnectionState } from './links/internal/subscription'
 import type { inferAsyncIterableYield, Nullish, TypeError } from './utils/types'
 
-type TRPCType = 'mutation' | 'query' | 'subscription'
+export type EdenRequestType = 'mutation' | 'query' | 'subscription'
 
-export interface TRPCSubscriptionObserver<TValue, TError> {
+export interface EdenSubscriptionObserver<TValue, TError> {
   onStarted: (opts: { context: OperationContext | undefined }) => void
+
   onData: (value: inferAsyncIterableYield<TValue>) => void
+
   onError: (err: TError) => void
+
   onStopped: () => void
+
   onComplete: () => void
+
   onConnectionStateChange: (state: EdenConnectionState<TError>) => void
+}
+
+/**
+ */
+export interface EdenCreateClientOptions<T extends AnyElysia> {
+  links: EdenLink<T>[]
+  transformer?: TypeError<'The transformer property has moved to httpLink/httpBatchLink/wsLink'>
+}
+
+/**
+ * The options that are used internally by the client for initiating requests.
+ *
+ * @internal
+ */
+export interface EdenClientRequestOptions<T> {
+  type: EdenRequestType
+  params: T
+  path: string
+  context?: OperationContext
+  signal?: AbortSignal | Nullish
 }
 
 /**
  * @internal
  */
-export type EdenCreateClientOptions<T extends AnyElysia> = {
-  links: EdenLink<T>[]
-  transformer?: TypeError<'The transformer property has moved to httpLink/httpBatchLink/wsLink'>
-}
+export interface EdenClientSubscriptionOptions
+  extends Partial<EdenSubscriptionObserver<unknown, EdenClientError<AnyElysia>>>,
+    EdenRequestOptions {}
 
-export type EdenRequestOptions = {
+export interface EdenRequestOptions {
   context?: OperationContext
   signal?: AbortSignal
 }
@@ -51,65 +75,59 @@ export class EdenClient<T extends AnyElysia> {
     this.links = opts.links.map((link) => link(this.runtime))
   }
 
-  private $request<TInput extends EdenRequestParams = any, TOutput = unknown>(opts: {
-    type: TRPCType
-    params: TInput
-    path: string
-    context?: OperationContext
-    signal?: AbortSignal | Nullish
-  }) {
+  private $request<TInput extends EdenRequestParams = any, TOutput = unknown>(
+    options: EdenClientRequestOptions<TInput>,
+  ) {
     const chain$ = createChain<AnyElysia, TInput, TOutput>({
       links: this.links as OperationLink<any, any, any>[],
       op: {
-        ...opts,
-        context: opts.context ?? {},
+        ...options,
+        context: options.context ?? {},
         id: ++this.requestId,
       },
     })
 
-    const a = chain$.pipe(share())
-    return a
+    const observable = chain$.pipe(share())
+
+    return observable
   }
 
-  private async requestAsPromise<TInput extends EdenRequestParams = any, TOutput = unknown>(opts: {
-    type: TRPCType
-    params: TInput
-    path: string
-    context?: OperationContext
-    signal?: AbortSignal | Nullish
-  }): Promise<TOutput> {
-    const req$ = this.$request<TInput, TOutput>(opts)
-
+  private async requestAsPromise<TInput extends EdenRequestParams = any, TOutput = unknown>(
+    options: EdenClientRequestOptions<TInput>,
+  ): Promise<TOutput> {
+    const req$ = this.$request<TInput, TOutput>(options)
     const promise = await observableToPromise<any>(req$)
+    return promise
+  }
+
+  public query(path: string, params?: unknown, options?: EdenRequestOptions) {
+    const promise = this.requestAsPromise<any, unknown>({
+      type: 'query',
+      path,
+      params,
+      context: options?.context,
+      signal: options?.signal,
+    })
 
     return promise
   }
 
-  public query(path: string, params?: unknown, opts?: EdenRequestOptions) {
-    return this.requestAsPromise<any, unknown>({
-      type: 'query',
-      path,
-      params,
-      context: opts?.context,
-      signal: opts?.signal,
-    })
-  }
-
-  public mutation(path: string, params?: unknown, opts?: EdenRequestOptions) {
-    return this.requestAsPromise<any, unknown>({
+  public mutation(path: string, params?: unknown, options?: EdenRequestOptions) {
+    const promise = this.requestAsPromise<any, unknown>({
       type: 'mutation',
       path,
       params,
-      context: opts?.context,
-      signal: opts?.signal,
+      context: options?.context,
+      signal: options?.signal,
     })
+
+    return promise
   }
 
   public subscription(
     path: string,
     params: any,
-    opts: Partial<TRPCSubscriptionObserver<unknown, EdenClientError<AnyElysia>>> &
-      EdenRequestOptions,
+    opts: EdenClientSubscriptionOptions,
   ): Unsubscribable {
     const observable$ = this.$request({
       type: 'subscription',
@@ -119,7 +137,7 @@ export class EdenClient<T extends AnyElysia> {
       signal: opts.signal,
     })
 
-    return observable$.subscribe({
+    const unsubscribable = observable$.subscribe({
       next(envelope) {
         if (!('type' in envelope.result)) return
 
@@ -157,5 +175,7 @@ export class EdenClient<T extends AnyElysia> {
         opts.onComplete?.()
       },
     })
+
+    return unsubscribable
   }
 }

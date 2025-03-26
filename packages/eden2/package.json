@@ -4,6 +4,9 @@
   "version": "1.6.1",
   "description": "Fully type-safe Elysia.js client",
   "license": "MIT",
+  "scripts": {
+    "lint": "eslint --fix"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ap0nia/eden-query",
