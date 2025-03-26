@@ -8,19 +8,14 @@ export type IsUnknown<T> = IsAny<T> extends true ? false : unknown extends T ? t
 
 export type Not<T> = T extends true ? false : true
 
+export type MaybeArray<T> = T | Array<T>
+
+export type MaybePromise<T> = T | PromiseLike<T>
+
 /**
  * Types that can be used in a string template.
  */
 export type Stringable = string | number | boolean | bigint | Nullish
-
-/**
- * @example
- *
- * ```ts
- * type Value = `${Extract<T, Stringable>}`
- * ```
- */
-export type ExtractString<T> = Extract<T, Stringable>
 
 export type And<A extends boolean, B extends boolean> = A extends true
   ? B extends true
@@ -54,8 +49,8 @@ export type Range<F extends number, T extends number> = Exclude<Enumerate<T>, En
 
 export type Files = File | FileList
 
-export type ReplaceBlobWithFiles<in out RecordType extends Record<string, unknown>> = {
-  [K in keyof RecordType]: RecordType[K] extends Blob | Blob[] ? Files : RecordType[K]
+export type ReplaceBlobWithFiles<T> = {
+  [K in keyof T]: T[K] extends Blob | Blob[] ? Files : T[K]
 } & {}
 
 /**
