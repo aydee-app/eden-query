@@ -228,7 +228,7 @@ export type EdenRouteErrorResponses<T extends RouteSchema = RouteSchema> =
  * }
  *
  * type Result = EdenRouteError<Response>
- * //   ^?  Result = EdenClientError<400, 'Not found'> | EdenClientError<500, 'Server failed'> | EdenClientError<600, 'Custom error'>
+ * //   ^?  Result = EdenFetchError<400, 'Not found'> | EdenFetchError<500, 'Server failed'> | EdenFetchError<600, 'Custom error'>
  *
  * function handleError(possibleErrors: Result) {
  *     case 400: { ... }

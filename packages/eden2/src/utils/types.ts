@@ -64,3 +64,9 @@ const _errorSymbol = Symbol()
 export type TypeError<TMessage extends string> = TMessage & {
   _: typeof _errorSymbol
 }
+
+/**
+ * @internal
+ * Infers the type of the value yielded by an async iterable
+ */
+export type inferAsyncIterableYield<T> = T extends AsyncIterable<infer U> ? U : T

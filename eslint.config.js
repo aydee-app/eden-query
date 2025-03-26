@@ -116,6 +116,9 @@ const typescriptConfigs = tsEslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+
+      // Empty objects are used sometimes...
+      '@typescript-eslint/no-empty-object-type': 'off',
     },
   },
 )
