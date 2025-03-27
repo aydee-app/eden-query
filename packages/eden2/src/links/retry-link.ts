@@ -40,7 +40,7 @@ export function retryLink<T extends AnyElysia>(options: RetryLinkOptions<T>): Ed
     // Initialized in app.
     const operationLink: OperationLink<T> = (callOptions) => {
       // Initialized for request.
-      const observable = new Observable((observer) => {
+      return new Observable((observer) => {
         let next$: Unsubscribable
 
         let lastEventId: string | undefined = undefined
@@ -96,8 +96,6 @@ export function retryLink<T extends AnyElysia>(options: RetryLinkOptions<T>): Ed
           next$.unsubscribe()
         }
       })
-
-      return observable
     }
 
     return operationLink

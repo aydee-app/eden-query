@@ -32,11 +32,9 @@ export function splitLink<T extends AnyElysia = AnyElysia>(
     const operationLink: OperationLink<T> = (props) => {
       const links = options.condition(props.op) ? yes : no
 
-      const observable = new Observable((observer) => {
+      return new Observable((observer) => {
         return createChain({ op: props.op, links }).subscribe(observer)
       })
-
-      return observable
     }
 
     return operationLink

@@ -18,7 +18,7 @@ export function wsLink<T extends AnyElysia>(opts: WebSocketLinkOptions<T>): Eden
 
   const link: EdenLink<T> = () => {
     const operationLink: OperationLink<T> = ({ op }) => {
-      const observable = new Observable((observer) => {
+      return new Observable((observer) => {
         const connectionStateSubscription =
           op.type === 'subscription'
             ? opts.client.connectionState.subscribe({
@@ -38,8 +38,6 @@ export function wsLink<T extends AnyElysia>(opts: WebSocketLinkOptions<T>): Eden
           connectionStateSubscription?.unsubscribe()
         }
       })
-
-      return observable
     }
 
     return operationLink

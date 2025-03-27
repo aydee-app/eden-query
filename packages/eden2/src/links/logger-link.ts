@@ -242,7 +242,7 @@ export function loggerLink<T extends AnyElysia>(options?: LoggerLinkOptions<T>):
 
   const link: EdenLink<T> = (_runtime) => {
     const operationLink: OperationLink<T> = ({ op, next }) => {
-      const observable = new Observable((observer) => {
+      return new Observable((observer) => {
         if (enabled({ ...op, direction: 'up' })) {
           logger({ ...op, direction: 'up' })
         }
@@ -262,8 +262,6 @@ export function loggerLink<T extends AnyElysia>(options?: LoggerLinkOptions<T>):
           )
           .subscribe(observer)
       })
-
-      return observable
     }
 
     return operationLink
