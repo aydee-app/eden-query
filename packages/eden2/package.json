@@ -5,7 +5,8 @@
   "description": "Fully type-safe Elysia.js client",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint --fix"
+    "lint": "eslint --fix",
+    "test": "vitest"
   },
   "repository": {
     "type": "git",

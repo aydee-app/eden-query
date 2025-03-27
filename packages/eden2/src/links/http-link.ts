@@ -1,4 +1,4 @@
-import type { AnyElysia } from 'elysia'
+import type { AnyElysia, MaybeArray } from 'elysia'
 
 import type { EdenResolverConfig } from '../core/config'
 import type { HTTPHeaders } from '../core/headers'
@@ -6,61 +6,89 @@ import type { EdenRequestParams } from '../core/request'
 import { resolveEdenRequest } from '../core/resolve'
 import { Observable } from '../observable'
 import type { TransformerOptions } from '../trpc/client/transformer'
-import type { EdenLink } from './internal/eden-link'
+import { toArray } from '../utils/to-array'
+import type { MaybePromise, Nullish } from '../utils/types'
 import type { Operation } from './internal/operation'
 import type { OperationLink } from './internal/operation-link'
 
-export type HTTPLinkBaseOptions<T> = EdenResolverConfig & TransformerOptions<T>
+export type HTTPLinkBaseOptions<T> = Omit<EdenResolverConfig, 'headers'> & TransformerOptions<T>
 
-export type HTTPLinkOptions<T> = HTTPLinkBaseOptions<T> & {
+export type HTTPHeadersResolver = (operation: Operation) => MaybePromise<HTTPHeaders | Nullish>
+
+export type HTTPLinkHeaders = MaybeArray<HTTPHeaders | HTTPHeadersResolver>
+
+export type HTTPLinkOptions<T = any> = HTTPLinkBaseOptions<T> & {
   /**
    * Headers to be set on outgoing requests or a callback that of said headers
    * @see http://trpc.io/docs/client/headers
+   *
+   * Headers set at the link level can be resolver functions that receive the entire operation.
+   * Headers set at the request level can be resolver functions that receive the request params.
    */
-  headers?: HTTPHeaders | ((opts: { op: Operation }) => HTTPHeaders | Promise<HTTPHeaders>)
+  headers?: HTTPLinkHeaders
+}
+
+export function handleHttpRequest(options: HTTPLinkOptions, op: Operation) {
+  const { path, params, type } = op
+
+  if (type === 'subscription') {
+    throw new Error(
+      'Subscriptions are unsupported by `httpLink` - use `httpSubscriptionLink` or `wsLink`',
+    )
+  }
+
+  const headers = toArray(params.headers)
+
+  // Prepend a headers resolver for the link.
+  // Headers are applied sequentially, with higher indicies overriding properties
+  // applied by earlier ones. The link headers have the lowest precedence.
+  headers.unshift(async () => {
+    const resolvedHeaders: HTTPHeaders = {}
+
+    const optionHeaders = toArray(options.headers)
+
+    for (const header of optionHeaders) {
+      const headersIterable = typeof header === 'function' ? await header(op) : header
+
+      if (!headersIterable) continue
+
+      for (const key in headersIterable) {
+        resolvedHeaders[key] = headersIterable[key as keyof typeof headersIterable]
+      }
+    }
+
+    return resolvedHeaders
+  })
+
+  const fetch = { ...options.fetch, ...params.fetch }
+
+  const onRequest = [...toArray(options.onRequest), ...toArray(params.onRequest)]
+
+  const onResponse = [...toArray(options.onResponse), ...toArray(params.onResponse)]
+
+  const resolvedParams: EdenRequestParams = {
+    path,
+    ...options,
+    ...params,
+    fetch,
+    onRequest,
+    onResponse,
+    headers,
+  }
+
+  const request = resolveEdenRequest(resolvedParams)
+
+  return request
 }
 
 /**
  * @see https://trpc.io/docs/client/links/httpLink
  */
-export function httpLink<T extends AnyElysia = AnyElysia>(
-  options: HTTPLinkOptions<T>,
-): EdenLink<T> {
-  // const resolvedOptions = {
-  //   url: options.url.toString(),
-  //   fetch: options.fetch,
-  //   transformer: getTransformer(options.transformer),
-  //   methodOverride: options.methodOverride,
-  // }
-
-  const link: EdenLink<T> = () => {
+export function httpLink<T extends AnyElysia = AnyElysia>(options: HTTPLinkOptions<T> = {}) {
+  const link = () => {
     const operationLink: OperationLink<T> = ({ op }) => {
       return new Observable((observer) => {
-        const { path, params, type } = op
-
-        if (type === 'subscription') {
-          throw new Error(
-            'Subscriptions are unsupported by `httpLink` - use `httpSubscriptionLink` or `wsLink`',
-          )
-        }
-
-        const resolvedParams: EdenRequestParams = {
-          path,
-          ...params,
-          headers() {
-            if (!options.headers) {
-              return {}
-            }
-
-            if (typeof options.headers === 'function') {
-              return options.headers({ op })
-            }
-
-            return options.headers
-          },
-        }
-
-        const request = resolveEdenRequest(resolvedParams)
+        const request = handleHttpRequest(options, op)
 
         request
           .then((response) => {
@@ -74,25 +102,6 @@ export function httpLink<T extends AnyElysia = AnyElysia>(
           .catch((err) => {
             observer.error(err)
           })
-
-        // universalRequester({
-        //   ...resolvedOptions,
-        //   type,
-        //   path,
-        //   params,
-        //   signal: op.signal,
-        //   headers() {
-        //     if (!options.headers) {
-        //       return {}
-        //     }
-
-        //     if (typeof options.headers === 'function') {
-        //       return options.headers({ op })
-        //     }
-
-        //     return options.headers
-        //   },
-        // })
       })
     }
 

@@ -1,3 +1,5 @@
+import type { AnyElysia } from 'elysia'
+
 import type { MaybeArray, MaybePromise } from '../utils/types'
 import type { EdenRequestHeaders } from './headers'
 
@@ -11,7 +13,11 @@ export type EdenResponseTransformer = (response: Response) => MaybePromise<unkno
 /**
  * Global/general settings that influence the behavior of the resolver.
  */
-export interface EdenResolverConfig {
+export interface EdenResolverConfig<T extends AnyElysia = AnyElysia> {
+  /**
+   */
+  domain?: T | string
+
   fetch?: Omit<RequestInit, 'headers' | 'method'>
 
   fetcher?: typeof fetch

@@ -83,11 +83,11 @@ export class EdenClient<T extends AnyElysia> {
     options: OperationOptions<TInput>,
   ): Promise<TOutput> {
     const req$ = this.$request<TInput, TOutput>(options)
-    const promise = await promisifyObservable<any>(req$)
-    return promise
+    const promise = await promisifyObservable(req$)
+    return promise.result as TOutput
   }
 
-  public query(path: string, params?: unknown, options?: EdenRequestOptions) {
+  public query(path: string, params?: EdenRequestParams, options?: EdenRequestOptions) {
     const promise = this.requestAsPromise<any, unknown>({
       type: 'query',
       path,

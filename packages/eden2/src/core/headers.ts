@@ -1,4 +1,4 @@
-import type { MaybeArray, Nullish } from '../utils/types'
+import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
 import type { EdenRequestParams } from './request'
 
 interface HeadersInitEsque {
@@ -10,7 +10,9 @@ interface HeadersInitEsque {
  */
 export type HTTPHeaders = HeadersInitEsque | Record<string, string[] | string | Nullish>
 
-export type EdenRequestHeadersResolver = (params: EdenRequestParams) => HTTPHeaders | Nullish
+export type EdenRequestHeadersResolver = (
+  params: EdenRequestParams,
+) => MaybePromise<HTTPHeaders | Nullish>
 
 export type EdenRequestHeaders = MaybeArray<HTTPHeaders | EdenRequestHeadersResolver>
 
@@ -58,7 +60,7 @@ export async function processHeaders(
         return await processHeaders(edenRequestHeaders, fetchInit, params, headers)
       }
 
-      const v = edenRequestHeaders(params)
+      const v = await edenRequestHeaders(params)
 
       if (v) {
         return await processHeaders(v, fetchInit, params, headers)

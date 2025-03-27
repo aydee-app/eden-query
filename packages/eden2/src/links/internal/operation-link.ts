@@ -17,7 +17,7 @@ export type OperationLinkResult<TOutput, TError> = {
  */
 export type OperationLinkOptions<
   TElysia extends AnyElysia,
-  TInput extends EdenRequestParams = any,
+  TInput extends EdenRequestParams = EdenRequestParams,
   TOutput = unknown,
 > = {
   op: Operation<TInput>
@@ -29,7 +29,7 @@ export type OperationLinkOptions<
  */
 export type OperationLink<
   TElysia extends AnyElysia,
-  TInput extends EdenRequestParams = any,
+  TInput extends EdenRequestParams = EdenRequestParams,
   TOutput = unknown,
 > = (
   options: OperationLinkOptions<TElysia, TInput, TOutput>,
