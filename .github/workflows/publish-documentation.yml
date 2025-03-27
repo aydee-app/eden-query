@@ -3,9 +3,10 @@
 name: Deploy documentation to GitHub-Pages
 
 on:
-  push:
-    branches:
-      - canary
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - canary
 
 jobs:
   build:

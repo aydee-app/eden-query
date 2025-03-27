@@ -3,9 +3,10 @@
 name: Release canary packages
 
 on:
-  push:
-    branches:
-      - canary
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - canary
 
 jobs:
   publish:
