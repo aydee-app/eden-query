@@ -1,9 +1,9 @@
 import type { AnyElysia } from 'elysia'
 
 import type { EdenClientError } from '../core/errors'
+import { Observable, type Unsubscribable } from '../observable'
 import type { EdenLink } from './internal/eden-link'
 import { inputWithTrackedEventId } from './internal/input-with-tracked-event-id'
-import { Observable, type Unsubscribable } from './internal/observable'
 import type { Operation } from './internal/operation'
 import type { OperationLink } from './internal/operation-link'
 

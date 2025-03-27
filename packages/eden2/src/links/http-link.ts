@@ -1,14 +1,18 @@
 import type { AnyElysia } from 'elysia'
-import type { HTTPHeaders } from '../core/headers'
-import type { EdenLink } from './internal/eden-link'
-import { Observable } from './internal/observable'
-import type { OperationLink } from './internal/operation-link'
-import { getTransformer } from '../core/transformer'
-import { resolveEdenRequest } from '../core/resolve'
-import type { EdenRequestParams } from '../core/request'
-import type { Operation } from './internal/operation'
 
-export type HTTPLinkOptions<T extends AnyClientTypes> = HTTPLinkBaseOptions<T> & {
+import type { EdenResolverConfig } from '../core/config'
+import type { HTTPHeaders } from '../core/headers'
+import type { EdenRequestParams } from '../core/request'
+import { resolveEdenRequest } from '../core/resolve'
+import { Observable } from '../observable'
+import type { TransformerOptions } from '../trpc/client/transformer'
+import type { EdenLink } from './internal/eden-link'
+import type { Operation } from './internal/operation'
+import type { OperationLink } from './internal/operation-link'
+
+export type HTTPLinkBaseOptions<T> = EdenResolverConfig & TransformerOptions<T>
+
+export type HTTPLinkOptions<T> = HTTPLinkBaseOptions<T> & {
   /**
    * Headers to be set on outgoing requests or a callback that of said headers
    * @see http://trpc.io/docs/client/headers
@@ -63,9 +67,7 @@ export function httpLink<T extends AnyElysia = AnyElysia>(
             if (response.error) {
               observer.error(response.error)
             } else {
-              observer.next({
-                result: {},
-              })
+              observer.next({ result: response, context: op.context })
               observer.complete()
             }
           })

@@ -4,14 +4,14 @@ import type { EdenClientError } from './core/errors'
 import type { EdenRequestParams } from './core/request'
 import { createChain } from './links/internal/create-chain'
 import type { EdenClientRuntime, EdenLink } from './links/internal/eden-link'
-import { observableToPromise, type Unsubscribable } from './links/internal/observable'
-import type { OperationContext } from './links/internal/operation'
+import type {
+  EdenConnectionState,
+  OperationContext,
+  OperationOptions,
+} from './links/internal/operation'
 import type { OperationLink } from './links/internal/operation-link'
-import { share } from './links/internal/operators'
-import type { EdenConnectionState } from './links/internal/subscription'
-import type { inferAsyncIterableYield, Nullish, TypeError } from './utils/types'
-
-export type EdenRequestType = 'mutation' | 'query' | 'subscription'
+import { promisifyObservable, share, type Unsubscribable } from './observable'
+import type { inferAsyncIterableYield, TypeError } from './utils/types'
 
 export interface EdenSubscriptionObserver<TValue, TError> {
   onStarted: (opts: { context: OperationContext | undefined }) => void
@@ -32,19 +32,6 @@ export interface EdenSubscriptionObserver<TValue, TError> {
 export interface EdenCreateClientOptions<T extends AnyElysia> {
   links: EdenLink<T>[]
   transformer?: TypeError<'The transformer property has moved to httpLink/httpBatchLink/wsLink'>
-}
-
-/**
- * The options that are used internally by the client for initiating requests.
- *
- * @internal
- */
-export interface EdenClientRequestOptions<T> {
-  type: EdenRequestType
-  params: T
-  path: string
-  context?: OperationContext
-  signal?: AbortSignal | Nullish
 }
 
 /**
@@ -76,7 +63,7 @@ export class EdenClient<T extends AnyElysia> {
   }
 
   private $request<TInput extends EdenRequestParams = any, TOutput = unknown>(
-    options: EdenClientRequestOptions<TInput>,
+    options: OperationOptions<TInput>,
   ) {
     const chain$ = createChain<AnyElysia, TInput, TOutput>({
       links: this.links as OperationLink<any, any, any>[],
@@ -93,10 +80,10 @@ export class EdenClient<T extends AnyElysia> {
   }
 
   private async requestAsPromise<TInput extends EdenRequestParams = any, TOutput = unknown>(
-    options: EdenClientRequestOptions<TInput>,
+    options: OperationOptions<TInput>,
   ): Promise<TOutput> {
     const req$ = this.$request<TInput, TOutput>(options)
-    const promise = await observableToPromise<any>(req$)
+    const promise = await promisifyObservable<any>(req$)
     return promise
   }
 
@@ -139,8 +126,6 @@ export class EdenClient<T extends AnyElysia> {
 
     const unsubscribable = observable$.subscribe({
       next(envelope) {
-        if (!('type' in envelope.result)) return
-
         switch (envelope.result.type) {
           case 'state': {
             opts.onConnectionStateChange?.(envelope.result)
@@ -148,9 +133,7 @@ export class EdenClient<T extends AnyElysia> {
           }
 
           case 'started': {
-            opts.onStarted?.({
-              context: envelope.context,
-            })
+            opts.onStarted?.({ context: envelope.context })
             break
           }
 
@@ -159,8 +142,7 @@ export class EdenClient<T extends AnyElysia> {
             break
           }
 
-          case 'data':
-          // falls through
+          case 'data': // falls through
 
           case undefined: {
             opts.onData?.(envelope.result.data)

@@ -1,6 +1,4 @@
-import { type Noop, noop } from '../../utils/noop'
-
-export type TeardownLogic = Unsubscribable | Noop | void
+import type { Observer } from './observer'
 
 export type UnaryFunction<TSource = any, TReturn = any> = (source: TSource) => TReturn
 
@@ -18,70 +16,11 @@ export type OperatorFunction<
   TErrorAfter = any,
 > = UnaryFunction<Subscribable<TValueBefore, TErrorBefore>, Subscribable<TValueAfter, TErrorAfter>>
 
-export type Observer<TValue = any, TError = any> = {
-  next: (value: TValue) => void
-  error: (err: TError) => void
-  complete: () => void
-}
-
 export type Unsubscribable = {
   unsubscribe(): void
 }
 
-export type InferObservableValue<TObservable> =
-  TObservable extends Observable<infer TValue, unknown> ? TValue : never
-
-export function isObservable(x: unknown): x is Observable<unknown, unknown> {
-  return typeof x === 'object' && x !== null && 'subscribe' in x
-}
-
-export function pipeReducer(previousValue: any, next: UnaryFunction) {
-  return next(previousValue)
-}
-
-export function promisifyObservable<T>(observable: Observable<T>) {
-  let abort = noop
-
-  const promise = new Promise<T>((resolve, reject) => {
-    let isDone = false
-
-    const onDone = () => {
-      if (isDone) return
-      isDone = true
-      reject(new ObservableAbortError('This operation was aborted.'))
-      obs$.unsubscribe()
-    }
-
-    const obs$ = observable.subscribe({
-      next: (data) => {
-        isDone = true
-        resolve(data)
-        onDone()
-      },
-      error: (data) => {
-        isDone = true
-        reject(data)
-        onDone()
-      },
-      complete: () => {
-        isDone = true
-        onDone()
-      },
-    })
-
-    abort = onDone
-  })
-
-  return { promise, abort }
-}
-
-export class ObservableAbortError extends Error {
-  constructor(message?: string) {
-    super(message)
-    this.name = 'ObservableAbortError'
-    Object.setPrototypeOf(this, ObservableAbortError.prototype)
-  }
-}
+export type TeardownLogic = Unsubscribable | Function | void
 
 export class Subscribable<TValue = any, TError = any> {
   constructor(public onSubscribe: (observer: Observer<TValue, TError>) => TeardownLogic) {}
@@ -180,26 +119,42 @@ export class Observable<TValue = any, TError = any> extends Subscribable<TValue,
   }
 }
 
+export function isObservable(x: unknown): x is Observable<unknown, unknown> {
+  return typeof x === 'object' && x !== null && 'subscribe' in x
+}
+
+export function pipeReducer(previousValue: any, next: UnaryFunction) {
+  return next(previousValue)
+}
+
+/**
+ * Alias for {@link observableToPromise}.
+ */
+export const promisifyObservable = observableToPromise
+
 /**
  * @internal
+ *
+ * @see https://github.com/trpc/trpc/blob/045fe47ec3c0fa39141e9048c38902fae41fc5ba/packages/server/src/observable/observable.ts#L90C1-L123C2
  */
-export function observableToPromise<TValue>(observable: Observable<TValue, unknown>) {
-  const ac = new AbortController()
+export function observableToPromise<T>(observable: Observable<T, unknown>) {
+  const abortController = new AbortController()
 
-  const promise = new Promise<TValue>((resolve, reject) => {
+  const promise = new Promise<T>((resolve, reject) => {
     let isDone = false
 
     function onDone() {
       if (isDone) return
+
       isDone = true
-      obs$.unsubscribe()
+      unsubscribable.unsubscribe()
     }
 
-    ac.signal.addEventListener('abort', () => {
-      reject(ac.signal.reason)
+    abortController.signal.addEventListener('abort', () => {
+      reject(abortController.signal.reason)
     })
 
-    const obs$ = observable.subscribe({
+    const unsubscribable = observable.subscribe({
       next(data) {
         isDone = true
         resolve(data)
@@ -209,7 +164,7 @@ export function observableToPromise<TValue>(observable: Observable<TValue, unkno
         reject(data)
       },
       complete() {
-        ac.abort()
+        abortController.abort()
         onDone()
       },
     })

@@ -1,4 +1,5 @@
-import { Observable, type Observer } from './observable'
+import { Observable } from './observable'
+import type { Observer } from './observer'
 
 export interface BehaviorSubject<T> extends Observable<T, never> {
   observable: Observable<T, never>
@@ -6,11 +7,11 @@ export interface BehaviorSubject<T> extends Observable<T, never> {
   get: () => T
 }
 
-export interface ReadonlyBehaviorSubject<TValue> extends Omit<BehaviorSubject<TValue>, 'next'> {}
-
 /**
  * @internal
+ *
  * An observable that maintains and provides a "current value" to subscribers
+ *
  * @see https://www.learnrxjs.io/learn-rxjs/subjects/behaviorsubject
  */
 export function behaviorSubject<TValue>(initialValue: TValue): BehaviorSubject<TValue> {
@@ -30,7 +31,7 @@ export function behaviorSubject<TValue>(initialValue: TValue): BehaviorSubject<T
     observerList.splice(observerList.indexOf(observer), 1)
   }
 
-  const obs = new Observable<TValue, never>((observer) => {
+  const observable = new Observable<TValue, never>((observer) => {
     addObserver(observer)
 
     return () => {
@@ -38,7 +39,7 @@ export function behaviorSubject<TValue>(initialValue: TValue): BehaviorSubject<T
     }
   }) as BehaviorSubject<TValue>
 
-  obs.next = (nextValue: TValue) => {
+  observable.next = (nextValue: TValue) => {
     if (value === nextValue) return
 
     value = nextValue
@@ -48,7 +49,7 @@ export function behaviorSubject<TValue>(initialValue: TValue): BehaviorSubject<T
     }
   }
 
-  obs.get = () => value
+  observable.get = () => value
 
-  return obs
+  return observable
 }

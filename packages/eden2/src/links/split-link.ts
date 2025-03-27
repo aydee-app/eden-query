@@ -1,9 +1,9 @@
 import type { AnyElysia } from 'elysia'
 
+import { Observable } from '../observable'
 import { toArray } from '../utils/to-array'
 import { createChain } from './internal/create-chain'
 import type { EdenLink } from './internal/eden-link'
-import { Observable } from './internal/observable'
 import type { Operation } from './internal/operation'
 import type { OperationLink } from './internal/operation-link'
 

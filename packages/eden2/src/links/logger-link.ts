@@ -1,12 +1,11 @@
 import type { AnyElysia } from 'elysia'
 
 import type { EdenClientError } from '../core/errors'
+import { Observable, tap } from '../observable'
 import { constNoop } from '../utils/noop'
 import type { EdenLink } from './internal/eden-link'
-import { Observable } from './internal/observable'
-import type { Operation, OperationResultEnvelope } from './internal/operation'
-import type { OperationLink } from './internal/operation-link'
-import { tap } from './internal/operators'
+import type { Operation } from './internal/operation'
+import type { OperationLink, OperationLinkResult } from './internal/operation-link'
 
 /**
  * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L16
@@ -22,7 +21,7 @@ type ConsoleEsque = {
 type EnableFnOptions<T extends AnyElysia> =
   | {
       direction: 'down'
-      result: OperationResultEnvelope<unknown, EdenClientError<T>> | EdenClientError<T>
+      result: OperationLinkResult<unknown, EdenClientError<T>> | EdenClientError<T>
     }
   | (Operation & {
       direction: 'up'
@@ -43,7 +42,7 @@ type LoggerLinkFnOptions<T extends AnyElysia> = Operation &
          * Request result
          */
         direction: 'down'
-        result: OperationResultEnvelope<unknown, EdenClientError<T>> | EdenClientError<T>
+        result: OperationLinkResult<unknown, EdenClientError<T>> | EdenClientError<T>
         elapsedMs: number
       }
     | {
@@ -231,7 +230,7 @@ export function loggerLink<T extends AnyElysia>(options?: LoggerLinkOptions<T>):
   const logResult = (
     op: Operation,
     requestStartTime: number,
-    result: OperationResultEnvelope<unknown, EdenClientError<T>> | EdenClientError<T>,
+    result: OperationLinkResult<unknown, EdenClientError<T>> | EdenClientError<T>,
   ) => {
     const elapsedMs = Date.now() - requestStartTime
 

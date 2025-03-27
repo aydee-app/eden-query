@@ -1,10 +1,6 @@
-import {
-  MonoTypeOperatorFunction,
-  Observable,
-  Observer,
-  OperatorFunction,
-  Unsubscribable,
-} from './observable'
+import type { MonoTypeOperatorFunction, OperatorFunction, Unsubscribable } from './observable'
+import { Observable } from './observable'
+import type { Observer } from './observer'
 
 export function map<TValueBefore, TError, TValueAfter>(
   project: (value: TValueBefore, index: number) => TValueAfter,
@@ -12,6 +8,7 @@ export function map<TValueBefore, TError, TValueAfter>(
   return (source) => {
     return new Observable((destination) => {
       let index = 0
+
       const subscription = source.subscribe({
         next(value) {
           destination.next(project(value, index++))
@@ -23,26 +20,24 @@ export function map<TValueBefore, TError, TValueAfter>(
           destination.complete()
         },
       })
+
       return subscription
     })
   }
 }
 
 interface ShareConfig {}
+
 export function share<TValue, TError>(
   _opts?: ShareConfig,
 ): MonoTypeOperatorFunction<TValue, TError> {
   return (source) => {
     let refCount = 0
-
     let subscription: Unsubscribable | null = null
     const observers: Partial<Observer<TValue, TError>>[] = []
 
     function startIfNeeded() {
-      if (subscription) {
-        return
-      }
-      subscription = source.subscribe({
+      subscription ||= source.subscribe({
         next(value) {
           for (const observer of observers) {
             observer.next?.(value)
@@ -60,6 +55,7 @@ export function share<TValue, TError>(
         },
       })
     }
+
     function resetIfNeeded() {
       // "resetOnRefCountZero"
       if (refCount === 0 && subscription) {
@@ -73,10 +69,13 @@ export function share<TValue, TError>(
       refCount++
 
       observers.push(subscriber)
+
       startIfNeeded()
+
       return {
         unsubscribe() {
           refCount--
+
           resetIfNeeded()
 
           const index = observers.findIndex((v) => v === subscriber)
@@ -124,9 +123,8 @@ export function distinctUntilChanged<TValue, TError>(
 
       return source.subscribe({
         next(value) {
-          if (lastValue !== distinctUnsetMarker && compare(lastValue, value)) {
-            return
-          }
+          if (lastValue !== distinctUnsetMarker && compare(lastValue, value)) return
+
           lastValue = value
           destination.next(value)
         },
@@ -142,9 +140,8 @@ export function distinctUntilChanged<TValue, TError>(
 }
 
 const isDeepEqual = <T>(a: T, b: T): boolean => {
-  if (a === b) {
-    return true
-  }
+  if (a === b) return true
+
   const bothAreObjects = a && b && typeof a === 'object' && typeof b === 'object'
 
   return (
@@ -153,6 +150,7 @@ const isDeepEqual = <T>(a: T, b: T): boolean => {
     Object.entries(a).every(([k, v]) => isDeepEqual(v, b[k as keyof T]))
   )
 }
+
 export function distinctUntilDeepChanged<TValue, TError>(): MonoTypeOperatorFunction<
   TValue,
   TError
