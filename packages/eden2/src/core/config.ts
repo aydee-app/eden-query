@@ -27,6 +27,8 @@ export type EdenResultTransformer = (
  * Global/general settings that influence the behavior of the resolver.
  */
 export interface EdenResolverConfig<T extends AnyElysia = AnyElysia> {
+  query?: Record<string, any>
+
   fetch?: Omit<RequestInit, 'headers' | 'method'>
 
   fetcher?: typeof fetch

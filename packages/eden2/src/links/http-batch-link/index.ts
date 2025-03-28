@@ -97,7 +97,12 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
         transformer: undefined,
         path: endpoint,
         method,
-        options: { query: resolvedBatchParams.query },
+        options: {
+          query: {
+            ...options.query,
+            ...resolvedBatchParams.query,
+          },
+        },
         body: resolvedBatchParams.body,
         headers: resolvedBatchParams.headers,
       }
@@ -125,9 +130,9 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
         return result
       })
 
-      const finalResult = await Promise.all(resultOperations)
+      const results = await Promise.all(resultOperations)
 
-      return finalResult
+      return results
     },
   }
 

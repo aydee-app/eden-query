@@ -26,8 +26,6 @@ export async function deserializeBatchPostParams(
 
   const globalHeaders: any = {}
 
-  const globalQuery: any = {}
-
   for (const [key, value] of request.headers) {
     const [index, name] = key.split('.')
 
@@ -60,25 +58,11 @@ export async function deserializeBatchPostParams(
 
     if (!index) continue
 
-    if (!name) {
-      globalQuery[index] = value
-      continue
-    }
-
     const paramIndex = Number(index)
 
     if (Number.isNaN(paramIndex)) continue
 
     switch (name) {
-      case 'query': {
-        result[paramIndex] ??= {}
-        result[paramIndex].options ??= {}
-        result[paramIndex].options.query ??= {}
-        ;(result[paramIndex].options.query as any)[name] = value
-
-        continue
-      }
-
       case 'body': {
         const bodyType = formData.get(`${index}.body_type`)
 
@@ -174,14 +158,6 @@ export async function deserializeBatchPostParams(
     for (const result of definedResults) {
       result.headers ??= {}
       ;(result.headers as any)[key] = globalHeaders[key]
-    }
-  }
-
-  for (const key in globalQuery) {
-    for (const result of definedResults) {
-      result.options ??= {}
-      result.options.query ??= {}
-      ;(result.options.query as any)[key] = globalQuery[key]
     }
   }
 

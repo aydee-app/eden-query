@@ -1,6 +1,5 @@
 import type { EdenRequestParams } from '../../core/request'
 import { resolveFetchOptions } from '../../core/resolve'
-import { getTransformer } from '../../trpc/client/transformer'
 import { extractFiles } from '../../utils/file'
 
 const KEYS = {
@@ -11,30 +10,10 @@ const KEYS = {
   query: 'query',
   filePaths: 'files.path',
   files: 'files.files',
-  transformed: 'transformer',
+  transformed: 'transformed',
   transformerId: 'transformer-id',
 } as const
 
-/**
- * If using POST request to batch, most of the request data will be encoded in the FormData body.
- *
- * It will look like this:
- *
- * {
- *   // POST request to /api/a with a JSON body of { value: 0 }
- *
- *   '0.path': '/api/a',
- *   '0.method': 'POST',
- *   '0.body_type': 'JSON',
- *   '0.body': '{ value: 0 }'
- *
- *   // GET request to /api/b?name=elysia, i.e. query of name=elysia
- *
- *   '1.path': '/api/b',
- *   '1.method': 'GET',
- *   '1.query.name': 'elysia'
- * }
- */
 export async function serializeBatchPostParams(batchParams: EdenRequestParams[]) {
   const body = new FormData()
 
@@ -47,7 +26,7 @@ export async function serializeBatchPostParams(batchParams: EdenRequestParams[])
       body.append(`${index}.${KEYS.method}`, fetchInit.method)
     }
 
-    body.append(`${index}.${KEYS.path}`, path + (query ? '?' : '') + query)
+    body.append(`${index}.${KEYS.path}`, `${path}${query}`)
 
     for (const key in fetchInit.headers) {
       const value = fetchInit.headers[key]
@@ -69,23 +48,12 @@ export async function serializeBatchPostParams(batchParams: EdenRequestParams[])
       return
     }
 
+    const contentType = fetchInit.headers['content-type']?.split(';')[0]
+
+    if (contentType !== 'application/json') return
+
     body.append(`${index}.${KEYS.bodyType}`, 'json')
-
-    const transformer = getTransformer(params)
-
-    if (transformer) {
-      if (transformer.id) {
-        body.append(`${index}.${KEYS.transformerId}`, transformer.id)
-      }
-
-      body.append(`${index}.${KEYS.transformed}`, 'true')
-
-      fetchInit.body = transformer.input.serialize(fetchInit?.body)
-    }
-
-    const stringified = JSON.stringify(fetchInit.body)
-
-    body.set(`${index}.${KEYS.body}`, stringified)
+    body.set(`${index}.${KEYS.body}`, fetchInit.body)
 
     const files = extractFiles(fetchInit?.body)
 

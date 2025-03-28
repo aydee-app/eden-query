@@ -53,8 +53,10 @@ export function batchPlugin(options?: BatchPluginOptions) {
     const resolveBatchPostRequest = resolveBatchRequest.bind(null, 'post')
 
     const instance = new Elysia()
-      .post(endpoint, async (context) => await resolveBatchPostRequest(context.request))
       .get(endpoint, async (context) => await resolveBatchGetRequest(context.request))
+      .post(endpoint, async (context) => await resolveBatchPostRequest(context.request), {
+        parse: () => null,
+      })
 
     return elysia.use(instance) as T
   }
@@ -125,8 +127,21 @@ export function jsonTransformerPlugin(options: JsonTransformerPluginOptions) {
             return deserialized
           }
 
-          default:
+          case 'text/plain': {
+            const text = await context.request.clone().text()
+
+            const transformerId = context.headers['transformer-id']
+
+            const transformer = transformers.find((t) => t.id === transformerId) || firstTransformer
+
+            const deserialized = await transformer.input.deserialize(text)
+
+            return deserialized
+          }
+
+          default: {
             return
+          }
         }
       })
       .mapResponse(async (context) => {

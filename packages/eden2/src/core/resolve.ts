@@ -25,37 +25,41 @@ export const defaultOnRequest: EdenRequestTransformer = async (_path, fetchInit,
   const transformer = getTransformer(params)
 
   if (transformer && fetchInit.body && typeof fetchInit.body !== 'string') {
-    const transformer = getTransformer(params)
-
     const files = extractFiles(fetchInit.body)
-
-    if (!files.length) return
-
-    const body = new FormData()
 
     fetchInit.headers ??= {}
 
     const headers: any = fetchInit.headers
 
-    if (transformer) {
-      if (transformer.id) {
-        headers['transformer-id'] = transformer.id
+    if (transformer.id) {
+      headers['transformer-id'] = transformer.id
+    }
+
+    headers['transformed'] = true
+    headers['content-type'] = 'application/json'
+
+    if (files.length) {
+      const body = new FormData()
+
+      fetchInit.body = await transformer.input.serialize(fetchInit.body)
+
+      const stringified = JSON.stringify(fetchInit.body)
+
+      body.append('body', stringified)
+
+      for (const file of files) {
+        body.append('files.path', file.path)
+        body.append('files.file', file.file)
       }
 
-      headers['transformed'] = true
-      fetchInit.body = await transformer.input.serialize(fetchInit.body)
+      fetchInit.body = body
+    } else {
+      const serialized = await transformer.input.serialize(fetchInit.body)
+
+      const stringified = JSON.stringify(serialized)
+
+      fetchInit.body = stringified
     }
-
-    const stringified = JSON.stringify(fetchInit.body)
-
-    body.append('body', stringified)
-
-    for (const file of files) {
-      body.append('files.path', file.path)
-      body.append('files.file', file.file)
-    }
-
-    fetchInit.body = body
 
     return
   }
@@ -117,7 +121,7 @@ export async function resolveFetchOptions(params: EdenRequestParams) {
 
   const headers = await processHeaders(params?.headers, params.options, params)
 
-  const query = buildQueryString(params.options?.query)
+  const query = buildQueryString({ ...params.query, ...params.options?.query })
 
   let fetchInit = {
     method: params.method?.toUpperCase(),
