@@ -1,5 +1,5 @@
 import { uneval } from 'devalue'
-import Elysia, { type Context } from 'elysia'
+import { type Context,Elysia, t } from 'elysia'
 import SuperJSON from 'superjson'
 import { describe, expect, test, vi } from 'vitest'
 
@@ -10,9 +10,18 @@ import { useApp } from '../setup'
 
 describe('http-link', () => {
   test('resolves object option headers', async () => {
-    const handlePost = vi.fn(async (context: Context) => {
-      console.log({ body: context.body })
-      return { hello: 'POST!', value: context.body.number }
+    const body = t.Object({
+      number: t.BigInt(),
+      hello: t.String(),
+      yes: t.File(),
+    })
+
+    const handlePost = vi.fn(async (context: Context<{ body: typeof body.static }>) => {
+      return {
+        hello: context.body.number,
+        value: context.body.hello,
+        name: context.body.yes.name,
+      }
     })
 
     const app = new Elysia()
@@ -30,14 +39,13 @@ describe('http-link', () => {
         }),
       )
       .get('/hello', () => 'GET!')
-      .post('/hello', handlePost)
+      .post('/hello', handlePost, { body })
 
     useApp(app)
 
     const link = httpBatchLink({
       domain: 'http://localhost:3000',
       transformer: SuperJSON,
-      // onRequest:
     })
 
     const client = new EdenClient({ links: [link] })
