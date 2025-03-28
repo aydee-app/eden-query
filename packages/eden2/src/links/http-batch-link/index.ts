@@ -9,7 +9,7 @@ import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
 import type { EdenResult } from '../../core/response'
 import { Observable } from '../../observable'
 import { toArray } from '../../utils/to-array'
-import { handleHttpRequest, type HTTPLinkOptions, resolveEdenParams } from '../http-link'
+import { handleHttpRequest, type HTTPLinkOptions, resolveHttpOperationParams } from '../http-link'
 import type { Operation } from '../internal/operation'
 import type { OperationLink } from '../internal/operation-link'
 import { type BatchLoader, dataLoader } from './data-loader'
@@ -50,8 +50,12 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
   options: HTTPBatchLinkOptions<T> = {},
 ) {
   const maxURLLength = options.maxURLLength ?? Infinity
+
   const maxItems = options.maxItems ?? Infinity
+
   const endpoint = options.endpoint ?? BATCH_ENDPOINT
+
+  const edenParamsResolver = resolveHttpOperationParams.bind(null, options)
 
   const batchLoader: BatchLoader<Operation, EdenResult<any, EdenFetchError>> = {
     async validate(batchOps) {
@@ -84,8 +88,6 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
       const postRequest = batchOps.find((op) => op.params?.method?.toUpperCase() === 'POST')
 
       const method = (postRequest && 'POST') || options.method || 'POST'
-
-      const edenParamsResolver = resolveEdenParams.bind(null, options)
 
       const resolvedBatchOps = batchOps.map(edenParamsResolver)
 

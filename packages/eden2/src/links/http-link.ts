@@ -28,7 +28,7 @@ export type HTTPLinkOptions<T = any> = HTTPLinkBaseOptions<T> & {
   headers?: HTTPLinkHeaders
 }
 
-export function resolveEdenParams(options: HTTPLinkOptions, op: Operation) {
+export function resolveHttpOperationParams(options: HTTPLinkOptions, op: Operation) {
   const { path, params } = op
 
   const operationHeadersResolver: EdenRequestHeaders = async () => {
@@ -76,7 +76,7 @@ export function resolveEdenParams(options: HTTPLinkOptions, op: Operation) {
 }
 
 export async function handleHttpRequest(options: HTTPLinkOptions, op: Operation) {
-  const resolvedParams = resolveEdenParams(options, op)
+  const resolvedParams = resolveHttpOperationParams(options, op)
 
   const result = await resolveEdenRequest(resolvedParams)
 

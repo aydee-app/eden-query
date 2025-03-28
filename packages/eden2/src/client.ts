@@ -58,7 +58,6 @@ export class EdenClient<T extends AnyElysia> {
 
     this.runtime = {}
 
-    // Initialize the links
     this.links = opts.links.map((link) => link(this.runtime))
   }
 
@@ -73,9 +72,7 @@ export class EdenClient<T extends AnyElysia> {
         id: ++this.requestId,
       },
     })
-
     const observable = chain$.pipe(share())
-
     return observable
   }
 
@@ -88,20 +85,27 @@ export class EdenClient<T extends AnyElysia> {
     return promise.result as TOutput
   }
 
-  public query(path: string, params: EdenRequestParams = {}, options?: EdenRequestOptions) {
-    const promise = this.requestAsPromise({
+  public query<TInput extends EdenRequestParams = EdenRequestParams, TOutput = unknown>(
+    path: string,
+    params: TInput = {} as any,
+    options?: EdenRequestOptions,
+  ) {
+    const promise = this.requestAsPromise<TInput, TOutput>({
       type: 'query',
       path,
       params,
       context: options?.context,
       signal: options?.signal,
     })
-
     return promise
   }
 
-  public mutation(path: string, params: EdenRequestParams = {}, options?: EdenRequestOptions) {
-    const promise = this.requestAsPromise({
+  public mutation<TInput extends EdenRequestParams = EdenRequestParams, TOutput = unknown>(
+    path: string,
+    params: TInput = {} as any,
+    options?: EdenRequestOptions,
+  ) {
+    const promise = this.requestAsPromise<TInput, TOutput>({
       type: 'mutation',
       path,
       params,
@@ -112,12 +116,12 @@ export class EdenClient<T extends AnyElysia> {
     return promise
   }
 
-  public subscription(
+  public subscription<TInput extends EdenRequestParams = EdenRequestParams, TOutput = unknown>(
     path: string,
-    params: EdenRequestParams = {},
+    params: TInput = {} as any,
     options?: EdenClientSubscriptionOptions,
   ): Unsubscribable {
-    const observable$ = this.$request({
+    const observable$ = this.$request<TInput, TOutput>({
       type: 'subscription',
       path,
       params,
