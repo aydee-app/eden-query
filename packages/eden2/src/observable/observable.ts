@@ -172,3 +172,91 @@ export function observableToPromise<T>(observable: Observable<T, unknown>) {
 
   return promise
 }
+
+/**
+ * @internal
+ */
+export type Result<TType, TErr = unknown> = { ok: true; value: TType } | { ok: false; error: TErr }
+
+/**
+ * @internal
+ */
+function observableToReadableStream<TValue>(
+  observable: Observable<TValue, unknown>,
+  signal: AbortSignal,
+): ReadableStream<Result<TValue>> {
+  let unsub: Unsubscribable | null = null
+
+  const onAbort = () => {
+    unsub?.unsubscribe()
+    unsub = null
+    signal.removeEventListener('abort', onAbort)
+  }
+
+  return new ReadableStream<Result<TValue>>({
+    start(controller) {
+      unsub = observable.subscribe({
+        next(data) {
+          controller.enqueue({ ok: true, value: data })
+        },
+        error(error) {
+          controller.enqueue({ ok: false, error })
+          controller.close()
+        },
+        complete() {
+          controller.close()
+        },
+      })
+
+      if (signal.aborted) {
+        onAbort()
+      } else {
+        signal.addEventListener('abort', onAbort, { once: true })
+      }
+    },
+    cancel() {
+      onAbort()
+    },
+  })
+}
+
+/** @internal */
+export function observableToAsyncIterable<TValue>(
+  observable: Observable<TValue, unknown>,
+  signal: AbortSignal,
+): AsyncIterable<TValue> {
+  const stream = observableToReadableStream(observable, signal)
+
+  const reader = stream.getReader()
+  const iterator: AsyncIterator<TValue> = {
+    async next() {
+      const value = await reader.read()
+      if (value.done) {
+        return {
+          value: undefined,
+          done: true,
+        }
+      }
+      const { value: result } = value
+      if (!result.ok) {
+        throw result.error
+      }
+      return {
+        value: result.value,
+        done: false,
+      }
+    },
+    async return() {
+      await reader.cancel()
+      return {
+        value: undefined,
+        done: true,
+      }
+    },
+  }
+  return {
+    [Symbol.asyncIterator]() {
+      return iterator
+    },
+  }
+}

@@ -119,6 +119,9 @@ const typescriptConfigs = tsEslint.config(
 
       // Empty objects are used sometimes...
       '@typescript-eslint/no-empty-object-type': 'off',
+
+      // Don't really care about this rule.
+      '@typescript-eslint/no-unsafe-function-type': 'off',
     },
   },
 )
