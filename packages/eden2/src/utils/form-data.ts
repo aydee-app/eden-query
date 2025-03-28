@@ -1,3 +1,5 @@
+/* c8 ignore start */
+
 const kindOfCache = Object.create(null)
 
 function kindOf(thing: unknown) {
@@ -126,3 +128,4 @@ export function formDataToJSON(formData: string): Record<string, any> | null {
 }
 
 export default formDataToJSON
+/* c8 ignore end */
