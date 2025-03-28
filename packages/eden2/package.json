@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint --fix",
-    "test": "vitest"
+    "test": "vitest http-batch-link"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,8 @@
   "devDependencies": {
     "@trpc/client": "^11.0.0",
     "@trpc/server": "^11.0.0",
+    "devalue": "^5.1.1",
+    "superjson": "^2.2.2",
     "typescript": "^5.6.3"
   },
   "peerDependencies": {

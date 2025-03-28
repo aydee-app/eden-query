@@ -1,3 +1,4 @@
+import { processHeaders } from '../../core/headers'
 import type { EdenRequestParams } from '../../core/request'
 
 /**
@@ -12,7 +13,7 @@ import type { EdenRequestParams } from '../../core/request'
  *
  * batch=1&0.path=/api/b&0.method=GET&0.query.name=elysia
  */
-export async function parametizeBatchGet(batchParams: EdenRequestParams[]) {
+export async function serializeBatchGetParams(batchParams: EdenRequestParams[]) {
   const query: Record<string, any> = {}
 
   const headers = new Headers()
@@ -41,26 +42,15 @@ export async function parametizeBatchGet(batchParams: EdenRequestParams[]) {
       }
     }
 
-    // Handle headers.
+    const currentHeaders = await processHeaders(params.headers, params.fetch, params)
 
-    /**
-     * These headers may be set at the root of the client as defaults.
-     */
-    const defaultHeaders =
-      typeof params.headers === 'function' ? await params.headers(params) : params.headers
-
-    /**
-     * These headers are set on this specific request.
-     */
-    const requestHeaders = params.options?.headers
-
-    const resolvedHeaders = { ...defaultHeaders, ...requestHeaders }
+    const resolvedHeaders = { ...currentHeaders, ...params.options?.headers }
 
     for (const key in resolvedHeaders) {
-      const header = resolvedHeaders[key as never]
+      const value = currentHeaders[key as keyof typeof currentHeaders]
 
-      if (header != null) {
-        headers.append(key, header)
+      if (value) {
+        headers.append(`${index}.headers.${key}`, value)
       }
     }
   })

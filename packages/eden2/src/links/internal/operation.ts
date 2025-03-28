@@ -113,12 +113,13 @@ export interface OperationContext extends Record<string, unknown> {}
 /**
  * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/types.ts#L26
  */
-export interface Operation<T extends EdenRequestParams = any> extends OperationOptions<T> {
+export interface Operation<T extends EdenRequestParams = EdenRequestParams>
+  extends OperationOptions<T> {
   id: number
   context: OperationContext
 }
 
-export interface OperationOptions<T extends EdenRequestParams = any> {
+export interface OperationOptions<T extends EdenRequestParams = EdenRequestParams> {
   type: Procedure
   path: string
   context?: OperationContext

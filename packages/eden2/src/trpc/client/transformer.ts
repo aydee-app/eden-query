@@ -48,9 +48,11 @@ export type TransformerOptionsStrict<T extends Pick<AnyClientTypes, 'transformer
  */
 export type TransformerOptions<T = any> = T extends any
   ? {
+      id?: string
       transformer?: DataTransformerOptions
     }
   : {
+      id?: string
       transformer?: DataTransformerOptions
     }
 
@@ -75,12 +77,12 @@ Object.freeze(defaultTransformer.output)
 /**
  * @internal
  */
-export function getTransformer(options?: TransformerOptions): CombinedDataTransformer {
+export function getTransformer(options?: TransformerOptions): CombinedDataTransformer | undefined {
   const transformer = options?.transformer
 
-  if (!transformer) return defaultTransformer
+  if (!transformer) return transformer
 
   if ('input' in transformer) return transformer
 
-  return { input: transformer, output: transformer }
+  return { id: transformer.id || options.id, input: transformer, output: transformer }
 }

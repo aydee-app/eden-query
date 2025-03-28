@@ -1,5 +1,19 @@
 import type { EdenRequestParams } from '../../core/request'
+import { resolveFetchOptions } from '../../core/resolve'
 import { getTransformer } from '../../trpc/client/transformer'
+import { extractFiles } from '../../utils/file'
+
+const KEYS = {
+  method: 'method',
+  path: 'path',
+  body: 'body',
+  bodyType: 'body_type',
+  query: 'query',
+  filePaths: 'files.path',
+  files: 'files.files',
+  transformed: 'transformer',
+  transformerId: 'transformer-id',
+} as const
 
 /**
  * If using POST request to batch, most of the request data will be encoded in the FormData body.
@@ -21,94 +35,67 @@ import { getTransformer } from '../../trpc/client/transformer'
  *   '1.query.name': 'elysia'
  * }
  */
-export async function parametizeBatchPost(requestParams: EdenRequestParams[]) {
+export async function serializeBatchPostParams(batchParams: EdenRequestParams[]) {
   const body = new FormData()
 
   const headers = new Headers()
 
-  const parametizerOperations = requestParams.map(async (params, index) => {
-    let operationPath = params.path ?? ''
+  const operations = batchParams.map(async (params, index) => {
+    const { path, query, fetchInit } = await resolveFetchOptions(params)
 
-    // Specify method of the request.
-    if (params.method != null) {
-      body.append(`${index}.method`, params.method)
+    if (fetchInit.method) {
+      body.append(`${index}.${KEYS.method}`, fetchInit.method)
     }
 
-    // Handle path parameters.
-    for (const key in params.options?.params) {
-      const placeholder = `:${key}`
+    body.append(`${index}.${KEYS.path}`, path + (query ? '?' : '') + query)
 
-      const param = params.options.params[key as never]
+    for (const key in fetchInit.headers) {
+      const value = fetchInit.headers[key]
 
-      if (param != null) {
-        operationPath = operationPath.replace(placeholder, param)
+      if (value) {
+        headers.append(`${index}.${key}`, value)
       }
     }
 
-    // Specify the path of the request.
-    body.append(`${index}.path`, operationPath)
+    if (fetchInit?.body == null) return
 
-    // Handle query parameters.
-    for (const key in params.options?.query) {
-      const value = params.options.query[key as never]
+    if (fetchInit.body instanceof FormData) {
+      body.append(`${index}.${KEYS.bodyType}`, 'formdata')
 
-      if (value != null) {
-        body.append(`${index}.query.${key}`, value)
-      }
+      fetchInit?.body.forEach((value, key) => {
+        body.set(`${index}.${KEYS.body}.${key}`, value)
+      })
+
+      return
     }
 
-    // Handle headers.
-
-    /**
-     * These headers may be set at the root of the client as defaults.
-     */
-    const defaultHeaders =
-      typeof params.headers === 'function' ? params.headers(params) : params.headers
-
-    /**
-     * These headers are set on this specific request.
-     */
-    const requestHeaders = params.options?.headers
-
-    const resolvedHeaders = { ...defaultHeaders, ...requestHeaders }
-
-    for (const key in resolvedHeaders) {
-      const header = resolvedHeaders[key as never]
-      if (header != null) {
-        headers.append(key, header)
-      }
-    }
-
-    // Handle body.
-
-    if (params?.body == null) return
+    body.append(`${index}.${KEYS.bodyType}`, 'json')
 
     const transformer = getTransformer(params)
 
-    // Intermediary variable so TypeScript can coerce the type properly.
-    const paramsBody = params.body
+    if (transformer) {
+      if (transformer.id) {
+        body.append(`${index}.${KEYS.transformerId}`, transformer.id)
+      }
 
-    if (paramsBody instanceof FormData) {
-      body.append(`${index}.body_type`, 'formdata')
+      body.append(`${index}.${KEYS.transformed}`, 'true')
 
-      paramsBody.forEach((value, key) => {
-        const serialized = transformer.input.serialize(value)
+      fetchInit.body = transformer.input.serialize(fetchInit?.body)
+    }
 
-        // FormData is special and can handle additional data types, like Files.
-        // So we will not JSON.stringify the serialized result.
-        body.set(`${index}.body.${key}`, serialized)
-      })
-    } else {
-      body.append(`${index}.body_type`, 'json')
+    const stringified = JSON.stringify(fetchInit.body)
 
-      const serialized = transformer.input.serialize(params.body)
-      const stringified = JSON.stringify(serialized)
+    body.set(`${index}.${KEYS.body}`, stringified)
 
-      body.set(`${index}.body`, stringified)
+    const files = extractFiles(fetchInit?.body)
+
+    for (const file of files) {
+      body.append(`${index}.${KEYS.filePaths}`, file.path)
+      body.append(`${index}.${KEYS.files}`, file.file)
     }
   })
 
-  await Promise.all(parametizerOperations)
+  await Promise.all(operations)
 
   return { body, query: {}, headers }
 }

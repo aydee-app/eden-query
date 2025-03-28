@@ -24,6 +24,11 @@ export interface EdenRequestInit {
   /**
    */
   method?: string
+
+  /**
+   * Passed as second argument to new URL if applicable.
+   */
+  base?: string
 }
 
 /**

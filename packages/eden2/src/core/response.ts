@@ -2,7 +2,7 @@
  * Roughly correlates to tRPC responses.
  * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L73-L83
  *
- * The main difference is that {@link EdenErrorResponse} does not conform to any shape
+ * The main difference is that {@link EdenErrorResult} does not conform to any shape
  * since this library does not provide any wrapping around the errors returned from the server.
  *
  * i.e. If your endpoint returns a string as an error, this library will give you the returned string.
@@ -13,7 +13,7 @@ import { parseStringifiedValue } from '../utils/parse'
 /**
  * @template T The data that is returned from a successful response.
  */
-export interface EdenSuccessResponse<T> {
+export interface EdenSuccessResult<T> {
   data: T
   error: null
   response: Response
@@ -22,7 +22,7 @@ export interface EdenSuccessResponse<T> {
 /**
  * @template T The data that is returned from an unsuccessful response.
  */
-export interface EdenErrorResponse<T> {
+export interface EdenErrorResult<T> {
   data: null
   error: T
   response: Response
@@ -35,9 +35,9 @@ export interface EdenErrorResponse<T> {
  * @template TData The data that is returned from a successul response.
  * @template TError The data that is returned from an unsuccessful response.
  */
-export type EdenResponse<TData = unknown, TError = unknown> =
-  | EdenSuccessResponse<TData>
-  | EdenErrorResponse<TError>
+export type EdenResult<TData = unknown, TError = unknown> =
+  | EdenSuccessResult<TData>
+  | EdenErrorResult<TError>
 
 /**
  * A subset of the standard ReadableStream properties needed by tRPC internally.

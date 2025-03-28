@@ -1,18 +1,18 @@
 import type { AnyElysia } from 'elysia'
 
+import { serializeBatchGetParams } from '../../batch/serializer/get'
+import { serializeBatchPostParams } from '../../batch/serializer/post'
 import { BATCH_ENDPOINT } from '../../constants'
 import type { EdenFetchError } from '../../core/errors'
 import type { EdenRequestParams } from '../../core/request'
-import { resolveEdenRequest } from '../../core/resolve'
-import type { EdenResponse } from '../../core/response'
+import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
+import type { EdenResult } from '../../core/response'
 import { Observable } from '../../observable'
-import { getTransformer } from '../../trpc/client/transformer'
-import { handleHttpRequest, type HTTPLinkOptions } from '../http-link'
+import { toArray } from '../../utils/to-array'
+import { handleHttpRequest, type HTTPLinkOptions, resolveEdenParams } from '../http-link'
 import type { Operation } from '../internal/operation'
 import type { OperationLink } from '../internal/operation-link'
 import { type BatchLoader, dataLoader } from './data-loader'
-import { parametizeBatchGet } from './parametizers/get'
-import { parametizeBatchPost } from './parametizers/post'
 
 export type BatchMethod = 'GET' | 'POST'
 
@@ -38,9 +38,9 @@ export type HTTPBatchLinkOptions<T = any> = HTTPLinkOptions<T> & {
   method?: BatchMethod
 }
 
-const batchParametizers = {
-  GET: parametizeBatchGet,
-  POST: parametizeBatchPost,
+const batchSerializer = {
+  GET: serializeBatchGetParams,
+  POST: serializeBatchPostParams,
 }
 
 /**
@@ -53,8 +53,8 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
   const maxItems = options.maxItems ?? Infinity
   const endpoint = options.endpoint ?? BATCH_ENDPOINT
 
-  const batchLoader: BatchLoader<Operation, EdenResponse<any, EdenFetchError>> = {
-    validate(batchOps) {
+  const batchLoader: BatchLoader<Operation, EdenResult<any, EdenFetchError>> = {
+    async validate(batchOps) {
       // If not a GET request, then we don't care about size limits.
       if (options.method !== 'GET') return true
 
@@ -63,7 +63,7 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
 
       if (batchOps.length > maxItems) return false
 
-      const params = parametizeBatchGet(batchOps)
+      const params = await serializeBatchGetParams(batchOps)
 
       const searchParams = new URLSearchParams(params.query)
 
@@ -72,7 +72,6 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
       return url.length <= maxURLLength
     },
     async fetch(batchOps) {
-      // If there is only one request, make a regular HTTP request.
       if (batchOps.length === 1) {
         const [firstOperation] = batchOps
 
@@ -82,106 +81,53 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
         }
       }
 
-      // If any requests are POST, then the entire batch request must be POST.
-      // Otherwise, default to user-provided method and fallback to POST.
-      const method =
-        (batchOps.find((op) => op.params.method === 'POST') && 'POST') || options.method || 'POST'
+      const postRequest = batchOps.find((op) => op.params?.method?.toUpperCase() === 'POST')
 
-      const parametize = batchParametizers[method]
+      const method = (postRequest && 'POST') || options.method || 'POST'
 
-      const params = parametize(batchOps)
+      const edenParamsResolver = resolveEdenParams.bind(null, options)
+
+      const resolvedBatchOps = batchOps.map(edenParamsResolver)
+
+      const resolvedBatchParams = await batchSerializer[method](resolvedBatchOps)
 
       const resolvedParams: EdenRequestParams = {
         ...options,
+        // Batch requests either use FormData (POST) or URL query (GET), no transformer needed.
+        transformer: undefined,
+        path: endpoint,
         method,
-        options: { query: params.query },
-        body: params.body,
-        headers: params.headers,
+        options: { query: resolvedBatchParams.query },
+        body: resolvedBatchParams.body,
+        headers: resolvedBatchParams.headers,
       }
 
       const result = await resolveEdenRequest(resolvedParams)
 
-      /**
-       * result.data should be an array of JSON data from each request in the batch.
-       */
-      if (!('data' in result) || !Array.isArray(result.data)) {
-        return []
-      }
+      if (!Array.isArray(result.data)) return []
 
-      const resolvedTransformer = getTransformer(options)
+      const batchedData: EdenResult<any, EdenFetchError>[] = result.data
 
-      const batchedData: EdenResponse<any, EdenFetchError>[] = result.data
+      const resultOperations = batchedData.map(async (batchedResult, index) => {
+        let result = batchedResult
 
-      /**
-       * The batch plugin also encodes its data into a JSON.
-       *
-       * @example
-       * If the data from a batched request is [3, 'OK', false],
-       * the batch plugin should return a JSON like
-       * [
-       *   { data: 3, error: null, status: 200, statusText: 'OK' },
-       *   { data: 'OK', error: null, status: 200, statusText: 'OK' }
-       *   { data: false, error: null, status: 200, statusText: 'OK' }
-       * ]
-       */
-      const transformedResponses = batchedData.map((batchedResult, index) => {
-        // The raw data from each request has not be de-serialized yet.
-        // De-serialize it so every entry is the finalized result.
-        if (resolvedTransformer != null && batchedResult.data != null) {
-          batchedResult.data = resolvedTransformer.output.deserialize(batchedResult.data)
+        const op = resolvedBatchOps[index]
+
+        if (op == null) return batchedResult
+
+        const onResult = [...toArray(op?.onResult), defaultOnResult]
+
+        for (const handler of onResult) {
+          const newResult = await handler(result, op)
+          result = newResult || result
         }
 
-        const operation = batchOps[index]
-
-        // If this specific operation wanted the raw information, append the required properties.
-        if (operation?.params.raw) {
-          // Recreate custom headers object.
-          const headers = new Headers()
-
-          /**
-           * If the header value has a numeric prefix, only assign it if it matches the operation index,
-           * otherwise, assign it.
-           *
-           * The batch plugin will add a numeric prefix to organize the headers.
-           *
-           * @example
-           * '0.set-cookie': 'abc' should be a header only for request 0.
-           * 'set-cookie': should be a header for all the batched requests.
-           */
-          result.response.headers.forEach((value, key) => {
-            const [prefix, name] = key.split('.')
-
-            if (Number(prefix) === index && name != null) {
-              headers.set(name, value)
-            } else {
-              headers.set(key, value)
-            }
-          })
-
-          /**
-           * TODO: how to guarantee that this value is the correct body?
-           */
-          const body =
-            resolvedTransformer != null
-              ? resolvedTransformer.output.serialize(batchedResult.data)
-              : JSON.stringify(batchedResult.data)
-
-          /**
-           * Create a new response using the re-serialized body.
-           */
-          const response = new Response(body, {
-            status: batchedResult.response.status,
-            statusText: batchedResult.response.statusText,
-            headers,
-          })
-
-          batchedResult.response = response
-        }
-
-        return batchedResult
+        return result
       })
 
-      return transformedResponses
+      const finalResult = await Promise.all(resultOperations)
+
+      return finalResult
     },
   }
 
@@ -196,9 +142,8 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
           )
         }
 
-        const promise = loader.load(op)
-
-        promise
+        loader
+          .load(op)
           .then((response) => {
             if (response.error) {
               observer.error(response.error)

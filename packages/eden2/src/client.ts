@@ -79,16 +79,17 @@ export class EdenClient<T extends AnyElysia> {
     return observable
   }
 
-  private async requestAsPromise<TInput extends EdenRequestParams = any, TOutput = unknown>(
-    options: OperationOptions<TInput>,
-  ): Promise<TOutput> {
+  private async requestAsPromise<
+    TInput extends EdenRequestParams = EdenRequestParams,
+    TOutput = unknown,
+  >(options: OperationOptions<TInput>): Promise<TOutput> {
     const req$ = this.$request<TInput, TOutput>(options)
     const promise = await promisifyObservable(req$)
     return promise.result as TOutput
   }
 
-  public query(path: string, params?: EdenRequestParams, options?: EdenRequestOptions) {
-    const promise = this.requestAsPromise<any, unknown>({
+  public query(path: string, params: EdenRequestParams = {}, options?: EdenRequestOptions) {
+    const promise = this.requestAsPromise({
       type: 'query',
       path,
       params,
@@ -99,8 +100,8 @@ export class EdenClient<T extends AnyElysia> {
     return promise
   }
 
-  public mutation(path: string, params?: unknown, options?: EdenRequestOptions) {
-    const promise = this.requestAsPromise<any, unknown>({
+  public mutation(path: string, params: EdenRequestParams = {}, options?: EdenRequestOptions) {
+    const promise = this.requestAsPromise({
       type: 'mutation',
       path,
       params,
@@ -113,48 +114,48 @@ export class EdenClient<T extends AnyElysia> {
 
   public subscription(
     path: string,
-    params: any,
-    opts: EdenClientSubscriptionOptions,
+    params: EdenRequestParams = {},
+    options?: EdenClientSubscriptionOptions,
   ): Unsubscribable {
     const observable$ = this.$request({
       type: 'subscription',
       path,
       params,
-      context: opts.context,
-      signal: opts.signal,
+      context: options?.context,
+      signal: options?.signal,
     })
 
     const unsubscribable = observable$.subscribe({
       next(envelope) {
         switch (envelope.result.type) {
           case 'state': {
-            opts.onConnectionStateChange?.(envelope.result)
+            options?.onConnectionStateChange?.(envelope.result)
             break
           }
 
           case 'started': {
-            opts.onStarted?.({ context: envelope.context })
+            options?.onStarted?.({ context: envelope.context })
             break
           }
 
           case 'stopped': {
-            opts.onStopped?.()
+            options?.onStopped?.()
             break
           }
 
           case 'data': // falls through
 
           case undefined: {
-            opts.onData?.(envelope.result.data)
+            options?.onData?.(envelope.result.data)
             break
           }
         }
       },
       error(err) {
-        opts.onError?.(err)
+        options?.onError?.(err)
       },
       complete() {
-        opts.onComplete?.()
+        options?.onComplete?.()
       },
     })
 

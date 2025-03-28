@@ -1,4 +1,4 @@
- 
+import type { MaybePromise } from '../../utils/types'
 
 type BatchItem<TKey, TValue> = {
   aborted: boolean
@@ -13,7 +13,7 @@ type Batch<TKey, TValue> = {
 }
 
 export type BatchLoader<TKey = any, TValue = any> = {
-  validate: (keys: TKey[]) => boolean
+  validate: (keys: TKey[]) => MaybePromise<boolean>
   fetch: (keys: TKey[]) => Promise<TValue[] | Promise<TValue>[]>
 }
 
@@ -44,15 +44,17 @@ export function dataLoader<TKey, TValue>(batchLoader: BatchLoader<TKey, TValue>)
   /**
    * Iterate through the items and split them into groups based on the `batchLoader`'s validate function
    */
-  function groupItems(items: BatchItem<TKey, TValue>[]) {
+  async function groupItems(items: BatchItem<TKey, TValue>[]) {
     const groupedItems: BatchItem<TKey, TValue>[][] = [[]]
+
     let index = 0
+
     while (true) {
       const item = items[index]
-      if (!item) {
-        // we're done
-        break
-      }
+
+      // we're done
+      if (!item) break
+
       const lastGroup = groupedItems[groupedItems.length - 1]!
 
       if (item.aborted) {
@@ -62,7 +64,7 @@ export function dataLoader<TKey, TValue>(batchLoader: BatchLoader<TKey, TValue>)
         continue
       }
 
-      const isValid = batchLoader.validate(lastGroup.concat(item).map((it) => it.key))
+      const isValid = await batchLoader.validate(lastGroup.concat(item).map((it) => it.key))
 
       if (isValid) {
         lastGroup.push(item)
@@ -75,27 +77,30 @@ export function dataLoader<TKey, TValue>(batchLoader: BatchLoader<TKey, TValue>)
         index++
         continue
       }
+
       // Create new group, next iteration will try to add the item to that
       groupedItems.push([])
     }
     return groupedItems
   }
 
-  function dispatch() {
-    const groupedItems = groupItems(pendingItems!)
+  async function dispatch() {
+    const groupedItems = await groupItems(pendingItems!)
+
     destroyTimerAndPendingItems()
 
     // Create batches for each group of items
     for (const items of groupedItems) {
-      if (!items.length) {
-        continue
-      }
+      if (!items.length) continue
+
       const batch: Batch<TKey, TValue> = {
         items,
       }
+
       for (const item of items) {
         item.batch = batch
       }
+
       const promise = batchLoader.fetch(batch.items.map((_item) => _item.key))
 
       promise
@@ -130,6 +135,7 @@ export function dataLoader<TKey, TValue>(batchLoader: BatchLoader<TKey, TValue>)
         })
     }
   }
+
   function load(key: TKey): Promise<TValue> {
     const item: BatchItem<TKey, TValue> = {
       aborted: false,
@@ -146,6 +152,7 @@ export function dataLoader<TKey, TValue>(batchLoader: BatchLoader<TKey, TValue>)
       if (!pendingItems) {
         pendingItems = []
       }
+
       pendingItems.push(item)
     })
 

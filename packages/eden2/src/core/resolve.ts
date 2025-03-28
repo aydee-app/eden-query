@@ -1,24 +1,67 @@
 import type { AnyElysia } from 'elysia'
 
-import { hasFile } from '../utils/file'
+import { getTransformer } from '../trpc/client/transformer'
+import { extractFiles, hasFile } from '../utils/file'
 import { buildQueryString, isGetOrHeadMethod } from '../utils/http'
 import { jsonToFormData } from '../utils/json-to-formdata'
 import { toArray } from '../utils/to-array'
-import type { EdenRequestTransformer, EdenResponseTransformer } from './config'
+import type {
+  EdenRequestTransformer,
+  EdenResponseTransformer,
+  EdenResultTransformer,
+} from './config'
 import { EdenFetchError } from './errors'
 import { getFetch } from './fetch'
 import { processHeaders } from './headers'
 import type { EdenRequestParams } from './request'
-import { getResponseData } from './response'
+import { type EdenResult, getResponseData } from './response'
 
-const defaultOnRequest: EdenRequestTransformer = (_path, fetchInit) => {
+export const defaultOnRequest: EdenRequestTransformer = async (_path, fetchInit, params) => {
   // Noop don't handle raw FormData passed to the resolver.
   if (typeof FormData !== 'undefined' && fetchInit.body instanceof FormData) {
     return
   }
 
+  const transformer = getTransformer(params)
+
+  if (transformer && fetchInit.body && typeof fetchInit.body !== 'string') {
+    const transformer = getTransformer(params)
+
+    const files = extractFiles(fetchInit.body)
+
+    if (!files.length) return
+
+    const body = new FormData()
+
+    fetchInit.headers ??= {}
+
+    const headers: any = fetchInit.headers
+
+    if (transformer) {
+      if (transformer.id) {
+        headers['transformer-id'] = transformer.id
+      }
+
+      headers['transformed'] = true
+      fetchInit.body = await transformer.input.serialize(fetchInit.body)
+    }
+
+    const stringified = JSON.stringify(fetchInit.body)
+
+    body.append('body', stringified)
+
+    for (const file of files) {
+      body.append('files.path', file.path)
+      body.append('files.file', file.file)
+    }
+
+    fetchInit.body = body
+
+    return
+  }
+
   if (hasFile(fetchInit.body as any)) {
-    const formData = jsonToFormData(fetchInit.body)
+    const formData = await jsonToFormData(fetchInit.body)
 
     // We don't do this because we need to let the browser set the content type with the correct boundary
     // fetchInit.headers['content-type'] = 'multipart/form-data'
@@ -40,7 +83,7 @@ const defaultOnRequest: EdenRequestTransformer = (_path, fetchInit) => {
   }
 }
 
-const defaultOnResponse: EdenResponseTransformer = async (response) => {
+export const defaultOnResponse: EdenResponseTransformer = async (response) => {
   const data = await getResponseData(response)
 
   if (response.status >= 400) {
@@ -51,15 +94,15 @@ const defaultOnResponse: EdenResponseTransformer = async (response) => {
   return data
 }
 
-/**
- * Resolve an eden request to a presumably Elysia.js backend.
- * Also handles transformations.
- *
- * When compared to tRPC, this function represents both:
- * - universalRequester {@see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/httpLink.ts#L90}
- * - transformResult {@see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/httpLink.ts#L112}
- */
-export async function resolveEdenRequest<T extends AnyElysia>(params: EdenRequestParams<T>) {
+export const defaultOnResult: EdenResultTransformer = async (result, params) => {
+  const transformer = getTransformer(params)
+
+  if (transformer) {
+    result.data = await transformer.output.deserialize(result.data)
+  }
+}
+
+export async function resolveFetchOptions(params: EdenRequestParams) {
   let path = params.path ?? ''
 
   if (params.options?.params != null) {
@@ -87,10 +130,10 @@ export async function resolveEdenRequest<T extends AnyElysia>(params: EdenReques
   if (isGetOrHead) delete fetchInit.body
 
   // default request handler runs first and user-provided ones see the initially transformed result.
-  const onRequest = [defaultOnRequest, ...toArray(params.onRequest)]
+  const onRequest = [...toArray(params.onRequest), defaultOnRequest]
 
   for (const value of onRequest) {
-    const temp = await value(path, fetchInit)
+    const temp = await value(path, fetchInit, params)
 
     if (typeof temp === 'object')
       fetchInit = {
@@ -103,11 +146,31 @@ export async function resolveEdenRequest<T extends AnyElysia>(params: EdenReques
       }
   }
 
+  const onResponse = [...toArray(params.onResponse), defaultOnResponse]
+
+  const onResult = [...toArray(params.onResult), defaultOnResult]
+
+  return { path, fetchInit, query, onResponse, onResult }
+}
+
+/**
+ * Resolve an eden request to a presumably Elysia.js backend.
+ * Also handles transformations.
+ *
+ * When compared to tRPC, this function represents both:
+ * - universalRequester {@see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/httpLink.ts#L90}
+ * - transformResult {@see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/httpLink.ts#L112}
+ */
+export async function resolveEdenRequest<T extends AnyElysia>(params: EdenRequestParams<T>) {
+  const { path, query, fetchInit, onResult, onResponse } = await resolveFetchOptions(params)
+
   const domain = typeof params.domain === 'string' ? params.domain : ''
 
   const elysia = typeof params.domain === 'string' ? undefined : params.domain
 
-  const url = domain + path + query
+  const base = domain || params.base
+
+  const url = base + path + query
 
   const fetcher = getFetch(params.fetcher)
 
@@ -115,32 +178,36 @@ export async function resolveEdenRequest<T extends AnyElysia>(params: EdenReques
 
   const response = await request
 
-  // Default onResponse handler runs last after all user provided ones.
-  const onResponse = [...toArray(params.onResponse), defaultOnResponse]
-
   let currentResponse: typeof response | undefined = undefined
 
-  // Stop when a error occurs or first defined data is returned by handler.
+  let result: EdenResult<any, EdenFetchError>
+
   try {
     for (const value of onResponse) {
-      // Lazily clone the response to process.
-      // If there is only the default response transformer, it will not be cloned.
       currentResponse = currentResponse ? currentResponse.clone() : response
 
-      const data = await value(currentResponse)
+      const data = await value(currentResponse, params)
 
-      if (data != null) return { error: null, data, response }
+      if (data != null) {
+        result = { error: null, data, response }
+        break
+      }
     }
   } catch (err) {
     const error = err instanceof EdenFetchError ? err : new EdenFetchError(422, err)
-    return { error, data: null, response }
+    result = { error, data: null, response }
   }
 
-  // If nothing was able to handle the response, return error response.
-
-  return {
+  result ||= {
     error: new EdenFetchError(422, 'Unhandled response'),
     data: null,
     response,
   }
+
+  for (const value of onResult) {
+    const newResult = await value(result, params)
+    result = newResult || result
+  }
+
+  return result
 }

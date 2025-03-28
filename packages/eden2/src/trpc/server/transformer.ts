@@ -2,7 +2,13 @@
  * @public
  */
 export interface DataTransformer {
+  /**
+   * Unique identifier for the transformer if you want to use multiple ones.
+   */
+  id?: string
+
   serialize: (object: any) => any
+
   deserialize: (object: any) => any
 }
 
@@ -32,6 +38,11 @@ interface OutputDataTransformer extends DataTransformer {
  * @public
  */
 export interface CombinedDataTransformer {
+  /**
+   * Unique identifier for the transformer if you want to use multiple ones.
+   */
+  id?: string
+
   /**
    * Specify how the data sent from the client to the server should be transformed.
    */
