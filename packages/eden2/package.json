@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint --fix",
-    "test": "vitest http-batch-link"
+    "test": "vitest"
   },
   "repository": {
     "type": "git",

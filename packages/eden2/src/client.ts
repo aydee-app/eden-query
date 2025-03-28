@@ -2,6 +2,7 @@ import type { AnyElysia } from 'elysia'
 
 import type { EdenClientError } from './core/errors'
 import type { EdenRequestParams } from './core/request'
+import type { EdenResult } from './core/response'
 import { createChain } from './links/internal/create-chain'
 import type { EdenClientRuntime, EdenLink } from './links/internal/eden-link'
 import type {
@@ -85,11 +86,10 @@ export class EdenClient<T extends AnyElysia> {
     return promise.result as TOutput
   }
 
-  public query<TInput extends EdenRequestParams = EdenRequestParams, TOutput = unknown>(
-    path: string,
-    params: TInput = {} as any,
-    options?: EdenRequestOptions,
-  ) {
+  public query<
+    TInput extends EdenRequestParams = EdenRequestParams,
+    TOutput extends EdenResult = EdenResult,
+  >(path: string, params: TInput = {} as any, options?: EdenRequestOptions) {
     const promise = this.requestAsPromise<TInput, TOutput>({
       type: 'query',
       path,
@@ -100,11 +100,10 @@ export class EdenClient<T extends AnyElysia> {
     return promise
   }
 
-  public mutation<TInput extends EdenRequestParams = EdenRequestParams, TOutput = unknown>(
-    path: string,
-    params: TInput = {} as any,
-    options?: EdenRequestOptions,
-  ) {
+  public mutation<
+    TInput extends EdenRequestParams = EdenRequestParams,
+    TOutput extends EdenResult = EdenResult,
+  >(path: string, params: TInput = {} as any, options?: EdenRequestOptions) {
     const promise = this.requestAsPromise<TInput, TOutput>({
       type: 'mutation',
       path,
