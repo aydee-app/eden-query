@@ -8,13 +8,20 @@ interface HeadersInitEsque {
 /**
  * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/types.ts#L42
  */
-export type HTTPHeaders = HeadersInitEsque | Record<string, string[] | string | Nullish>
+export type HTTPHeaders =
+  | HeadersInitEsque
+  | Record<string, string[] | string | Nullish>
+  | Array<[string, string]>
 
 export type EdenRequestHeadersResolver = (
   params: EdenRequestParams,
 ) => MaybePromise<HTTPHeaders | Nullish>
 
 export type EdenRequestHeaders = MaybeArray<HTTPHeaders | EdenRequestHeadersResolver>
+
+function isString(value: unknown): value is string {
+  return typeof value === 'string'
+}
 
 /**
  * @param edenRequestHeaders The input headers to resolve, a superset of regular request headers.
@@ -25,41 +32,25 @@ export type EdenRequestHeaders = MaybeArray<HTTPHeaders | EdenRequestHeadersReso
 export async function processHeaders(
   edenRequestHeaders: EdenRequestHeaders | Nullish,
   fetchInit: RequestInit = {},
-  params: EdenRequestParams,
+  params: EdenRequestParams = {},
   headers: Record<string, string> = {},
 ): Promise<Record<string, string>> {
+  if (!edenRequestHeaders) return headers
+
   if (Array.isArray(edenRequestHeaders)) {
-    for (const value of edenRequestHeaders) {
-      if (!Array.isArray(value)) {
-        headers = await processHeaders(value, fetchInit, params, headers)
-        continue
-      }
-
-      const key = value[0]
-
-      if (typeof key === 'string') {
-        headers[key.toLowerCase()] = value[1] as string
-        continue
-      }
-
-      for (const [k, value] of key) {
-        if (k) {
-          headers[k.toLowerCase()] = value as string
-        }
+    if (edenRequestHeaders.length === 2 && edenRequestHeaders.every(isString)) {
+      const [key, value] = edenRequestHeaders as [string, string]
+      headers[key.toLowerCase()] = value
+    } else {
+      for (const value of edenRequestHeaders) {
+        headers = await processHeaders(value as any, fetchInit, params, headers)
       }
     }
-
     return headers
   }
 
-  if (!edenRequestHeaders) return headers
-
   switch (typeof edenRequestHeaders) {
     case 'function': {
-      if (edenRequestHeaders instanceof Headers) {
-        return await processHeaders(edenRequestHeaders, fetchInit, params, headers)
-      }
-
       const v = await edenRequestHeaders(params)
 
       if (v) {

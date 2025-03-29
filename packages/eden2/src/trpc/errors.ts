@@ -1,3 +1,4 @@
+/* c8 ignore start */
 // reference: https://www.jsonrpc.org/specification
 
 import type { InvertKeyValue, ValueOf } from './utils'
@@ -96,3 +97,5 @@ export interface DefaultErrorShape extends TRPCErrorShape<DefaultErrorData> {
   message: string
   code: TRPC_ERROR_CODE_NUMBER
 }
+
+/* c8 ignore end */

@@ -1,4 +1,4 @@
-import { type AnyElysia, type Context, Elysia } from 'elysia'
+import { type AnyElysia, Elysia } from 'elysia'
 
 import { deserializeBatchGetParams } from '../../batch/deserializer/get'
 import {
@@ -26,9 +26,7 @@ export function batchPlugin(options?: BatchPluginOptions) {
   const endpoint = options?.endpoint ?? BATCH_ENDPOINT
 
   const plugin = <T extends AnyElysia>(elysia: T) => {
-    const resolveBatchRequest = async (key: keyof typeof batchDeserializers, context: Context) => {
-      const request = context.request
-
+    const resolveBatchRequest = async (key: keyof typeof batchDeserializers, request: Request) => {
       const batchParams = await batchDeserializers[key](request, options)
 
       const url = new URL(request.url)
@@ -49,21 +47,27 @@ export function batchPlugin(options?: BatchPluginOptions) {
 
       const results = await Promise.all(batchOperations)
 
+      const headers = new Headers()
+
       for (const result of results) {
         for (const [key, value] of result.response.headers) {
-          context.set.headers[key] = value
+          headers.append(key, value)
         }
       }
 
-      return results
+      headers.set('content-type', 'application/json')
+
+      const response = new Response(JSON.stringify(results), { headers })
+
+      return response
     }
 
     const resolveBatchGetRequest = resolveBatchRequest.bind(null, 'get')
     const resolveBatchPostRequest = resolveBatchRequest.bind(null, 'post')
 
     const instance = new Elysia()
-      .get(endpoint, async (context) => await resolveBatchGetRequest(context))
-      .post(endpoint, async (context) => await resolveBatchPostRequest(context), {
+      .get(endpoint, async (context) => await resolveBatchGetRequest(context.request))
+      .post(endpoint, async (context) => await resolveBatchPostRequest(context.request), {
         parse: () => null,
       })
 
@@ -91,19 +95,25 @@ export function jsonTransformerPlugin(options: JsonTransformerPluginOptions) {
 
     ely
       .onParse(async (context) => {
-        if (!context.headers['transformed'] && !context.headers['transformer-id']) return
+        const transformed = context.request.headers.get('transformed')
 
-        switch (context.contentType) {
+        const transformerId = context.request.headers.get('transformer-id')
+
+        if (!transformed && !transformerId) return
+
+        const contentType = context.request.headers.get('content-type')?.split(';')[0]
+
+        const request = context.request
+
+        switch (contentType) {
           case 'multipart/form-data': {
-            const formData = await context.request.clone().formData()
+            const formData = await request.clone().formData()
 
             const body = formData.get('body')
 
             if (!body) return
 
             const json = JSON.parse(body.toString())
-
-            const transformerId = context.headers['transformer-id']
 
             const transformer = transformers.find((t) => t.id === transformerId) || firstTransformer
 
@@ -125,9 +135,7 @@ export function jsonTransformerPlugin(options: JsonTransformerPluginOptions) {
           }
 
           case 'application/json': {
-            const json = await context.request.clone().json()
-
-            const transformerId = context.headers['transformer-id']
+            const json = await request.clone().json()
 
             const transformer = transformers.find((t) => t.id === transformerId) || firstTransformer
 
@@ -137,9 +145,7 @@ export function jsonTransformerPlugin(options: JsonTransformerPluginOptions) {
           }
 
           case 'text/plain': {
-            const text = await context.request.clone().text()
-
-            const transformerId = context.headers['transformer-id']
+            const text = await request.clone().text()
 
             const transformer = transformers.find((t) => t.id === transformerId) || firstTransformer
 
@@ -154,11 +160,13 @@ export function jsonTransformerPlugin(options: JsonTransformerPluginOptions) {
         }
       })
       .mapResponse(async (context) => {
-        if (!context.headers['transformed'] && !context.headers['transformer-id']) return
+        const transformed = context.request.headers.get('transformed')
+
+        const transformerId = context.request.headers.get('transformer-id')
+
+        if (!transformed && !transformerId) return
 
         if (context.response instanceof Response) return
-
-        const transformerId = context.headers['transformer-id']
 
         const transformer = transformers.find((t) => t.id === transformerId) || firstTransformer
 

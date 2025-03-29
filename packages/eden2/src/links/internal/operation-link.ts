@@ -8,7 +8,7 @@ import type { Operation, OperationContext, OperationResult } from './operation'
 /**
  * An {@link OperationLink} attaches additional metadata to a returned {@link OperationResult}
  */
-export type OperationLinkResult<TOutput, TError> = {
+export type OperationLinkResult<TOutput = any, TError = any> = {
   context?: OperationContext
   result: OperationResult<TOutput, TError>
 }

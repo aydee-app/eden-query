@@ -57,7 +57,7 @@ export function extractFiles(object: Record<string, any>, path: string[] = []): 
 
       result.push(extracted)
 
-      delete object[key]
+      // delete object[key]
 
       continue
     }

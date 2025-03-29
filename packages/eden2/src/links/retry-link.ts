@@ -76,8 +76,10 @@ export function retryLink<T extends AnyElysia>(options: RetryLinkOptions<T>): Ed
               }
             },
             next(envelope) {
+              if (!envelope?.result) return observer.next(envelope)
+
               if (
-                (!envelope.result.type || envelope.result.type === 'data') &&
+                (!envelope.result?.type || envelope.result?.type === 'data') &&
                 envelope.result.id
               ) {
                 //

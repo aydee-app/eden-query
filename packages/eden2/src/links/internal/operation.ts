@@ -23,7 +23,7 @@ export interface EdenBaseEnvelope {
 /**
  * Operation result with data.
  */
-export interface EdenDataResult<T> {
+export interface EdenDataResult<T = any> {
   id?: string
 
   /**

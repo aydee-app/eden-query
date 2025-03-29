@@ -39,7 +39,7 @@ export interface RequestInitEsque {
 export type FetchEsque = (
   input: RequestInfo | URL | string,
   init?: RequestInit | RequestInitEsque,
-) => Promise<Response>
+) => Promise<Response> | Response
 
 /**
  * A simpler version of the native fetch function's type for packages with

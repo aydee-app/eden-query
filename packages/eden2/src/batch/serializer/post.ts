@@ -22,17 +22,21 @@ export async function serializeBatchPostParams(batchParams: EdenRequestParams[])
   const operations = batchParams.map(async (params, index) => {
     const { path, query, fetchInit } = await resolveFetchOptions(params)
 
-    if (fetchInit.method) {
+    if (fetchInit?.method) {
       body.append(`${index}.${KEYS.method}`, fetchInit.method)
     }
 
-    body.append(`${index}.${KEYS.path}`, `${path}${query}`)
+    const fetchInitHeaders: any = fetchInit?.headers
 
-    for (const key in fetchInit.headers) {
-      const value = fetchInit.headers[key]
+    body.append(`${index}.${KEYS.path}`, `${path}${query ? '?' : ''}${query}`)
 
-      if (value) {
-        headers.append(`${index}.${key}`, value)
+    if (fetchInit?.headers) {
+      for (const key in fetchInit.headers) {
+        const value = fetchInitHeaders[key]
+
+        if (value) {
+          headers.append(`${index}.${key}`, value)
+        }
       }
     }
 
@@ -48,14 +52,16 @@ export async function serializeBatchPostParams(batchParams: EdenRequestParams[])
       return
     }
 
-    const contentType = fetchInit.headers['content-type']?.split(';')[0]
+    const contentType = fetchInitHeaders['content-type']?.split(';')[0]
 
     if (contentType !== 'application/json') return
 
-    body.append(`${index}.${KEYS.bodyType}`, 'json')
-    body.set(`${index}.${KEYS.body}`, fetchInit.body)
+    const fetchInitBody: any = fetchInit?.body
 
-    const files = extractFiles(fetchInit?.body)
+    body.append(`${index}.${KEYS.bodyType}`, 'json')
+    body.set(`${index}.${KEYS.body}`, fetchInitBody)
+
+    const files = extractFiles(fetchInitBody)
 
     for (const file of files) {
       body.append(`${index}.${KEYS.filePaths}`, file.path)

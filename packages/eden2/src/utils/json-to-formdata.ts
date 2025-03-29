@@ -18,18 +18,12 @@ export async function jsonToFormData(body: unknown) {
       continue
     }
 
-    if (field instanceof FileList) {
-      for (let i = 0; i < field.length; i++) {
-        formData.append(key as any, await createNewFile((field as any)[i]))
+    if (field instanceof FileList || Array.isArray(field)) {
+      for (const value of field) {
+        const formValue = value instanceof File ? await createNewFile(value) : value
+        formData.append(key, formValue)
       }
-      continue
-    }
 
-    if (Array.isArray(field)) {
-      for (let i = 0; i < field.length; i++) {
-        const value = field[i]
-        formData.append(key, value instanceof File ? await createNewFile(value) : value)
-      }
       continue
     }
 

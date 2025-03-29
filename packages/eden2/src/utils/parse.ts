@@ -1,20 +1,18 @@
 import { FORMAL_DATE_REGEX, ISO8601_REGEX, SHORTENED_DATE_REGEX } from '../constants'
 
-function isNumericString(message: string) {
+export function isNumericString(message: string) {
   return message.trim().length !== 0 && !Number.isNaN(Number(message))
 }
 
-function isStringifiedObject(value: string): boolean {
+export function isStringifiedObject(value: string): boolean {
   const start = value.charCodeAt(0)
   const end = value.charCodeAt(value.length - 1)
 
   return (start === 123 && end === 125) || (start === 91 && end === 93)
 }
 
-export function parseStringifiedDate(value: unknown): Date | null {
-  if (typeof value !== 'string') {
-    return null
-  }
+export function parseStringifiedDate(value: unknown): Date | undefined {
+  if (typeof value !== 'string') return
 
   // Remove quote from stringified date
   const temp = value.replace(/"/g, '')
@@ -27,7 +25,7 @@ export function parseStringifiedDate(value: unknown): Date | null {
     }
   }
 
-  return null
+  return
 }
 
 export function parseStringifiedObject(data: string) {
@@ -51,13 +49,7 @@ export function parseStringifiedValue(value: string) {
     return +value
   }
 
-  if (value === 'true') {
-    return true
-  }
-
-  if (value === 'false') {
-    return false
-  }
+  if (value === 'true' || value === 'false') return value === 'true'
 
   const date = parseStringifiedDate(value)
 
@@ -74,10 +66,4 @@ export function parseStringifiedValue(value: string) {
   }
 
   return value
-}
-
-export function parseMessageEvent(event: MessageEvent) {
-  const messageString = event.data.toString()
-
-  return messageString === 'null' ? null : parseStringifiedValue(messageString)
 }
