@@ -1,4 +1,4 @@
-import { type AnyElysia, Elysia } from 'elysia'
+import { type AnyElysia, type Context, Elysia } from 'elysia'
 
 import { deserializeBatchGetParams } from '../../batch/deserializer/get'
 import {
@@ -26,7 +26,9 @@ export function batchPlugin(options?: BatchPluginOptions) {
   const endpoint = options?.endpoint ?? BATCH_ENDPOINT
 
   const plugin = <T extends AnyElysia>(elysia: T) => {
-    const resolveBatchRequest = async (key: keyof typeof batchDeserializers, request: Request) => {
+    const resolveBatchRequest = async (key: keyof typeof batchDeserializers, context: Context) => {
+      const request = context.request
+
       const batchParams = await batchDeserializers[key](request, options)
 
       const url = new URL(request.url)
@@ -46,6 +48,13 @@ export function batchPlugin(options?: BatchPluginOptions) {
       })
 
       const results = await Promise.all(batchOperations)
+
+      for (const result of results) {
+        for (const [key, value] of result.response.headers) {
+          context.set.headers[key] = value
+        }
+      }
+
       return results
     }
 
@@ -53,8 +62,8 @@ export function batchPlugin(options?: BatchPluginOptions) {
     const resolveBatchPostRequest = resolveBatchRequest.bind(null, 'post')
 
     const instance = new Elysia()
-      .get(endpoint, async (context) => await resolveBatchGetRequest(context.request))
-      .post(endpoint, async (context) => await resolveBatchPostRequest(context.request), {
+      .get(endpoint, async (context) => await resolveBatchGetRequest(context))
+      .post(endpoint, async (context) => await resolveBatchPostRequest(context), {
         parse: () => null,
       })
 

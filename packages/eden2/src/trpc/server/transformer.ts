@@ -65,19 +65,3 @@ export type CombinedDataTransformerClient = {
  * @public
  */
 export type DataTransformerOptions = CombinedDataTransformer | DataTransformer
-
-/**
- * @internal
- */
-export function getDataTransformer(transformer: DataTransformerOptions): CombinedDataTransformer {
-  if ('input' in transformer) return transformer
-  return { input: transformer, output: transformer }
-}
-
-/**
- * @internal
- */
-export const defaultTransformer: CombinedDataTransformer = {
-  input: { serialize: (obj) => obj, deserialize: (obj) => obj },
-  output: { serialize: (obj) => obj, deserialize: (obj) => obj },
-}

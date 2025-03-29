@@ -4,15 +4,15 @@ pre-commit:
   commands:
     format-miscellaneous:
       glob: '*.{css,json,yml,yaml}'
-      run: pnpm prettier --write {staged_files}
+      run: bun prettier --write {staged_files}
       stage_fixed: true
     format:
       glob: '*.{svelte,js,jsx,ts,tsx}'
-      run: pnpm prettier --write {staged_files}
+      run: bun prettier --write {staged_files}
       stage_fixed: true
     lint:
       glob: '*.{svelte,js,jsx,ts,tsx}'
-      run: pnpm eslint --fix {staged_files}
+      run: bun eslint --fix {staged_files}
       stage_fixed: true
 
 commit-msg:
