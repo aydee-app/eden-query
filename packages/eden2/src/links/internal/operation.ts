@@ -45,8 +45,9 @@ export interface EdenStoppedResult {
   data?: never
 }
 
-export interface EdenProcedureRequest<T> {
+export interface EdenProcedureRequest<T = EdenRequestParams> extends EdenBaseEnvelope {
   type: Procedure
+
   params: T
 
   /**

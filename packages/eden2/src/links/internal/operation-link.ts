@@ -2,7 +2,7 @@ import type { AnyElysia } from 'elysia'
 
 import type { EdenClientError } from '../../core/errors'
 import type { EdenRequestParams } from '../../core/request'
-import type { Observable } from '../../observable'
+import type { Observable, Observer } from '../../observable'
 import type { Operation, OperationContext, OperationResult } from './operation'
 
 /**
@@ -42,3 +42,10 @@ export type OperationLinkResultObservable<TElysia extends AnyElysia, TOutput> = 
   OperationLinkResult<TOutput, EdenClientError<TElysia>>,
   EdenClientError<TElysia>
 >
+
+/**
+ */
+export type OperationLinkResultObserver<
+  TElysia extends AnyElysia = AnyElysia,
+  TOutput = unknown,
+> = Observer<OperationLinkResult<TOutput, EdenClientError<TElysia>>, EdenClientError<TElysia>>

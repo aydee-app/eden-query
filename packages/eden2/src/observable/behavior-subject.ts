@@ -7,6 +7,10 @@ export interface BehaviorSubject<T> extends Observable<T, never> {
   get: () => T
 }
 
+export function behaviorSubject<TValue>(): BehaviorSubject<TValue | undefined>
+
+export function behaviorSubject<TValue>(initialValue: TValue): BehaviorSubject<TValue>
+
 /**
  * @internal
  *
@@ -14,8 +18,8 @@ export interface BehaviorSubject<T> extends Observable<T, never> {
  *
  * @see https://www.learnrxjs.io/learn-rxjs/subjects/behaviorsubject
  */
-export function behaviorSubject<TValue>(initialValue: TValue): BehaviorSubject<TValue> {
-  let value: TValue = initialValue
+export function behaviorSubject<TValue>(initialValue?: TValue): BehaviorSubject<TValue> {
+  let value = initialValue as TValue
 
   const observerList: Observer<TValue, never>[] = []
 
