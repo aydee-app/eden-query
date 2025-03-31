@@ -2,21 +2,58 @@ import type { AnyElysia } from 'elysia'
 
 import { serializeBatchGetParams } from '../../batch/serializer/get'
 import { serializeBatchPostParams } from '../../batch/serializer/post'
-import { BATCH_ENDPOINT } from '../../constants'
+import type { BatchMethod } from '../../batch/shared'
+import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../../constants'
 import type { EdenFetchError } from '../../core/errors'
 import type { EdenRequestParams } from '../../core/request'
 import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
 import type { EdenResult } from '../../core/response'
 import { Observable } from '../../observable'
 import { toArray } from '../../utils/to-array'
+import type { Falsy, TypeError } from '../../utils/types'
 import { handleHttpRequest, type HTTPLinkOptions, resolveHttpOperationParams } from '../http-link'
+import type { EdenLink } from '../internal/eden-link'
 import type { Operation } from '../internal/operation'
 import type { OperationLink } from '../internal/operation-link'
 import { type BatchLoader, dataLoader } from './data-loader'
 
-export type BatchMethod = 'GET' | 'POST'
+export type BatchingNotDetectedError =
+  TypeError<'Batch plugin not detected on Elysia.js server application'>
 
-export type HTTPBatchLinkOptions<T = any> = HTTPLinkOptions<T> & {
+export type ConfigWithBatching = { batch: any }
+
+/**
+ * If type-checking has been enabled and batching has not been enabled on the server, force
+ * the return to be incorrect.
+ */
+export type HttpBatchLinkResult<
+  TElysia extends AnyElysia = AnyElysia,
+  TKey = undefined,
+> = TKey extends Falsy
+  ? EdenLink<TElysia>
+  : TKey extends keyof TElysia['store']
+    ? TElysia['store'][TKey] extends ConfigWithBatching
+      ? EdenLink<TElysia>
+      : BatchingNotDetectedError
+    : TKey extends true
+      ? TElysia['store'][typeof EDEN_STATE_KEY] extends ConfigWithBatching
+        ? EdenLink<TElysia>
+        : BatchingNotDetectedError
+      : EdenLink<TElysia>
+
+/**
+ * @template TKey A unique key to index the server application state to try to find a transformer configuration.
+ *   Possible values:
+ *   - falsy: disable type checking, and it is completely optional.
+ *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link Elysia.store.eden}.
+ *   - PropertyKey: any valid property key will be used to index {@link Elysia.store}.
+ *
+ *   Defaults to undefined, indicating to turn type-checking off.
+ */
+export type HTTPBatchLinkOptions<
+  TElysia extends AnyElysia = AnyElysia,
+  TKey = undefined,
+> = HTTPLinkOptions<TElysia, TKey> & {
   /**
    * Path for the batch endpoint.
    *
@@ -45,10 +82,18 @@ const batchSerializer = {
 
 /**
  * @see https://trpc.io/docs/client/links/httpLink
+ *
+ * @template TKey A unique key to index the server application state to try to find a batch configuration.
+ *   Possible values:
+ *   - falsy: disable type checking, and it is completely optional.
+ *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link Elysia.store.eden}.
+ *   - PropertyKey: any valid property key will be used to index {@link Elysia.store}.
+ *
+ *   Defaults to undefined, indicating to turn type-checking off.
  */
-export function httpBatchLink<T extends AnyElysia = AnyElysia>(
-  options: HTTPBatchLinkOptions<T> = {},
-) {
+export function httpBatchLink<TElysia extends AnyElysia = AnyElysia, TKey = undefined>(
+  options: HTTPBatchLinkOptions<TElysia, TKey> = {} as any,
+): HttpBatchLinkResult<TElysia, TKey> {
   const maxURLLength = options.maxURLLength ?? Infinity
 
   const maxItems = options.maxItems ?? Infinity
@@ -140,8 +185,8 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
 
   const loader = dataLoader(batchLoader)
 
-  const link = () => {
-    const operationLink: OperationLink<T> = ({ op }) => {
+  const link = (() => {
+    const operationLink: OperationLink<TElysia> = ({ op }) => {
       return new Observable((observer) => {
         if (op.type === 'subscription') {
           throw new Error(
@@ -166,7 +211,7 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
     }
 
     return operationLink
-  }
+  }) satisfies EdenLink<TElysia>
 
-  return link
+  return link as any
 }

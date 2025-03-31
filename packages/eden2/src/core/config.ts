@@ -1,6 +1,16 @@
+/**
+ * Regarding locations of type-safety implentation...
+ *
+ * Type-safety for transformers is implemented in {@link EdenResolverConfig} since transformers
+ * are applied per request.
+ *
+ * Type-safety for batching is implemented in {@link _httpBatchLink} since batching is applied
+ * via the specific link.
+ */
 import type { AnyElysia, Context } from 'elysia'
 
 import type { BatchMethod } from '../batch/shared'
+import { httpBatchLink as _httpBatchLink } from '../links/http-batch-link'
 import type { DataTransformerOptions } from '../trpc/server/transformer'
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
 import type { EdenFetchError } from './errors'
@@ -39,7 +49,7 @@ export type EdenResultTransformer = (
  *
  * @template TElysia The type definition of the Elysia.js server application.
  *
- * @template TKey A unique key to index the server application state to try to find transformer configuration.
+ * @template TKey A unique key to index the server application state to try to find a transformer configuration.
  *   Possible values:
  *   - falsy: disable type checking, and it is completely optional.
  *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link Elysia.store.eden}.
@@ -198,6 +208,7 @@ export interface BatchPluginConfig extends EdenPluginBaseConfig {
  * This configuration will be stored within {@link AnyElysia.store} and introspected by the client.
  *
  * Roughly correlates with tRPC RootConfig.
+ *
  * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/server/src/unstable-core-do-not-import/rootConfig.ts#L32
  */
 export interface EdenPluginConfig {
