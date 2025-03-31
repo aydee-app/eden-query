@@ -9,15 +9,18 @@ export function isFile(value: unknown) {
 /**
  * FormData is 1 level deep.
  */
-export function hasFile(object: Record<string, any>) {
+export function hasFile(object?: unknown) {
   if (!object) return false
 
-  for (const key in object) {
-    if (isFile(object[key])) return true
-    if (Array.isArray(object[key]) && object[key].find(isFile)) return true
-  }
+  if (typeof object !== 'object') return
 
-  return false
+  const hasFileValue = Object.values(object).some((v) => {
+    if (isFile(v)) return true
+    if (Array.isArray(v) && v.find(isFile)) return true
+    return false
+  })
+
+  return hasFileValue
 }
 
 export function createNewFile(value: File) {

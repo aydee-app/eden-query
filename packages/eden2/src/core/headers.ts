@@ -1,5 +1,5 @@
+import type { CallbackOrValue } from '../utils/resolve-callback-or-value'
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
-import type { EdenRequestParams } from './request'
 
 interface HeadersInitEsque {
   [Symbol.iterator](): IterableIterator<[string, string]>
@@ -13,63 +13,60 @@ export type HTTPHeaders =
   | Record<string, string[] | string | Nullish>
   | Array<[string, string]>
 
-export type EdenRequestHeadersResolver = (
-  params: EdenRequestParams,
-) => MaybePromise<HTTPHeaders | Nullish>
-
-export type EdenRequestHeaders = MaybeArray<HTTPHeaders | EdenRequestHeadersResolver>
+export type HeadersEsque<T extends any[] = []> = MaybeArray<
+  CallbackOrValue<MaybePromise<HTTPHeaders | Nullish>, T>
+>
 
 function isString(value: unknown): value is string {
   return typeof value === 'string'
 }
 
 /**
- * @param edenRequestHeaders The input headers to resolve, a superset of regular request headers.
+ * @param headersEsque The input headers to resolve, a superset of regular request headers.
  * @param fetchInit The options that the fetch function will be called with.
  * @param params The raw, original argument passed to the resolver function.
  * @param [headers={}] The currently accumulated headers result.
  */
-export async function processHeaders(
-  edenRequestHeaders: EdenRequestHeaders | Nullish,
-  fetchInit: RequestInit = {},
-  params: EdenRequestParams = {},
+export async function processHeaders<T = any>(
+  headersEsque: HeadersEsque<[T]>,
+  params: T = {} as any,
   headers: Record<string, string> = {},
 ): Promise<Record<string, string>> {
-  if (!edenRequestHeaders) return headers
+  if (!headersEsque) return headers
 
-  if (Array.isArray(edenRequestHeaders)) {
-    if (edenRequestHeaders.length === 2 && edenRequestHeaders.every(isString)) {
-      const [key, value] = edenRequestHeaders as [string, string]
+  if (Array.isArray(headersEsque)) {
+    if (headersEsque.length === 2 && headersEsque.every(isString)) {
+      const [key, value] = headersEsque as [string, string]
       headers[key.toLowerCase()] = value
     } else {
-      for (const value of edenRequestHeaders) {
-        headers = await processHeaders(value as any, fetchInit, params, headers)
+      for (const value of headersEsque) {
+        headers = await processHeaders(value as any, params, headers)
       }
     }
     return headers
   }
 
-  switch (typeof edenRequestHeaders) {
+  switch (typeof headersEsque) {
     case 'function': {
-      const v = await edenRequestHeaders(params)
+      const v = await headersEsque(params)
 
       if (v) {
-        return await processHeaders(v, fetchInit, params, headers)
+        return await processHeaders(v, params, headers)
       }
 
       return headers
     }
 
     case 'object': {
-      if (edenRequestHeaders instanceof Headers) {
-        edenRequestHeaders.forEach((value, key) => {
+      if (headersEsque instanceof Headers) {
+        headersEsque.forEach((value, key) => {
           headers[key.toLowerCase()] = value
         })
 
         return headers
       }
 
-      for (const [key, value] of Object.entries(edenRequestHeaders)) {
+      for (const [key, value] of Object.entries(headersEsque)) {
         headers[key.toLowerCase()] = value as string
       }
 

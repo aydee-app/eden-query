@@ -1,7 +1,7 @@
 import type { AnyElysia } from 'elysia'
 
 import { getTransformer } from '../trpc/client/transformer'
-import { extractFiles, hasFile } from '../utils/file'
+import { extractFiles } from '../utils/file'
 import { buildQueryString } from '../utils/http'
 import { jsonToFormData } from '../utils/json-to-formdata'
 import { toArray } from '../utils/to-array'
@@ -24,26 +24,27 @@ import { type EdenResult, getResponseData } from './response'
  * This means that {@link RequestInit.headers} should have been "cast" to an object.
  */
 export const defaultOnRequest = (async (_path, fetchInit, params) => {
-  let headers = await processHeaders(params?.headers, params.options, params)
+  let headers = await processHeaders(params?.headers, params)
 
-  fetchInit.headers ??= {}
   fetchInit.headers = { ...fetchInit.headers, ...headers }
+
+  if (fetchInit.body == null) return
+
+  if (fetchInit.body instanceof FormData) return
+
+  if (typeof fetchInit.body !== 'object') return
 
   headers = fetchInit.headers as any
 
-  // Do nothing if no body.
-  if (fetchInit.body == null) return
-
-  // Do nothing if body is already FormData.
-  if (typeof FormData !== 'undefined' && fetchInit.body instanceof FormData) {
-    return
-  }
-
   const transformer = getTransformer(params)
 
-  if (transformer && fetchInit.body && typeof fetchInit.body !== 'string') {
-    const files = extractFiles(fetchInit.body)
+  const files = extractFiles(fetchInit.body)
 
+  if (!files.length) {
+    headers['content-type'] = 'application/json'
+  }
+
+  if (transformer) {
     if (transformer.id) {
       headers['transformer-id'] = transformer.id
     }
@@ -52,15 +53,10 @@ export const defaultOnRequest = (async (_path, fetchInit, params) => {
 
     fetchInit.body = await transformer.input.serialize(fetchInit.body)
 
-    // TODO: Possible future feature to allow transformers directly returning a valid {@link RequestInit.body}
-    // TODO: brainstorm recipe for setting a content-type header for that type of serializer.
-    // if (typeof fetchInit.body !== 'object') return
-
-    headers['content-type'] = 'application/json'
-
     const stringified = JSON.stringify(fetchInit.body)
 
     if (!files.length) {
+      headers['content-type'] = 'application/json'
       fetchInit.body = stringified
       return
     }
@@ -77,23 +73,13 @@ export const defaultOnRequest = (async (_path, fetchInit, params) => {
     return
   }
 
-  if (hasFile(fetchInit.body as any)) {
+  if (files.length) {
     const formData = await jsonToFormData(fetchInit.body)
-
-    // We don't do this because we need to let the browser set the content type with the correct boundary
-    // fetchInit.headers['content-type'] = 'multipart/form-data'
     fetchInit.body = formData
-
     return
   }
 
-  if (typeof fetchInit.body === 'object') {
-    headers['content-type'] = 'application/json'
-
-    fetchInit.body = JSON.stringify(fetchInit.body)
-
-    return
-  }
+  fetchInit.body = JSON.stringify(fetchInit.body)
 }) satisfies EdenRequestTransformer
 
 export const defaultOnResponse = (async (response) => {
@@ -151,7 +137,7 @@ export async function resolveFetchOptions(params: EdenRequestParams = {}) {
 
     fetchInit = { ...fetchInit, ...temp }
 
-    const headers = await processHeaders(temp?.headers, fetchInit, params)
+    const headers = await processHeaders(temp?.headers, params)
 
     if (headers) {
       fetchInit.headers ??= {}

@@ -1,6 +1,7 @@
-import { describe, expect,test } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
-import { type EdenRequestHeaders,processHeaders } from '../../src/core/headers'
+import type { EdenRequestHeaders } from '../../src/core/config'
+import { processHeaders } from '../../src/core/headers'
 
 describe('headers', () => {
   test('returns empty object if nothing provided', async () => {
@@ -99,7 +100,7 @@ describe('headers', () => {
 
     const headers = (() => {}) satisfies EdenRequestHeaders
 
-    const result = await processHeaders(headers, {}, {}, initialHeaders)
+    const result = await processHeaders(headers, {}, initialHeaders)
 
     expect(result).toStrictEqual(initialHeaders)
   })
@@ -108,7 +109,7 @@ describe('headers', () => {
     const initialHeaders = { a: 'a', b: 'b', c: 'c' }
 
     // @ts-expect-error Testing invalid input.
-    const result = await processHeaders('hello', {}, {}, initialHeaders)
+    const result = await processHeaders('hello', {}, initialHeaders)
 
     expect(result).toStrictEqual(initialHeaders)
   })

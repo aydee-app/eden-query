@@ -42,7 +42,7 @@ export async function serializeBatchGetParams(batchParams: EdenRequestParams[]) 
       }
     }
 
-    const currentHeaders = await processHeaders(params.headers, params.fetch, params)
+    const currentHeaders = await processHeaders(params.headers, params)
 
     const resolvedHeaders = { ...currentHeaders, ...params.options?.headers }
 

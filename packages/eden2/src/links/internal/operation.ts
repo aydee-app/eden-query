@@ -112,6 +112,8 @@ export type OperationResult<TOutput, TError> =
 export interface OperationContext extends Record<string, unknown> {}
 
 /**
+ * An initialized operation will have an ID and context that other operation handlers can use.
+ *
  * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/types.ts#L26
  */
 export interface Operation<T extends EdenRequestParams = EdenRequestParams>
@@ -120,6 +122,12 @@ export interface Operation<T extends EdenRequestParams = EdenRequestParams>
   context: OperationContext
 }
 
+/**
+ * Options to create an operation. Typically, the operation ID and context will be managed
+ * by a link, and they are not required when initiating an operation.
+ *
+ * @see https://github.com/trpc/trpc/blob/187dfb41c28ef88117fd289859f84e4b101e3e34/packages/client/src/links/types.ts#L26
+ */
 export interface OperationOptions<T extends EdenRequestParams = EdenRequestParams> {
   type: Procedure
   path: string

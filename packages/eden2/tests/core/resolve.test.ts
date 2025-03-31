@@ -177,7 +177,6 @@ describe('defaultOnRequest', () => {
     expect(init).toStrictEqual({
       body: expectedBody,
       headers: {
-        'content-type': 'application/json',
         transformed: 'true',
       },
     })

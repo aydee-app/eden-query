@@ -89,7 +89,7 @@ export function httpBatchLink<T extends AnyElysia = AnyElysia>(
 
       const method = (postRequest && 'POST') || options.method || 'POST'
 
-      const resolvedBatchOps = batchOps.map(edenParamsResolver)
+      const resolvedBatchOps = await Promise.all(batchOps.map(edenParamsResolver))
 
       const resolvedBatchParams = await batchSerializer[method](resolvedBatchOps)
 
