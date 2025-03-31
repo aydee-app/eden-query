@@ -34,6 +34,7 @@ export interface EdenRequestInit {
  * Values in the request-specific options will have greater precedence
  * than the global resolver configuration options.
  */
-export interface EdenRequestParams<T extends AnyElysia = AnyElysia>
-  extends EdenResolverConfig<T>,
-    EdenRequestInit {}
+export type EdenRequestParams<
+  T extends AnyElysia = AnyElysia,
+  TKey = undefined,
+> = EdenResolverConfig<T, TKey> & EdenRequestInit

@@ -1,6 +1,6 @@
 import type { AnyElysia } from 'elysia'
 
-import type { EdenResolverConfig, TransformersOptions } from '../core/config'
+import type { EdenResolverConfig } from '../core/config'
 import { type HTTPHeaders, processHeaders } from '../core/headers'
 import type { EdenRequestParams } from '../core/request'
 import { resolveEdenRequest } from '../core/resolve'
@@ -21,12 +21,7 @@ import type { OperationLink } from './internal/operation-link'
  *
  * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L22
  */
-export type HTTPLinkBaseOptions<_T> = Omit<EdenResolverConfig, 'headers'> & {
-  /**
-   * Specify multiple transformers for requests.
-   */
-  transformers?: TransformersOptions
-}
+export type HTTPLinkBaseOptions<_T> = Omit<EdenResolverConfig, 'headers'>
 
 /**
  * An extremely flexible resolver for HTTP Headers.

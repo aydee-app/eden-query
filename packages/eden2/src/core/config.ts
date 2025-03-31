@@ -7,6 +7,7 @@ import type { FetchEsque } from './fetch'
 import type { HeadersEsque } from './headers'
 import type { EdenRequestParams } from './request'
 import type { EdenResult } from './response'
+import type { EdenClientTransformerOptions, TransformersOptions } from './transform'
 
 /**
  * Accepted headers includes any object that resembles headers, or a promise that resolves to one.
@@ -34,8 +35,23 @@ export type EdenResultTransformer = (
 
 /**
  * Global/general settings that influence the behavior of the resolver.
+ *
+ * @template TElysia The type definition of the Elysia.js server application.
+ *
+ * @template TKey
+ *  Specify the key that will store the {@link EdenPluginConfig} on the server application.
+ *  i.e. within {@link AnyElysia.store}. It can be one of several possible types.
+ *
+ *  - true: TKey = "eden"
+ *  - PropertyKey: TKey = the provided key.
+ *  - falsy value: no key.
+ *
+ *  If it is a falsy value, then type checking is turned off.
  */
-export interface EdenResolverConfig<T extends AnyElysia = AnyElysia> {
+export type EdenResolverConfig<
+  TElysia extends AnyElysia = AnyElysia,
+  TKey = undefined,
+> = EdenClientTransformerOptions<TElysia['store'], TKey> & {
   /**
    * Global query parameters for requests.
    */
@@ -75,17 +91,17 @@ export interface EdenResolverConfig<T extends AnyElysia = AnyElysia> {
   /**
    * Either an origin or the Elysia.js application.
    */
-  domain?: T | string
+  domain?: TElysia | string
 
-  /**
-   * Transformer for request body.
-   *
-   * Unlike tRPC, eden-query does not perform strict checking on whether a transformer
-   * is present on both the client and server. So this is a looser interpretation of `TransformerOptions`.
-   *
-   * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/internals/transformer.ts#L37
-   */
-  transformer?: DataTransformerOptions
+  // /**
+  //  * Transformer for request body.
+  //  *
+  //  * Unlike tRPC, eden-query does not perform strict checking on whether a transformer
+  //  * is present on both the client and server. So this is a looser interpretation of `TransformerOptions`.
+  //  *
+  //  * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/internals/transformer.ts#L37
+  //  */
+  // transformer?: DataTransformerOptions
 
   /**
    */
@@ -131,20 +147,6 @@ export interface EdenPluginBaseConfig {
   key?: PropertyKey
 }
 
-/**
- * Provide a single transformer to use the same transformer on all requests.
- *
- * Provide an array of transformers with a unique ID for each in order to alternate between specific ones.
- * If a specifically requested transformer is not found, then default to the first transformer in the array.
- *
- * Provide a mapping of transformer IDs to transformers for a similar effect to the array.
- * Since transformers such as SuperJSON will not naturally have an ID, this is a simpler
- * alternative to assigning IDs to them without using spread syntax.
- */
-export type TransformersOptions =
-  | MaybeArray<DataTransformerOptions>
-  | Record<string, DataTransformerOptions>
-
 export interface TransformerPluginConfig extends EdenPluginBaseConfig {
   /**
    * Single transformer for all requests.
@@ -152,7 +154,7 @@ export interface TransformerPluginConfig extends EdenPluginBaseConfig {
   transformer?: DataTransformerOptions
 
   /**
-   * Different transformers.
+   * At the moment, all plugins may refer to the
    *
    * Will use first one if none specified.
    */
@@ -184,10 +186,6 @@ export interface BatchPluginConfig extends EdenPluginBaseConfig {
    * On the server, each individual request needs to be parsed from the bundle.
    */
   deserializer?: BatchDeserializer
-
-  /**
-   */
-  transformers?: TransformersOptions
 }
 
 /**

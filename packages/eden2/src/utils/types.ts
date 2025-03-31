@@ -1,5 +1,7 @@
 export type Nullish = null | undefined | void
 
+export type Falsy = Nullish | false
+
 export type IsAny<T> = 0 extends 1 & T ? true : false
 
 export type IsNever<T> = [T] extends [never] ? true : false

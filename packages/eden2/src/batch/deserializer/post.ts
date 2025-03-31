@@ -1,17 +1,14 @@
 import type { BatchDeserializer } from '../../core/config'
 import type { EdenRequestParams } from '../../core/request'
-import { resolveTransformers } from '../../core/transform'
 import { set } from '../../utils/set'
-import { BODY_KEYS,BODY_TYPES, IGNORED_HEADERS } from '../shared'
+import { BODY_KEYS, BODY_TYPES, IGNORED_HEADERS } from '../shared'
 
-export const deserializeBatchPostParams: BatchDeserializer = async (context, config) => {
+export const deserializeBatchPostParams: BatchDeserializer = async (context, _config) => {
   const request = context.request
 
   const result: Array<EdenRequestParams & { body_type?: string }> = []
 
   const globalHeaders: any = {}
-
-  const transformers = resolveTransformers(config.transformers)
 
   for (const [key, value] of request.headers) {
     const [index, name] = key.split('.')
@@ -85,7 +82,7 @@ export const deserializeBatchPostParams: BatchDeserializer = async (context, con
 
           if (rawBody == null) continue
 
-          let body = JSON.parse(rawBody.toString())
+          const body = JSON.parse(rawBody.toString())
 
           const filePaths = formData.getAll(`${index}.${BODY_KEYS.filePaths}`)
 
@@ -98,20 +95,6 @@ export const deserializeBatchPostParams: BatchDeserializer = async (context, con
 
             set(body, path.toString(), file)
           })
-
-          const transformed = formData.get(`${index}.${BODY_KEYS.transformed}`)
-
-          if (transformed) {
-            const transformerId = formData.get(`${index}.${BODY_KEYS.transformerId}`)
-
-            const transformer =
-              transformers.find((transformer) => transformer.id === transformerId) ||
-              transformers[0]
-
-            if (transformer) {
-              body = transformer.input.deserialize(body)
-            }
-          }
 
           result[paramIndex] ??= {}
           result[paramIndex].body = body

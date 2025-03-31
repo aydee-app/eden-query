@@ -1,10 +1,25 @@
+import type { EDEN_STATE_KEY } from '../constants'
 import type {
   CombinedDataTransformer,
   DataTransformer,
   DataTransformerOptions,
 } from '../trpc/server/transformer'
 import { notNull } from '../utils/null'
-import type { TransformersOptions } from './config'
+import type { Falsy, MaybeArray, TypeError } from '../utils/types'
+
+/**
+ * Provide a single transformer to use the same transformer on all requests.
+ *
+ * Provide an array of transformers with a unique ID for each in order to alternate between specific ones.
+ * If a specifically requested transformer is not found, then default to the first transformer in the array.
+ *
+ * Provide a mapping of transformer IDs to transformers for a similar effect to the array.
+ * Since transformers such as SuperJSON will not naturally have an ID, this is a simpler
+ * alternative to assigning IDs to them without using spread syntax.
+ */
+export type TransformersOptions =
+  | MaybeArray<DataTransformerOptions>
+  | Record<string, DataTransformerOptions>
 
 export interface ResolvedTransformer extends CombinedDataTransformer {
   /**
@@ -98,3 +113,66 @@ export function matchTransformer(
 
   return resolveTransformer(transformer)
 }
+
+/**
+ * A client-side transformer is required because it was found on the server application.
+ */
+export interface EdenClientRequiredTransformer {
+  transformer: DataTransformerOptions
+}
+
+/**
+ * A client-side transformer is prohibited until one is found on the server application.
+ */
+export interface EdenClientProhibitedTransformer {
+  /**
+   * Data transformer
+   *
+   * You must use the same transformer on the backend and frontend
+   * @see https://trpc.io/docs/v11/data-transformers
+   **/
+  transformer?: TypeError<'You must define a transformer on your your `initTRPC`-object first'>
+}
+
+/**
+ * A non-strict configuration for transformer.
+ * It allows a transformer without explicitly prohibiting or requiring one.
+ */
+export interface EdenClientAllowedTransformer {
+  transformer?: DataTransformerOptions
+}
+
+/**
+ * If the server has either transformer or transformers defined, then assume that
+ * transformers have been enabled.
+ */
+export type ConfigWithTransformer = { transformer: any } | { transformers: any }
+
+/**
+ * Once a configuration has been located, determine if a transformer should be required or prohibited.
+ */
+export type TransformerOptionsFromTransformerConfig<TConfig> = TConfig extends ConfigWithTransformer
+  ? EdenClientRequiredTransformer
+  : EdenClientProhibitedTransformer
+
+/**
+ * @template TStore Elysia.js server application state.
+ *
+ * @template TKey A unique key to index the server application state to try to find transformer configuration.
+ *   Possible values:
+ *   - falsy: disable type checking, and it is completely optional.
+ *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link Elysia.store.eden}.
+ *   - PropertyKey: any valid property key will be used to index {@link Elysia.store}.
+ *
+ *   Defaults to undefined, indicating to turn type-checking off.
+ */
+export type EdenClientTransformerOptions<
+  TStore extends Record<string, any> = {},
+  TKey = undefined,
+> = TKey extends Falsy
+  ? EdenClientAllowedTransformer
+  : TKey extends keyof TStore
+    ? TransformerOptionsFromTransformerConfig<TStore[TKey]>
+    : TKey extends true
+      ? TransformerOptionsFromTransformerConfig<TStore[typeof EDEN_STATE_KEY]>
+      : EdenClientAllowedTransformer
