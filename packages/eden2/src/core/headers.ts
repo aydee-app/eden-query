@@ -12,6 +12,9 @@ export type HTTPHeaders =
   | HeadersInitEsque
   | Record<string, string[] | string | Nullish>
   | Array<[string, string]>
+  | [string, string]
+  // Technically not a valid header, but specified here to since `toArray` includes it in the resulting type...
+  | string
 
 export type HeadersEsque<T extends any[] = []> = MaybeArray<
   CallbackOrValue<MaybePromise<HTTPHeaders | Nullish>, T>
@@ -34,15 +37,22 @@ export async function processHeaders<T = any>(
 ): Promise<Record<string, string>> {
   if (!headersEsque) return headers
 
-  if (Array.isArray(headersEsque)) {
-    if (headersEsque.length === 2 && headersEsque.every(isString)) {
-      const [key, value] = headersEsque as [string, string]
-      headers[key.toLowerCase()] = value
-    } else {
-      for (const value of headersEsque) {
-        headers = await processHeaders(value as any, params, headers)
-      }
+  if (Array.isArray(headersEsque) && headersEsque.length === 2 && headersEsque.every(isString)) {
+    const [key, value] = headersEsque
+
+    if (key && value) {
+      headers[key.toString()] = value.toString()
     }
+
+    return headers
+  }
+
+  // Need to lower arrays in order to prevent infinite loop.
+  if (Array.isArray(headersEsque)) {
+    for (const value of headersEsque) {
+      headers = await processHeaders(value as any, params, headers)
+    }
+
     return headers
   }
 
@@ -72,6 +82,8 @@ export async function processHeaders<T = any>(
 
       return headers
     }
+
+    case 'string': // falls through
 
     default: {
       return headers

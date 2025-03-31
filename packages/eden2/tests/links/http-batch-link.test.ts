@@ -3,12 +3,18 @@ import { type Context, Elysia, t } from 'elysia'
 import SuperJSON from 'superjson'
 import { describe, expect, test, vi } from 'vitest'
 
-import { batchPlugin, jsonTransformerPlugin } from '../../src/batch/plugin'
 import { EdenClient } from '../../src/client'
 import type { EdenResult } from '../../src/core/response'
 import { httpBatchLink } from '../../src/links/http-batch-link'
+import { batchPlugin } from '../../src/plugins/batch'
+import { transformPlugin } from '../../src/plugins/transform'
 import type { DataTransformerOptions } from '../../src/trpc/server/transformer'
 import { useApp } from '../setup'
+
+const devalue: DataTransformerOptions = {
+  serialize: (object) => uneval(object),
+  deserialize: (object) => eval(`(${object})`),
+}
 
 describe('http-batch-link', () => {
   test('throws error if no links', async () => {
@@ -20,7 +26,7 @@ describe('http-batch-link', () => {
   describe('query', () => {
     test('forwards global query', async () => {
       const app = new Elysia()
-        .use(jsonTransformerPlugin({ transformer: [SuperJSON] }))
+        .use(transformPlugin({ transformer: SuperJSON }))
         .use(batchPlugin())
         .get('/', (context) => {
           return context.query
@@ -48,7 +54,7 @@ describe('http-batch-link', () => {
   describe('headers', () => {
     test('forwards global headers', async () => {
       const app = new Elysia()
-        .use(jsonTransformerPlugin({ transformer: [SuperJSON] }))
+        .use(transformPlugin({ transformer: SuperJSON }))
         .use(batchPlugin())
         .get('/', (context) => {
           return context.headers
@@ -95,7 +101,7 @@ describe('http-batch-link', () => {
       })
 
       const app = new Elysia()
-        .use(jsonTransformerPlugin({ transformer: [SuperJSON] }))
+        .use(transformPlugin({ transformer: SuperJSON }))
         .use(batchPlugin())
         .get('/query', handleGet, { query })
 
@@ -147,7 +153,7 @@ describe('http-batch-link', () => {
       })
 
       const app = new Elysia()
-        .use(jsonTransformerPlugin({ transformer: [SuperJSON] }))
+        .use(transformPlugin({ transformer: SuperJSON }))
         .use(batchPlugin())
         .post('/json-transformer', handlePost, { body })
 
@@ -200,7 +206,7 @@ describe('http-batch-link', () => {
       })
 
       const app = new Elysia()
-        .use(jsonTransformerPlugin({ transformer: [SuperJSON] }))
+        .use(transformPlugin({ transformer: SuperJSON }))
         .use(batchPlugin())
         .post('/json-transformer', handlePost, { body })
 
@@ -246,13 +252,8 @@ describe('http-batch-link', () => {
         return context.body
       })
 
-      const transformer: DataTransformerOptions = {
-        serialize: (object) => uneval(object),
-        deserialize: (object) => eval(`(${object})`),
-      }
-
       const app = new Elysia()
-        .use(jsonTransformerPlugin({ transformer }))
+        .use(transformPlugin({ transformer: devalue }))
         .use(batchPlugin())
         .post('/text-transformer', handlePost, { body })
 
@@ -260,7 +261,7 @@ describe('http-batch-link', () => {
 
       const link = httpBatchLink({
         domain: 'http://localhost:3000',
-        transformer,
+        transformer: devalue,
       })
 
       const client = new EdenClient({ links: [link] })
@@ -299,7 +300,7 @@ describe('http-batch-link', () => {
       })
 
       const app = new Elysia()
-        .use(jsonTransformerPlugin({ transformer: [SuperJSON] }))
+        .use(transformPlugin({ transformer: SuperJSON }))
         .use(batchPlugin())
         .post('/hello', handlePost, { body })
 
@@ -345,29 +346,17 @@ describe('http-batch-link', () => {
         return context.body
       })
 
-      const superJsonTransformer: DataTransformerOptions = {
-        id: 'superjson',
-        ...SuperJSON,
-      }
-
-      const devalueTransformer: DataTransformerOptions = {
-        id: 'devalue',
-        serialize: (object) => uneval(object),
-        deserialize: (object) => eval(`(${object})`),
-      }
-
       const app = new Elysia()
-        .use(
-          jsonTransformerPlugin({
-            transformer: [superJsonTransformer, devalueTransformer],
-          }),
-        )
+        .use(transformPlugin({ transformers: { SuperJSON, devalue } }))
         .use(batchPlugin())
         .post('/hello', handlePost, { body })
 
       useApp(app)
 
-      const link = httpBatchLink({ domain: 'http://localhost:3000' })
+      const link = httpBatchLink({
+        domain: 'http://localhost:3000',
+        transformers: { SuperJSON, devalue },
+      })
 
       const client = new EdenClient({ links: [link] })
 
@@ -385,7 +374,7 @@ describe('http-batch-link', () => {
           return client.mutation('/hello', {
             method: 'POST',
             body,
-            transformer: index % 2 ? superJsonTransformer : devalueTransformer,
+            transformer: index % 2 ? SuperJSON : devalue,
           })
         }),
       )) as EdenResult[]

@@ -1,30 +1,21 @@
+import type { BatchDeserializer } from '../../core/config'
 import type { EdenRequestParams } from '../../core/request'
-import { getTransformer } from '../../trpc/client/transformer'
-import type { DataTransformerOptions } from '../../trpc/server/transformer'
-import { notNull } from '../../utils/null'
+import { resolveTransformers } from '../../core/transform'
 import { set } from '../../utils/set'
-import { toArray } from '../../utils/to-array'
-
-export interface BatchPostDeserializerOptions {
-  transformer?: DataTransformerOptions | Array<DataTransformerOptions>
-}
 
 /**
  * Temporary fix to ignore these headers from the batch request.
  */
 const ignoreHeaders = ['content-type', 'content-length']
 
-export async function deserializeBatchPostParams(
-  request: Request,
-  options?: BatchPostDeserializerOptions,
-) {
-  const transformers = toArray(options?.transformer)
-    .map((transformer) => getTransformer({ transformer }))
-    .filter(notNull)
+export const deserializeBatchPostParams: BatchDeserializer = async (context, config) => {
+  const request = context.request
 
   const result: Array<EdenRequestParams & { body_type?: string }> = []
 
   const globalHeaders: any = {}
+
+  const transformers = resolveTransformers(config.transformers)
 
   for (const [key, value] of request.headers) {
     const [index, name] = key.split('.')

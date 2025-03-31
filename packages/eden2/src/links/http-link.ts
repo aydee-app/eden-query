@@ -1,11 +1,10 @@
 import type { AnyElysia } from 'elysia'
 
-import type { EdenResolverConfig } from '../core/config'
-import { type HTTPHeaders,processHeaders } from '../core/headers'
+import type { EdenResolverConfig, TransformersOptions } from '../core/config'
+import { type HTTPHeaders, processHeaders } from '../core/headers'
 import type { EdenRequestParams } from '../core/request'
 import { resolveEdenRequest } from '../core/resolve'
 import { Observable } from '../observable'
-import { type TransformerOptions } from '../trpc/client/transformer'
 import type { CallbackOrValue } from '../utils/resolve-callback-or-value'
 import { toArray } from '../utils/to-array'
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
@@ -22,7 +21,12 @@ import type { OperationLink } from './internal/operation-link'
  *
  * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L22
  */
-export type HTTPLinkBaseOptions<T> = Omit<EdenResolverConfig, 'headers'> & TransformerOptions<T>
+export type HTTPLinkBaseOptions<_T> = Omit<EdenResolverConfig, 'headers'> & {
+  /**
+   * Specify multiple transformers for requests.
+   */
+  transformers?: TransformersOptions
+}
 
 /**
  * An extremely flexible resolver for HTTP Headers.
@@ -34,10 +38,13 @@ export type HTTPLinkBaseOptions<T> = Omit<EdenResolverConfig, 'headers'> & Trans
  */
 export type HTTPLinkHeaders = CallbackOrValue<MaybePromise<HTTPHeaders | Nullish>, [Operation]>
 
-export type HTTPLinkOptions<T = any> = HTTPLinkBaseOptions<T> & {
+/**
+ * @template T Configuration
+ */
+export type HTTPLinkOptions<T> = HTTPLinkBaseOptions<T> & {
   /**
    * Headers to be set on outgoing requests or a callback that of said headers
-   * Basically like {@link EdenRequestHeaders} but callbacks are provided with the entire operation.
+   * Basically like {@link EdenResolverConfig.headers} but callbacks are provided with the entire operation.
    *
    * @see http://trpc.io/docs/client/headers
    */
@@ -50,7 +57,7 @@ export type HTTPLinkOptions<T = any> = HTTPLinkBaseOptions<T> & {
  * The parameters will be resolved further by {@link resolveFetchOptions}, but
  * those will only be with respect to the specific request.
  */
-export async function resolveHttpOperationParams(options: HTTPLinkOptions, op: Operation) {
+export async function resolveHttpOperationParams(options: HTTPLinkOptions<any>, op: Operation) {
   const { path, params } = op
 
   const fetch = { ...options.fetch, ...params?.fetch }
@@ -63,9 +70,7 @@ export async function resolveHttpOperationParams(options: HTTPLinkOptions, op: O
 
   const operationHeaders = await processHeaders(options.headers, op)
 
-  const headers = toArray(params.headers)
-
-  headers.unshift(operationHeaders as never)
+  const headers = [operationHeaders, ...toArray(params.headers)]
 
   const resolvedParams = {
     path,
@@ -81,7 +86,7 @@ export async function resolveHttpOperationParams(options: HTTPLinkOptions, op: O
   return resolvedParams
 }
 
-export async function handleHttpRequest(options: HTTPLinkOptions, op: Operation) {
+export async function handleHttpRequest(options: HTTPLinkOptions<any>, op: Operation) {
   const resolvedParams = await resolveHttpOperationParams(options, op)
   const result = await resolveEdenRequest(resolvedParams)
   return result

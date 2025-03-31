@@ -1,3 +1,4 @@
+import type { BatchDeserializer } from '../../core/config'
 import type { EdenRequestParams } from '../../core/request'
 
 /**
@@ -5,8 +6,10 @@ import type { EdenRequestParams } from '../../core/request'
  */
 const ignoreHeaders = ['content-type', 'content-length']
 
-export async function deserializeBatchGetParams(request: Request) {
+export const deserializeBatchGetParams: BatchDeserializer = async (context, _config) => {
   const result: Array<EdenRequestParams> = []
+
+  const request = context.request
 
   const url = new URL(request.url)
 

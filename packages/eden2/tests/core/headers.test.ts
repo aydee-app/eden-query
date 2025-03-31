@@ -108,7 +108,6 @@ describe('headers', () => {
   test('does not change headers if invalid value', async () => {
     const initialHeaders = { a: 'a', b: 'b', c: 'c' }
 
-    // @ts-expect-error Testing invalid input.
     const result = await processHeaders('hello', {}, initialHeaders)
 
     expect(result).toStrictEqual(initialHeaders)

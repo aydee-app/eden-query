@@ -1,4 +1,4 @@
-import type { AnyElysia } from 'elysia'
+import type { AnyElysia, Context } from 'elysia'
 
 import type { DataTransformerOptions } from '../trpc/server/transformer'
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
@@ -88,6 +88,10 @@ export interface EdenResolverConfig<T extends AnyElysia = AnyElysia> {
   transformer?: DataTransformerOptions
 
   /**
+   */
+  transformers?: TransformersOptions
+
+  /**
    * Passed as second argument to new URL if applicable.
    *
    * Basically {@link EdenRequestInit.domain} but always a string representing the "origin" of the request.
@@ -111,4 +115,96 @@ export interface EdenResolverConfig<T extends AnyElysia = AnyElysia> {
    * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L35
    */
   method?: string
+}
+
+/**
+ * Base configuration available to all eden plugins.
+ */
+export interface EdenPluginBaseConfig {
+  /**
+   * A custom key to store the configuration within Elysia.js state.
+   *
+   * @see https://elysiajs.com/essential/handler.html#state
+   *
+   * @default "eden"
+   */
+  key?: PropertyKey
+}
+
+/**
+ * Provide a single transformer to use the same transformer on all requests.
+ *
+ * Provide an array of transformers with a unique ID for each in order to alternate between specific ones.
+ * If a specifically requested transformer is not found, then default to the first transformer in the array.
+ *
+ * Provide a mapping of transformer IDs to transformers for a similar effect to the array.
+ * Since transformers such as SuperJSON will not naturally have an ID, this is a simpler
+ * alternative to assigning IDs to them without using spread syntax.
+ */
+export type TransformersOptions =
+  | MaybeArray<DataTransformerOptions>
+  | Record<string, DataTransformerOptions>
+
+export interface TransformerConfig extends EdenPluginBaseConfig {
+  /**
+   * Single transformer for all requests.
+   */
+  transformer?: DataTransformerOptions
+
+  /**
+   * Different transformers.
+   *
+   * Will use first one if none specified.
+   */
+  transformers?: TransformersOptions
+}
+
+export type BatchMethod = 'GET' | 'POST'
+
+export type BatchDeserializer = (
+  context: Context,
+  config: BatchConfig,
+) => MaybePromise<Array<EdenRequestParams>>
+
+export interface BatchConfig extends EdenPluginBaseConfig {
+  /**
+   * The endpoint for batch requests.
+   */
+  endpoint?: string
+
+  /**
+   * The supported method(s) for batch requests.
+   */
+  method?: MaybeArray<BatchMethod>
+
+  /**
+   * A custom deserializer for batch requests.
+   *
+   * When a batch request is made, multiple requests are "serialized" into a single request.
+   * On the server, each individual request needs to be parsed from the bundle.
+   */
+  deserializer?: BatchDeserializer
+
+  /**
+   */
+  transformers?: TransformersOptions
+}
+
+/**
+ * This configuration will be stored within {@link AnyElysia.store} and introspected by the client.
+ *
+ * Roughly correlates with tRPC RootConfig.
+ * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/server/src/unstable-core-do-not-import/rootConfig.ts#L32
+ */
+export interface EdenPluginConfig {
+  /**
+   * Options for transforming JSON inputs and outputs.
+   */
+  transformer?: TransformerConfig
+
+  /**
+   * Batching can be supported by using the batch plugin.
+   * The batch plugin will populate this property; batching is assumed to be enabled if it is defined.
+   */
+  batch?: BatchConfig
 }

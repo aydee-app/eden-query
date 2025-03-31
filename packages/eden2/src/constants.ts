@@ -31,3 +31,10 @@ export const SHORTENED_DATE_REGEX =
   /^(?:(?:(?:(?:0?[1-9]|[12][0-9]|3[01])[/\s-](?:0?[1-9]|1[0-2])[/\s-](?:19|20)\d{2})|(?:(?:19|20)\d{2}[/\s-](?:0?[1-9]|1[0-2])[/\s-](?:0?[1-9]|[12][0-9]|3[01]))))(?:\s(?:1[012]|0?[1-9]):[0-5][0-9](?::[0-5][0-9])?(?:\s[AP]M)?)?$/
 
 export const BATCH_ENDPOINT = '/batch'
+
+/**
+ * The default key for storing eden-plugin configuration within an Elysia.js application instance.
+ *
+ * @see https://elysiajs.com/essential/handler.html#state
+ */
+export const EDEN_STATE_KEY = 'eden' as const

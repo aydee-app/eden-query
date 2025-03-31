@@ -1,6 +1,5 @@
 import type { AnyElysia } from 'elysia'
 
-import { getTransformer } from '../trpc/client/transformer'
 import { extractFiles } from '../utils/file'
 import { buildQueryString } from '../utils/http'
 import { jsonToFormData } from '../utils/json-to-formdata'
@@ -15,6 +14,7 @@ import { getFetch } from './fetch'
 import { processHeaders } from './headers'
 import type { EdenRequestParams } from './request'
 import { type EdenResult, getResponseData } from './response'
+import { matchTransformer, resolveTransformers } from './transform'
 
 /**
  * Default request transformer just handles transforming the body.
@@ -36,7 +36,7 @@ export const defaultOnRequest = (async (_path, fetchInit, params) => {
 
   headers = fetchInit.headers as any
 
-  const transformer = getTransformer(params)
+  const transformer = matchTransformer(params.transformers, params.transformer)
 
   const files = extractFiles(fetchInit.body)
 
@@ -46,7 +46,7 @@ export const defaultOnRequest = (async (_path, fetchInit, params) => {
 
   if (transformer) {
     if (transformer.id) {
-      headers['transformer-id'] = transformer.id
+      headers['transformer-id'] = transformer.id.toString()
     }
 
     headers['transformed'] = 'true'
@@ -94,7 +94,9 @@ export const defaultOnResponse = (async (response) => {
 }) satisfies EdenResponseTransformer
 
 export const defaultOnResult = (async (result, params) => {
-  const transformer = getTransformer(params)
+  const transformers = resolveTransformers(params.transformer)
+
+  const transformer = transformers[0]
 
   if (transformer) {
     result.data = await transformer.output.deserialize(result.data)

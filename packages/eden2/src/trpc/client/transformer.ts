@@ -77,12 +77,12 @@ Object.freeze(defaultTransformer.output)
 /**
  * @internal
  */
-export function getTransformer(options?: TransformerOptions): CombinedDataTransformer | undefined {
-  const transformer = options?.transformer
-
+export function getTransformer(
+  transformer?: DataTransformerOptions,
+): CombinedDataTransformer | undefined {
   if (!transformer) return transformer
 
   if ('input' in transformer) return transformer
 
-  return { id: transformer.id || options.id, input: transformer, output: transformer }
+  return { id: transformer.id, input: transformer, output: transformer }
 }
