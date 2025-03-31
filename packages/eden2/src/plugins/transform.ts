@@ -5,7 +5,9 @@ import type { TransformerPluginConfig } from '../core/config'
 import { resolveTransformers } from '../core/transform'
 import { set } from '../utils/set'
 
-export function transformPlugin<const T extends TransformerPluginConfig>(config: T = {} as any) {
+export function safeTransformerPlugin<const T extends TransformerPluginConfig>(
+  config: T = {} as any,
+) {
   type TResolvedKey = T['key'] extends PropertyKey ? T['key'] : typeof EDEN_STATE_KEY
 
   const key = config.key ?? EDEN_STATE_KEY
@@ -18,15 +20,16 @@ export function transformPlugin<const T extends TransformerPluginConfig>(config:
    * @todo Decide whether it is worth it to return an instance with strongly-typed batch routes.
    */
   const plugin = (app: Elysia) => {
-    if (firstTransformer == null) return app
+    const appWithState = app.state((state) => {
+      type TResolvedState = typeof state & { [K in TResolvedKey]: T }
+      const eden = { transform: config }
+      const result = { ...state, [key]: eden }
+      return result as TResolvedState
+    })
 
-    return app
-      .state((state) => {
-        type TResolvedState = typeof state & { [K in TResolvedKey]: T }
-        const eden = { transform: config }
-        const result = { ...state, [key]: eden }
-        return result as TResolvedState
-      })
+    if (firstTransformer == null) return appWithState
+
+    return appWithState
       .onParse(async (context) => {
         const transformed = context.request.headers.get('transformed')
 
@@ -113,6 +116,20 @@ export function transformPlugin<const T extends TransformerPluginConfig>(config:
           },
         })
       })
+  }
+
+  return plugin
+}
+
+/**
+ * Adding the type-safety is an opt-in feature.
+ */
+export function transformerPlugin(config: TransformerPluginConfig = {}) {
+  const safePlugin = safeTransformerPlugin(config)
+
+  const plugin = (app: Elysia) => {
+    safePlugin(app)
+    return app
   }
 
   return plugin

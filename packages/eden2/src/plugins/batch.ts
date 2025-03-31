@@ -2,8 +2,9 @@ import { type Context, Elysia } from 'elysia'
 
 import { deserializeBatchGetParams } from '../batch/deserializer/get'
 import { deserializeBatchPostParams } from '../batch/deserializer/post'
+import type { BatchMethod } from '../batch/shared'
 import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../constants'
-import type { BatchDeserializer, BatchMethod, BatchPluginConfig } from '../core/config'
+import type { BatchDeserializer, BatchPluginConfig } from '../core/config'
 import { resolveEdenRequest } from '../core/resolve'
 import { toArray } from '../utils/to-array'
 

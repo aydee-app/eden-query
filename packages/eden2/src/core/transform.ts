@@ -117,9 +117,30 @@ export function matchTransformer(
 /**
  * A client-side transformer is required because it was found on the server application.
  */
-export interface EdenClientRequiredTransformer {
-  transformer: DataTransformerOptions
+export interface EdenClientRequiredTransformer<T = {}> {
+  transformer: ResolveTransformerFromConfig<T>
 }
+
+/**
+ * Given a configuration, e.g. one that may look like {@link ConfigWithTransformer}, try
+ * to infer the type of allowed transformers.
+ *
+ * - Object that maps IDs to transformers -> valid transformer is any value.
+ * - Array of transformers -> valid transformer is any element.
+ * - Single transformer specified -> valid transformer is the specified transformer.
+ *
+ *  This type does not perform output validation, i.e. that the output will conform to
+ *  {@link DataTransformerOptions}.
+ */
+export type ResolveTransformerFromConfig<T = {}> = T extends {
+  transformers: infer TransformerMapping extends Record<string, any>
+}
+  ? TransformerMapping extends any[]
+    ? TransformerMapping[number]
+    : TransformerMapping[keyof TransformerMapping]
+  : T extends { transformer: infer IndividualTransformer }
+    ? IndividualTransformer
+    : DataTransformerOptions
 
 /**
  * A client-side transformer is prohibited until one is found on the server application.
@@ -139,6 +160,9 @@ export interface EdenClientProhibitedTransformer {
  * It allows a transformer without explicitly prohibiting or requiring one.
  */
 export interface EdenClientAllowedTransformer {
+  /**
+   * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/internals/transformer.ts#L37
+   */
   transformer?: DataTransformerOptions
 }
 
@@ -150,9 +174,12 @@ export type ConfigWithTransformer = { transformer: any } | { transformers: any }
 
 /**
  * Once a configuration has been located, determine if a transformer should be required or prohibited.
+ *
+ * If a transformer is required, pass in the configuration and attempt to resolve the type of transformer
+ * to provide.
  */
 export type TransformerOptionsFromTransformerConfig<TConfig> = TConfig extends ConfigWithTransformer
-  ? EdenClientRequiredTransformer
+  ? EdenClientRequiredTransformer<TConfig>
   : EdenClientProhibitedTransformer
 
 /**
@@ -165,6 +192,10 @@ export type TransformerOptionsFromTransformerConfig<TConfig> = TConfig extends C
  *   - PropertyKey: any valid property key will be used to index {@link Elysia.store}.
  *
  *   Defaults to undefined, indicating to turn type-checking off.
+ *
+ * Based on tRPC checking for transformer.
+ *
+ * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/internals/transformer.ts#L37
  */
 export type EdenClientTransformerOptions<
   TStore extends Record<string, any> = {},

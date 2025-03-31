@@ -1,5 +1,6 @@
 import type { AnyElysia, Context } from 'elysia'
 
+import type { BatchMethod } from '../batch/shared'
 import type { DataTransformerOptions } from '../trpc/server/transformer'
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
 import type { EdenFetchError } from './errors'
@@ -38,15 +39,13 @@ export type EdenResultTransformer = (
  *
  * @template TElysia The type definition of the Elysia.js server application.
  *
- * @template TKey
- *  Specify the key that will store the {@link EdenPluginConfig} on the server application.
- *  i.e. within {@link AnyElysia.store}. It can be one of several possible types.
+ * @template TKey A unique key to index the server application state to try to find transformer configuration.
+ *   Possible values:
+ *   - falsy: disable type checking, and it is completely optional.
+ *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link Elysia.store.eden}.
+ *   - PropertyKey: any valid property key will be used to index {@link Elysia.store}.
  *
- *  - true: TKey = "eden"
- *  - PropertyKey: TKey = the provided key.
- *  - falsy value: no key.
- *
- *  If it is a falsy value, then type checking is turned off.
+ *   Defaults to undefined, indicating to turn type-checking off.
  */
 export type EdenResolverConfig<
   TElysia extends AnyElysia = AnyElysia,
@@ -93,16 +92,6 @@ export type EdenResolverConfig<
    */
   domain?: TElysia | string
 
-  // /**
-  //  * Transformer for request body.
-  //  *
-  //  * Unlike tRPC, eden-query does not perform strict checking on whether a transformer
-  //  * is present on both the client and server. So this is a looser interpretation of `TransformerOptions`.
-  //  *
-  //  * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/internals/transformer.ts#L37
-  //  */
-  // transformer?: DataTransformerOptions
-
   /**
    */
   transformers?: TransformersOptions
@@ -143,31 +132,46 @@ export interface EdenPluginBaseConfig {
    * @see https://elysiajs.com/essential/handler.html#state
    *
    * @default "eden"
+   *
+   * WARNING!!
+   *
+   * Be careful if using Symbols in conjunction with declaration or declarationMap on.
+   * The type will be added to the server application directly, i.e. {@link AnyElysia.store}
+   * and the resulting object may not be serializable.
+   *
+   * TS error code: 4118
+   * @see https://www.typescriptlang.org/tsconfig/#declaration
+   * @see https://www.typescriptlang.org/tsconfig/#declarationMap
    */
   key?: PropertyKey
 }
 
 export interface TransformerPluginConfig extends EdenPluginBaseConfig {
   /**
-   * Single transformer for all requests.
+   * Use the same transformer for all requests.
    */
   transformer?: DataTransformerOptions
 
   /**
-   * At the moment, all plugins may refer to the
-   *
-   * Will use first one if none specified.
+   * If multiple transformers desired, provide an array or object mapping of transformers.
    */
   transformers?: TransformersOptions
 }
 
-export type BatchMethod = 'GET' | 'POST'
-
+/**
+ * On the client, multiple requests are grouped and serialized into a single batch of params.
+ * A deserializer function will run on the server to parse out the individual requests.
+ *
+ * The client-side serializer function can be customized through the HTTP-batch-link (TODO).
+ */
 export type BatchDeserializer = (
   context: Context,
   config: BatchPluginConfig,
 ) => MaybePromise<Array<EdenRequestParams>>
 
+/**
+ * Server application batch plugin configuration.
+ */
 export interface BatchPluginConfig extends EdenPluginBaseConfig {
   /**
    * The endpoint for batch requests.
@@ -176,6 +180,8 @@ export interface BatchPluginConfig extends EdenPluginBaseConfig {
 
   /**
    * The supported method(s) for batch requests.
+   *
+   * @default "POST".
    */
   method?: MaybeArray<BatchMethod>
 
