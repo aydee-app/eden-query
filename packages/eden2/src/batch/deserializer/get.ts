@@ -1,10 +1,6 @@
 import type { BatchDeserializer } from '../../core/config'
 import type { EdenRequestParams } from '../../core/request'
-
-/**
- * Temporary fix to ignore these headers from the batch request.
- */
-const ignoreHeaders = ['content-type', 'content-length']
+import { IGNORED_HEADERS } from '../shared'
 
 export const deserializeBatchGetParams: BatchDeserializer = async (context, _config) => {
   const result: Array<EdenRequestParams> = []
@@ -25,13 +21,13 @@ export const deserializeBatchGetParams: BatchDeserializer = async (context, _con
     if (!index) continue
 
     if (!name) {
-      if (!ignoreHeaders.includes(index.toLowerCase())) {
+      if (!IGNORED_HEADERS.includes(index.toLowerCase())) {
         globalHeaders[index] = value
       }
       continue
     }
 
-    if (ignoreHeaders.includes(name.toLowerCase())) continue
+    if (IGNORED_HEADERS.includes(name.toLowerCase())) continue
 
     const paramIndex = Number(index)
 

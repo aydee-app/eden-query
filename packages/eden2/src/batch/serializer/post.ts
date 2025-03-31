@@ -1,18 +1,7 @@
 import type { EdenRequestParams } from '../../core/request'
 import { resolveFetchOptions } from '../../core/resolve'
 import { extractFiles } from '../../utils/file'
-
-const KEYS = {
-  method: 'method',
-  path: 'path',
-  body: 'body',
-  bodyType: 'body_type',
-  query: 'query',
-  filePaths: 'files.path',
-  files: 'files.files',
-  transformed: 'transformed',
-  transformerId: 'transformer-id',
-} as const
+import { BODY_KEYS,BODY_TYPES } from '../shared'
 
 export async function serializeBatchPostParams(batchParams: EdenRequestParams[]) {
   const body = new FormData()
@@ -23,12 +12,12 @@ export async function serializeBatchPostParams(batchParams: EdenRequestParams[])
     const { path, query, fetchInit } = await resolveFetchOptions(params)
 
     if (fetchInit?.method) {
-      body.append(`${index}.${KEYS.method}`, fetchInit.method)
+      body.append(`${index}.${BODY_KEYS.method}`, fetchInit.method)
     }
 
     const fetchInitHeaders: any = fetchInit?.headers
 
-    body.append(`${index}.${KEYS.path}`, `${path}${query ? '?' : ''}${query}`)
+    body.append(`${index}.${BODY_KEYS.path}`, `${path}${query ? '?' : ''}${query}`)
 
     if (fetchInit?.headers) {
       for (const key in fetchInit.headers) {
@@ -43,10 +32,10 @@ export async function serializeBatchPostParams(batchParams: EdenRequestParams[])
     if (fetchInit?.body == null) return
 
     if (fetchInit.body instanceof FormData) {
-      body.append(`${index}.${KEYS.bodyType}`, 'formdata')
+      body.append(`${index}.${BODY_KEYS.bodyType}`, BODY_TYPES.FORM_DATA)
 
       fetchInit?.body.forEach((value, key) => {
-        body.set(`${index}.${KEYS.body}.${key}`, value)
+        body.set(`${index}.${BODY_KEYS.body}.${key}`, value)
       })
 
       return
@@ -58,14 +47,14 @@ export async function serializeBatchPostParams(batchParams: EdenRequestParams[])
 
     const fetchInitBody: any = fetchInit?.body
 
-    body.append(`${index}.${KEYS.bodyType}`, 'json')
-    body.set(`${index}.${KEYS.body}`, fetchInitBody)
+    body.append(`${index}.${BODY_KEYS.bodyType}`, BODY_TYPES.JSON)
+    body.set(`${index}.${BODY_KEYS.body}`, fetchInitBody)
 
     const files = extractFiles(fetchInitBody)
 
     for (const file of files) {
-      body.append(`${index}.${KEYS.filePaths}`, file.path)
-      body.append(`${index}.${KEYS.files}`, file.file)
+      body.append(`${index}.${BODY_KEYS.filePaths}`, file.path)
+      body.append(`${index}.${BODY_KEYS.files}`, file.file)
     }
   })
 

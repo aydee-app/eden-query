@@ -3,16 +3,14 @@ import { type Context, Elysia } from 'elysia'
 import { deserializeBatchGetParams } from '../batch/deserializer/get'
 import { deserializeBatchPostParams } from '../batch/deserializer/post'
 import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../constants'
-import type { BatchConfig } from '../core/config'
+import type { BatchConfig, BatchDeserializer, BatchMethod } from '../core/config'
 import { resolveEdenRequest } from '../core/resolve'
 import { toArray } from '../utils/to-array'
 
 export const batchDeserializers = {
-  get: deserializeBatchGetParams,
-  post: deserializeBatchPostParams,
-} as const
-
-export type BatchRequestMethod = keyof typeof batchDeserializers
+  GET: deserializeBatchGetParams,
+  POST: deserializeBatchPostParams,
+} satisfies Record<BatchMethod, BatchDeserializer>
 
 /**
  */
@@ -23,11 +21,7 @@ export function batchPlugin<const T extends BatchConfig>(config: T = {} as any) 
 
   const key = config.key ?? EDEN_STATE_KEY
 
-  const resolveBatchRequest = async (
-    method: BatchRequestMethod,
-    domain: Elysia,
-    context: Context,
-  ) => {
+  const resolveBatchRequest = async (method: BatchMethod, domain: Elysia, context: Context) => {
     const url = new URL(context.request.url)
 
     const base = url.origin
@@ -69,14 +63,16 @@ export function batchPlugin<const T extends BatchConfig>(config: T = {} as any) 
    * @todo Decide whether it is worth it to return an instance with strongly-typed batch routes.
    */
   const plugin = (app: Elysia) => {
-    const resolveBatchGetRequest = resolveBatchRequest.bind(null, 'get', app)
-    const resolveBatchPostRequest = resolveBatchRequest.bind(null, 'post', app)
+    const resolveBatchGetRequest = resolveBatchRequest.bind(null, 'GET', app)
+    const resolveBatchPostRequest = resolveBatchRequest.bind(null, 'POST', app)
 
     const methods = toArray(config.method)
 
     if (!methods.length) {
       methods.push('POST')
     }
+
+    // Do not return the application typed with the batch methods, since they're not intended to be invoked directly...
 
     if (methods.includes('GET')) {
       app.get(endpoint, resolveBatchGetRequest)
@@ -86,9 +82,6 @@ export function batchPlugin<const T extends BatchConfig>(config: T = {} as any) 
       app.post(endpoint, resolveBatchPostRequest, { parse: () => null })
     }
 
-    /**
-     * Inject eden-query configuration into the state.
-     */
     const appWithState = app.state((state) => {
       type TResolvedState = typeof state & { [K in TResolvedKey]: T }
       const eden = { batch: config }

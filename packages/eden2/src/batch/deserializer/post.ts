@@ -2,11 +2,7 @@ import type { BatchDeserializer } from '../../core/config'
 import type { EdenRequestParams } from '../../core/request'
 import { resolveTransformers } from '../../core/transform'
 import { set } from '../../utils/set'
-
-/**
- * Temporary fix to ignore these headers from the batch request.
- */
-const ignoreHeaders = ['content-type', 'content-length']
+import { BODY_KEYS,BODY_TYPES, IGNORED_HEADERS } from '../shared'
 
 export const deserializeBatchPostParams: BatchDeserializer = async (context, config) => {
   const request = context.request
@@ -23,13 +19,13 @@ export const deserializeBatchPostParams: BatchDeserializer = async (context, con
     if (!index) continue
 
     if (!name) {
-      if (!ignoreHeaders.includes(index.toLowerCase())) {
+      if (!IGNORED_HEADERS.includes(index.toLowerCase())) {
         globalHeaders[index] = value
       }
       continue
     }
 
-    if (ignoreHeaders.includes(name.toLowerCase())) continue
+    if (IGNORED_HEADERS.includes(name.toLowerCase())) continue
 
     const paramIndex = Number(index)
 
@@ -54,18 +50,19 @@ export const deserializeBatchPostParams: BatchDeserializer = async (context, con
     if (Number.isNaN(paramIndex)) continue
 
     switch (name) {
-      case 'body': {
-        const bodyType = formData.get(`${index}.body_type`)
+      case BODY_KEYS.body: {
+        const bodyType = formData.get(`${index}.${BODY_KEYS.bodyType}`)
 
-        if (bodyType === 'formdata') {
+        if (bodyType === BODY_TYPES.FORM_DATA) {
           const body = new FormData()
 
-          const baseKey = `${index}.body`
+          const baseKey = `${index}.${BODY_KEYS.body}`
 
           const bodyEntries = formDataEntries
             .filter((entry) => {
               return (
-                entry[0].startsWith(`${index}.body`) && !entry[0].startsWith(`${index}.body_type`)
+                entry[0].startsWith(`${index}.${BODY_KEYS.body}`) &&
+                !entry[0].startsWith(`${index}.${BODY_KEYS.bodyType}`)
               )
             })
             .map((entry) => {
@@ -83,16 +80,16 @@ export const deserializeBatchPostParams: BatchDeserializer = async (context, con
           continue
         }
 
-        if (bodyType === 'json') {
-          const rawBody = formData.get(`${index}.body`)
+        if (bodyType === BODY_TYPES.JSON) {
+          const rawBody = formData.get(`${index}.${BODY_KEYS.body}`)
 
           if (rawBody == null) continue
 
           let body = JSON.parse(rawBody.toString())
 
-          const filePaths = formData.getAll(`${index}.files.path`)
+          const filePaths = formData.getAll(`${index}.${BODY_KEYS.filePaths}`)
 
-          const files = formData.getAll(`${index}.files.file`)
+          const files = formData.getAll(`${index}.${BODY_KEYS.files}`)
 
           files.forEach((file, index) => {
             const path = filePaths[index]
@@ -102,10 +99,10 @@ export const deserializeBatchPostParams: BatchDeserializer = async (context, con
             set(body, path.toString(), file)
           })
 
-          const transformed = formData.get(`${index}.transformed`)
+          const transformed = formData.get(`${index}.${BODY_KEYS.transformed}`)
 
           if (transformed) {
-            const transformerId = formData.get(`${index}.transformer-id`)
+            const transformerId = formData.get(`${index}.${BODY_KEYS.transformerId}`)
 
             const transformer =
               transformers.find((transformer) => transformer.id === transformerId) ||
@@ -123,14 +120,14 @@ export const deserializeBatchPostParams: BatchDeserializer = async (context, con
         continue
       }
 
-      case 'body_type': {
+      case BODY_KEYS.bodyType: {
         // noop because body handles this
         continue
       }
 
-      case 'method': // falls through
+      case BODY_KEYS.method: // falls through
 
-      case 'path': {
+      case BODY_KEYS.path: {
         result[paramIndex] ??= {}
         result[paramIndex][name] = value.toString()
 
