@@ -1,11 +1,11 @@
 import { Elysia } from 'elysia'
 
 import { EDEN_STATE_KEY } from '../constants'
-import type { TransformerConfig } from '../core/config'
+import type { TransformerPluginConfig } from '../core/config'
 import { resolveTransformers } from '../core/transform'
 import { set } from '../utils/set'
 
-export function transformPlugin<const T extends TransformerConfig>(config: T = {} as any) {
+export function transformPlugin<const T extends TransformerPluginConfig>(config: T = {} as any) {
   type TResolvedKey = T['key'] extends PropertyKey ? T['key'] : typeof EDEN_STATE_KEY
 
   const key = config.key ?? EDEN_STATE_KEY

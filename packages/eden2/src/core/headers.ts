@@ -1,7 +1,7 @@
 import type { CallbackOrValue } from '../utils/resolve-callback-or-value'
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
 
-interface HeadersInitEsque {
+export interface HeadersInitEsque {
   [Symbol.iterator](): IterableIterator<[string, string]>
 }
 
@@ -37,6 +37,7 @@ export async function processHeaders<T = any>(
 ): Promise<Record<string, string>> {
   if (!headersEsque) return headers
 
+  // [key, value] tuple.
   if (Array.isArray(headersEsque) && headersEsque.length === 2 && headersEsque.every(isString)) {
     const [key, value] = headersEsque
 

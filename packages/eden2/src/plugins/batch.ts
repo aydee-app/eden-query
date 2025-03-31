@@ -3,7 +3,7 @@ import { type Context, Elysia } from 'elysia'
 import { deserializeBatchGetParams } from '../batch/deserializer/get'
 import { deserializeBatchPostParams } from '../batch/deserializer/post'
 import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../constants'
-import type { BatchConfig, BatchDeserializer, BatchMethod } from '../core/config'
+import type { BatchDeserializer, BatchMethod,BatchPluginConfig } from '../core/config'
 import { resolveEdenRequest } from '../core/resolve'
 import { toArray } from '../utils/to-array'
 
@@ -14,7 +14,7 @@ export const batchDeserializers = {
 
 /**
  */
-export function batchPlugin<const T extends BatchConfig>(config: T = {} as any) {
+export function batchPlugin<const T extends BatchPluginConfig>(config: T = {} as any) {
   type TResolvedKey = T['key'] extends PropertyKey ? T['key'] : typeof EDEN_STATE_KEY
 
   const endpoint = config?.endpoint ?? BATCH_ENDPOINT

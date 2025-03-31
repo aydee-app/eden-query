@@ -145,7 +145,7 @@ export type TransformersOptions =
   | MaybeArray<DataTransformerOptions>
   | Record<string, DataTransformerOptions>
 
-export interface TransformerConfig extends EdenPluginBaseConfig {
+export interface TransformerPluginConfig extends EdenPluginBaseConfig {
   /**
    * Single transformer for all requests.
    */
@@ -163,10 +163,10 @@ export type BatchMethod = 'GET' | 'POST'
 
 export type BatchDeserializer = (
   context: Context,
-  config: BatchConfig,
+  config: BatchPluginConfig,
 ) => MaybePromise<Array<EdenRequestParams>>
 
-export interface BatchConfig extends EdenPluginBaseConfig {
+export interface BatchPluginConfig extends EdenPluginBaseConfig {
   /**
    * The endpoint for batch requests.
    */
@@ -200,11 +200,11 @@ export interface EdenPluginConfig {
   /**
    * Options for transforming JSON inputs and outputs.
    */
-  transformer?: TransformerConfig
+  transformer?: TransformerPluginConfig
 
   /**
    * Batching can be supported by using the batch plugin.
    * The batch plugin will populate this property; batching is assumed to be enabled if it is defined.
    */
-  batch?: BatchConfig
+  batch?: BatchPluginConfig
 }
