@@ -10,7 +10,7 @@ import type {
   ResolveTransformerFromConfig,
 } from '../../src/core/transform'
 import { batchPlugin } from '../../src/plugins/batch'
-import { transformerPlugin } from '../../src/plugins/transform'
+import { transformPlugin } from '../../src/plugins/transform'
 import type { DataTransformerOptions } from '../../src/trpc/server/transformer'
 
 describe('ResolveTransformerFromConfig', () => {
@@ -209,7 +209,7 @@ describe('EdenClientTransformerOptions', () => {
 
 describe('works with live application', () => {
   test('no key is added with the default plugin', () => {
-    const _app = new Elysia().use(transformerPlugin())
+    const _app = new Elysia().use(transformPlugin())
 
     type App = typeof _app
 
@@ -228,7 +228,7 @@ describe('works with live application', () => {
         }),
       )
       .use(
-        transformerPlugin({
+        transformPlugin({
           key: true,
           transformer: SuperJSON,
         }),
@@ -254,7 +254,7 @@ describe('works with live application', () => {
         }),
       )
       .use(
-        transformerPlugin({
+        transformPlugin({
           key,
           transformer: SuperJSON,
         }),

@@ -31,7 +31,9 @@ import type { OperationLink } from './internal/operation-link'
 export type HTTPLinkBaseOptions<
   TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
-> = Omit<EdenResolverConfig<TElysia, TKey>, 'headers'>
+> = Omit<EdenResolverConfig<TElysia, TKey>, 'headers'> & {
+  key?: PropertyKey | Nullish | true
+}
 
 /**
  * An extremely flexible resolver for HTTP Headers.
@@ -111,9 +113,10 @@ export async function handleHttpRequest(options: HTTPLinkOptions<any>, op: Opera
 /**
  * @see https://trpc.io/docs/client/links/httpLink
  */
-export function httpLink<T extends InternalElysia = InternalElysia>(
-  options: HTTPLinkOptions<T> = {},
-) {
+export function httpLink<
+  TElysia extends InternalElysia,
+  TConfig extends HTTPLinkOptions<TElysia, TConfig['key']>,
+>(options: TConfig = {} as any) {
   const link = (() => {
     const operationLink = (({ op }) => {
       if (op.type === 'subscription') {
@@ -138,10 +141,10 @@ export function httpLink<T extends InternalElysia = InternalElysia>(
             observer.error(err)
           })
       })
-    }) satisfies OperationLink<T>
+    }) satisfies OperationLink<TElysia>
 
     return operationLink
-  }) satisfies EdenLink<T>
+  }) satisfies EdenLink<TElysia>
 
   return link
 }

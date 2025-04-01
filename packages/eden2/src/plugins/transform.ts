@@ -1,4 +1,5 @@
 import { Elysia } from 'elysia'
+import { ElysiaCustomStatusResponse } from 'elysia/error'
 
 import { EDEN_STATE_KEY } from '../constants'
 import type { TransformerPluginConfig } from '../core/config'
@@ -6,7 +7,7 @@ import { resolveTransformers } from '../core/transform'
 import { set } from '../utils/set'
 import type { Falsy } from '../utils/types'
 
-export function transformerPlugin<T extends TransformerPluginConfig>(config: T = {} as any) {
+export function transformPlugin<T extends TransformerPluginConfig>(config: T = {} as any) {
   type TResolvedKey = T['key'] extends Falsy
     ? never
     : T['key'] extends true
@@ -110,6 +111,19 @@ export function transformerPlugin<T extends TransformerPluginConfig>(config: T =
         if (context.response instanceof Response) return
 
         const transformer = transformers.find((t) => t.id === transformerId) || firstTransformer
+
+        if (context.response instanceof ElysiaCustomStatusResponse) {
+          const serializedResponse = await transformer.output.serialize(context.response.response)
+
+          const text = JSON.stringify(serializedResponse)
+
+          return new Response(text, {
+            status: context.response.code,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+        }
 
         const serializedResponse = await transformer.output.serialize(context.response)
 

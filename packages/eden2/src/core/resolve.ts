@@ -27,15 +27,25 @@ export const defaultOnRequest = (async (_path, fetchInit, params) => {
 
   fetchInit.headers = { ...fetchInit.headers, ...headers }
 
+  headers = fetchInit.headers as any
+
+  const transformer = matchTransformer(params.transformers, params.transformer)
+
+  // Set the headers so the response body is transformed properly.
+  // Transform the request body when needed.
+  if (transformer) {
+    if (transformer.id) {
+      headers['transformer-id'] = transformer.id.toString()
+    }
+
+    headers['transformed'] = 'true'
+  }
+
   if (fetchInit.body == null) return
 
   if (fetchInit.body instanceof FormData) return
 
   if (typeof fetchInit.body !== 'object') return
-
-  headers = fetchInit.headers as any
-
-  const transformer = matchTransformer(params.transformers, params.transformer)
 
   const files = extractFiles(fetchInit.body)
 
@@ -44,12 +54,6 @@ export const defaultOnRequest = (async (_path, fetchInit, params) => {
   }
 
   if (transformer) {
-    if (transformer.id) {
-      headers['transformer-id'] = transformer.id.toString()
-    }
-
-    headers['transformed'] = 'true'
-
     fetchInit.body = await transformer.input.serialize(fetchInit.body)
 
     const stringified = JSON.stringify(fetchInit.body)
@@ -97,8 +101,14 @@ export const defaultOnResult = (async (result, params) => {
 
   const transformer = transformers[0]
 
-  if (transformer) {
+  if (!transformer) return
+
+  if (result.data) {
     result.data = await transformer.output.deserialize(result.data)
+  }
+
+  if (result.error) {
+    result.error.value = await transformer.output.deserialize(result.error.value)
   }
 }) satisfies EdenResultTransformer
 

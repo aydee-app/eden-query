@@ -30,8 +30,8 @@ export type HttpBatchLinkResult<
   TKey = undefined,
 > = TKey extends Falsy
   ? EdenLink<TElysia>
-  : TKey extends keyof TElysia['store']
-    ? TElysia['store'][TKey] extends ConfigWithBatching
+  : TKey extends PropertyKey
+    ? ConfigWithBatching extends TElysia['store'][Extract<TKey, keyof TElysia['store']>]
       ? EdenLink<TElysia>
       : BatchingNotDetectedError
     : TKey extends true
@@ -90,9 +90,10 @@ const batchSerializer = {
  *
  *   Defaults to undefined, indicating to turn type-checking off.
  */
-export function httpBatchLink<TElysia extends InternalElysia = InternalElysia, TKey = undefined>(
-  options: HTTPBatchLinkOptions<TElysia, TKey> = {} as any,
-): HttpBatchLinkResult<TElysia, TKey> {
+export function httpBatchLink<
+  TElysia extends InternalElysia,
+  TConfig extends HTTPBatchLinkOptions<TElysia, TConfig['key']>,
+>(options: TConfig = {} as any): HttpBatchLinkResult<TElysia, TConfig['key']> {
   const maxURLLength = options.maxURLLength ?? Infinity
 
   const maxItems = options.maxItems ?? Infinity
