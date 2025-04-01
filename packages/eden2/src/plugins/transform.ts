@@ -5,18 +5,21 @@ import { EDEN_STATE_KEY } from '../constants'
 import type { TransformerPluginConfig } from '../core/config'
 import { resolveTransformers } from '../core/transform'
 import { set } from '../utils/set'
-import type { Falsy } from '../utils/types'
+import type { Falsy, IsAny } from '../utils/types'
 
 export function transformPlugin<const T extends TransformerPluginConfig<any>>(
   config: T = {} as any,
 ) {
-  type TResolvedKey = T['key'] extends Falsy
-    ? never
-    : T['key'] extends true
-      ? typeof EDEN_STATE_KEY
-      : T['key'] extends PropertyKey
-        ? T['key']
-        : never
+  type TResolvedKey =
+    IsAny<T['key']> extends true
+      ? never
+      : T['key'] extends Falsy
+        ? never
+        : T['key'] extends true
+          ? typeof EDEN_STATE_KEY
+          : T['key'] extends PropertyKey
+            ? T['key']
+            : never
 
   const key = config.key ?? EDEN_STATE_KEY
 
@@ -29,7 +32,7 @@ export function transformPlugin<const T extends TransformerPluginConfig<any>>(
    */
   const plugin = (app: Elysia) => {
     const appWithState = app.state((state) => {
-      type TResolvedState = typeof state & { [K in TResolvedKey]: T }
+      type TResolvedState = typeof state & { [K in TResolvedKey]: { transform: T } }
       const eden = { transform: config }
       const result = { ...state, [key.toString()]: eden }
       return result as TResolvedState

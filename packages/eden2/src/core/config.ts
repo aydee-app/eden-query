@@ -136,8 +136,6 @@ export type EdenResolverConfig<
 
     /**
      * If multiple transformers should be supported, they should be provided as either an array or object mapping.
-     *
-     * @todo Move this to
      */
     transformers?: TransformersOptions
 

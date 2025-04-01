@@ -124,20 +124,20 @@ export function matchTransformer(
  *  This type does not perform output validation, i.e. that the output will conform to
  *  {@link DataTransformerOptions}.
  */
-export type ResolveTransformerFromConfig<T = {}> = T extends {
+export type ResolveTransformerFromConfig<T extends ConfigWithTransformer> = T['transform'] extends {
   transformers: infer TransformerMapping extends Record<string, any>
 }
   ? TransformerMapping extends any[]
     ? TransformerMapping[number]
     : TransformerMapping[keyof TransformerMapping]
-  : T extends { transformer: infer IndividualTransformer }
+  : T['transform'] extends { transformer: infer IndividualTransformer }
     ? IndividualTransformer
     : DataTransformerOptions
 
 /**
  * A client-side transformer is required because it was found on the server application.
  */
-export interface EdenClientRequiredTransformer<T = {}> {
+export interface EdenClientRequiredTransformer<T extends ConfigWithTransformer> {
   transformer: ResolveTransformerFromConfig<T>
 }
 
@@ -163,13 +163,20 @@ export interface EdenClientAllowedTransformer {
    * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/internals/transformer.ts#L37
    */
   transformer?: DataTransformerOptions
+
+  /**
+   * If multiple transformers should be supported, they should be provided as either an array or object mapping.
+   */
+  transformers?: TransformersOptions
 }
 
 /**
  * If the server has either transformer or transformers defined, then assume that
  * transformers have been enabled.
  */
-export type ConfigWithTransformer = { transformer: any } | { transformers: any }
+export type ConfigWithTransformer = {
+  transform: { transformer: any } | { transformers: any }
+}
 
 /**
  * Once a configuration has been located, determine if a transformer should be required or prohibited.
