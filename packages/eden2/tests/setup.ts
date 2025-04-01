@@ -1,7 +1,10 @@
+import { setup } from '@ark/attest'
 import type { AnyElysia } from 'elysia'
 import { http } from 'msw'
 import { setupServer } from 'msw/node'
 import { afterAll, afterEach, beforeAll } from 'vitest'
+
+setup({})
 
 /**
  * @see https://vitest.dev/guide/mocking#requests

@@ -9,7 +9,7 @@ import type { EdenResult } from '../../core/response'
 import type { InternalElysia } from '../../elysia'
 import { Observable } from '../../observable'
 import { toArray } from '../../utils/to-array'
-import type { Falsy, TypeError } from '../../utils/types'
+import type { TypeError } from '../../utils/types'
 import { handleHttpRequest, type HTTPLinkOptions, resolveHttpOperationParams } from '../http-link'
 import type { EdenLink } from '../internal/eden-link'
 import type { Operation } from '../internal/operation'
@@ -20,25 +20,6 @@ export type BatchingNotDetectedError =
   TypeError<'Batch plugin not detected on Elysia.js server application'>
 
 export type ConfigWithBatching = { batch: any }
-
-/**
- * If type-checking has been enabled and batching has not been enabled on the server, force
- * the return to be incorrect.
- */
-export type HttpBatchLinkResult<
-  TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
-> = TKey extends Falsy
-  ? EdenLink<TElysia>
-  : TKey extends PropertyKey
-    ? ConfigWithBatching extends TElysia['store'][Extract<TKey, keyof TElysia['store']>]
-      ? EdenLink<TElysia>
-      : BatchingNotDetectedError
-    : TKey extends true
-      ? TElysia['store'][typeof EDEN_STATE_KEY] extends ConfigWithBatching
-        ? EdenLink<TElysia>
-        : BatchingNotDetectedError
-      : EdenLink<TElysia>
 
 /**
  * @template TKey A unique key to index the server application state to try to find a transformer configuration.
@@ -82,18 +63,24 @@ const batchSerializer = {
 /**
  * @see https://trpc.io/docs/client/links/httpLink
  *
- * @template TKey A unique key to index the server application state to try to find a batch configuration.
- *   Possible values:
- *   - falsy: disable type checking, and it is completely optional.
- *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link Elysia.store.eden}.
- *   - PropertyKey: any valid property key will be used to index {@link Elysia.store}.
- *
- *   Defaults to undefined, indicating to turn type-checking off.
+ * Tried to extrapolate return type but was not able to get correct inference
+ * when inside of object errors. e.g. If {@link TConfig} itself contained an array,
+ * then introspection would fail...
  */
 export function httpBatchLink<
   TElysia extends InternalElysia,
   TConfig extends HTTPBatchLinkOptions<TElysia, TConfig['key']>,
->(options: TConfig = {} as any): HttpBatchLinkResult<TElysia, TConfig['key']> {
+>(
+  options: TConfig = {} as any,
+): TConfig['key'] extends PropertyKey
+  ? ConfigWithBatching extends TElysia['store'][Extract<TConfig['key'], keyof TElysia['store']>]
+    ? EdenLink<TElysia>
+    : BatchingNotDetectedError
+  : TConfig['key'] extends true
+    ? TElysia['store'][typeof EDEN_STATE_KEY] extends ConfigWithBatching
+      ? EdenLink<TElysia>
+      : BatchingNotDetectedError
+    : EdenLink<TElysia> {
   const maxURLLength = options.maxURLLength ?? Infinity
 
   const maxItems = options.maxItems ?? Infinity

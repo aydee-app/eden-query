@@ -6,7 +6,7 @@ import type {
   DataTransformerOptions,
 } from '../trpc/server/transformer'
 import { notNull } from '../utils/null'
-import type { Falsy, MaybeArray, TypeError } from '../utils/types'
+import type { Falsy, MaybeArray } from '../utils/types'
 
 /**
  * Provide a single transformer to use the same transformer on all requests.
@@ -153,7 +153,7 @@ export interface EdenClientProhibitedTransformer {
    * You must use the same transformer on the backend and frontend
    * @see https://trpc.io/docs/v11/data-transformers
    **/
-  transformer?: TypeError<'You must define a transformer on your your `initTRPC`-object first'>
+  transformer?: 'You must define a transformer on your your `initTRPC`-object first'
 }
 
 /**

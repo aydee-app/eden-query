@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint --fix",
-    "test": "vitest"
+    "test": "ATTEST_skipTypes=1 vitest",
+    "test:types": "vitest tests/plugins/transform.test-d"
   },
   "repository": {
     "type": "git",
@@ -15,6 +16,7 @@
   },
   "type": "module",
   "devDependencies": {
+    "@ark/attest": "^0.45.6",
     "@elysiajs/node": "^1.2.6",
     "@elysiajs/swagger": "^1.2.2",
     "@trpc/client": "^11.0.0",

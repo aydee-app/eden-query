@@ -1,0 +1,336 @@
+{
+  "tests/plugins/transform.test-d.ts": [
+    {
+      "location": {
+        "start": {
+          "line": 26,
+          "char": 9
+        },
+        "end": {
+          "line": 33,
+          "char": 11
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": [
+        "Type 'BatchingNotDetectedError' is not assignable to type 'EdenLink<Elysia<\"\", { decorator: {}; store: {}; derive: {}; resolve: {}; }, { typebox: TModule<{}, {}>; error: {}; }, { schema: {}; macro: {}; macroFn: {}; parser: {}; }, {}, { derive: {}; resolve: {}; schema: {}; }, { ...; }>>'.Type 'String & { _: unique symbol; }' provides no match for the signature '(opts: EdenClientRuntime): OperationLink<Elysia<\"\", { decorator: {}; store: {}; derive: {}; resolve: {}; }, { typebox: TModule<{}, {}>; error: {}; }, { schema: {}; macro: {}; macroFn: {}; parser: {}; }, {}, { ...; }, { ...; }>>'."
+      ],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 68,
+          "char": 9
+        },
+        "end": {
+          "line": 78,
+          "char": 11
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": [
+        "Type 'typeof SuperJSON' is not assignable to type '\"You must define a transformer on your your `initTRPC`-object first\"'."
+      ],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 86,
+          "char": 9
+        },
+        "end": {
+          "line": 93,
+          "char": 11
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": [
+        "Argument of type '{ key: true; }' is not assignable to parameter of type 'HTTPBatchLinkOptions<Elysia<\"\", { decorator: {}; store: { eden: { key: true; transformer: typeof SuperJSON; } & { key: true; } & { batch: true; }; }; derive: {}; resolve: {}; }, { error: {}; typebox: MergeTypeModule<MergeTypeModule<TModule<{}, {}>, TModule<...>>, TModule<...>>; }, { ...; }, {}, { ...; }, { ...; }>, ...'.Property 'transformer' is missing in type '{ key: true; }' but required in type 'Omit<EdenResolverConfig<Elysia<\"\", { decorator: {}; store: { eden: { key: true; transformer: typeof SuperJSON; } & { key: true; } & { batch: true; }; }; derive: {}; resolve: {}; }, { error: {}; typebox: MergeTypeModule<MergeTypeModule<TModule<{}, {}>, TModule<...>>, TModule<...>>; }, { ...; }, {}, { ...; }, { ...; }...'."
+      ],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 99,
+          "char": 9
+        },
+        "end": {
+          "line": 109,
+          "char": 11
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": ["Type 'boolean' is not assignable to type 'typeof SuperJSON'."],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 116,
+          "char": 11
+        },
+        "end": {
+          "line": 128,
+          "char": 13
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": ["Type 'boolean' is not assignable to type 'typeof SuperJSON'."],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 134,
+          "char": 11
+        },
+        "end": {
+          "line": 146,
+          "char": 13
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": [
+        "Type 'BatchingNotDetectedError' is not assignable to type 'EdenLink<Elysia<\"\", { decorator: {}; store: { eden: { key: true; transformer: typeof SuperJSON; }; }; derive: {}; resolve: {}; }, { error: {}; typebox: MergeTypeModule<TModule<{}, {}>, TModule<{}, {}>>; }, { ...; }, {}, { ...; }, { ...; }>>'.Type 'String & { _: unique symbol; }' provides no match for the signature '(opts: EdenClientRuntime): OperationLink<Elysia<\"\", { decorator: {}; store: { eden: { key: true; transformer: typeof SuperJSON; }; }; derive: {}; resolve: {}; }, { error: {}; typebox: MergeTypeModule<TModule<...>, TModule<...>>; }, { ...; }, {}, { ...; }, { ...; }>>'."
+      ],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 204,
+          "char": 11
+        },
+        "end": {
+          "line": 214,
+          "char": 13
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": [
+        "Type 'boolean' is not assignable to type 'typeof SuperJSON | { serialize: (object: any) => string; deserialize: (object: any) => any; }'."
+      ],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 272,
+          "char": 11
+        },
+        "end": {
+          "line": 282,
+          "char": 13
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": [
+        "Type 'boolean' is not assignable to type 'typeof SuperJSON | { serialize: (object: any) => string; deserialize: (object: any) => any; }'."
+      ],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 296,
+          "char": 9
+        },
+        "end": {
+          "line": 306,
+          "char": 11
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": [
+        "Type 'typeof SuperJSON' is not assignable to type '\"You must define a transformer on your your `initTRPC`-object first\"'."
+      ],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 312,
+          "char": 9
+        },
+        "end": {
+          "line": 321,
+          "char": 11
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": [
+        "Argument of type '{ key: true; }' is not assignable to parameter of type 'HTTPLinkOptions<Elysia<\"\", { decorator: {}; store: { eden: { key: true; transformer: typeof SuperJSON; }; }; derive: {}; resolve: {}; }, { error: {}; typebox: MergeTypeModule<TModule<{}, {}>, TModule<{}, {}>>; }, { ...; }, {}, { ...; }, { ...; }>, true>'.Property 'transformer' is missing in type '{ key: true; }' but required in type 'Omit<EdenResolverConfig<Elysia<\"\", { decorator: {}; store: { eden: { key: true; transformer: typeof SuperJSON; }; }; derive: {}; resolve: {}; }, { error: {}; typebox: MergeTypeModule<TModule<{}, {}>, TModule<{}, {}>>; }, { ...; }, {}, { ...; }, { ...; }>, true>, \"headers\">'."
+      ],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 327,
+          "char": 9
+        },
+        "end": {
+          "line": 337,
+          "char": 11
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": ["Type 'boolean' is not assignable to type 'typeof SuperJSON'."],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 388,
+          "char": 11
+        },
+        "end": {
+          "line": 398,
+          "char": 13
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": [
+        "Type 'boolean' is not assignable to type 'typeof SuperJSON | { serialize: (object: any) => string; deserialize: (object: any) => any; }'."
+      ],
+      "completions": {}
+    },
+    {
+      "location": {
+        "start": {
+          "line": 450,
+          "char": 11
+        },
+        "end": {
+          "line": 460,
+          "char": 13
+        }
+      },
+      "args": [
+        {
+          "type": "() => void",
+          "relationships": {
+            "args": ["equality"],
+            "typeArgs": []
+          }
+        }
+      ],
+      "typeArgs": [],
+      "errors": [
+        "Type 'boolean' is not assignable to type 'typeof SuperJSON | { serialize: (object: any) => string; deserialize: (object: any) => any; }'."
+      ],
+      "completions": {}
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 import SuperJSON from 'superjson'
-import { describe, expect,test } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import { EdenClient } from '../../src/client'
 import { EdenFetchError } from '../../src/core/errors'
