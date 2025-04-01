@@ -11,7 +11,7 @@ import type { BatchMethod } from '../batch/shared'
 import type { InternalContext, InternalElysia } from '../elysia'
 import { httpBatchLink as _httpBatchLink } from '../links/http-batch-link'
 import type { DataTransformerOptions } from '../trpc/server/transformer'
-import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
+import type { MaybeArray, MaybePromise } from '../utils/types'
 import type { FetchEsque } from './fetch'
 import type { EdenRequestParams } from './request'
 import type {
@@ -115,7 +115,7 @@ export type EdenResolverConfig<
 /**
  * Base configuration available to all eden plugins.
  */
-export interface EdenPluginBaseConfig {
+export interface EdenPluginBaseConfig<TKey = undefined> {
   /**
    * A custom key to store the configuration within Elysia.js state.
    *
@@ -133,10 +133,10 @@ export interface EdenPluginBaseConfig {
    * @see https://www.typescriptlang.org/tsconfig/#declaration
    * @see https://www.typescriptlang.org/tsconfig/#declarationMap
    */
-  key?: PropertyKey | Nullish | true
+  key?: TKey
 }
 
-export interface TransformerPluginConfig extends EdenPluginBaseConfig {
+export interface TransformerPluginConfig<TKey = undefined> extends EdenPluginBaseConfig<TKey> {
   /**
    * Use the same transformer for all requests.
    */
@@ -162,7 +162,7 @@ export type BatchDeserializer = (
 /**
  * Server application batch plugin configuration.
  */
-export interface BatchPluginConfig extends EdenPluginBaseConfig {
+export interface BatchPluginConfig<TKey = undefined> extends EdenPluginBaseConfig<TKey> {
   /**
    * The endpoint for batch requests.
    */

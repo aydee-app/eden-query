@@ -80,7 +80,7 @@ export function createBatchResolvers(domain: InternalElysia, config: BatchPlugin
 
 /**
  */
-export function batchPlugin<T extends BatchPluginConfig>(config: T = {} as any) {
+export function batchPlugin<const T extends BatchPluginConfig<any>>(config: T = {} as any) {
   type TResolvedKey = T['key'] extends Falsy
     ? never
     : T['key'] extends true

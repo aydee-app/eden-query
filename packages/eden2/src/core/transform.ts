@@ -189,8 +189,8 @@ export type TransformerOptionsFromTransformerConfig<TConfig> = TConfig extends C
  * @template TKey A unique key to index the server application state to try to find transformer configuration.
  *   Possible values:
  *   - falsy: disable type checking, and it is completely optional.
- *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link Elysia.store.eden}.
- *   - PropertyKey: any valid property key will be used to index {@link Elysia.store}.
+ *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link InternalElysia.store.eden}.
+ *   - PropertyKey: any valid property key will be used to index {@link InternalElysia.store}.
  *
  *   Defaults to undefined, indicating to turn type-checking off.
  *

@@ -236,9 +236,7 @@ describe('works with live application', () => {
 
     type App = typeof _app
 
-    type Store = App['store']
-
-    type Result = EdenClientTransformerOptions<{ store: Store }, true>
+    type Result = EdenClientTransformerOptions<App, true>
 
     expectTypeOf<Result['transformer']>().toEqualTypeOf<typeof SuperJSON>()
   })

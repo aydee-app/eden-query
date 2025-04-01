@@ -7,7 +7,9 @@ import { resolveTransformers } from '../core/transform'
 import { set } from '../utils/set'
 import type { Falsy } from '../utils/types'
 
-export function transformPlugin<T extends TransformerPluginConfig>(config: T = {} as any) {
+export function transformPlugin<const T extends TransformerPluginConfig<any>>(
+  config: T = {} as any,
+) {
   type TResolvedKey = T['key'] extends Falsy
     ? never
     : T['key'] extends true
