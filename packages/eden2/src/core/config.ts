@@ -39,6 +39,8 @@ export type EdenResolverConfig<
   TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
 > = EdenClientTransformerOptions<TElysia, TKey> & {
+  key?: PropertyKey | Nullish | true
+
   /**
    * Global query parameters for requests.
    */

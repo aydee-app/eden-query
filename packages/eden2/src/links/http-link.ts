@@ -31,9 +31,7 @@ import type { OperationLink } from './internal/operation-link'
 export type HTTPLinkBaseOptions<
   TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
-> = Omit<EdenResolverConfig<TElysia, TKey>, 'headers'> & {
-  key?: PropertyKey | Nullish | true
-}
+> = Omit<EdenResolverConfig<TElysia, TKey>, 'headers'>
 
 /**
  * An extremely flexible resolver for HTTP Headers.
@@ -104,7 +102,10 @@ export async function resolveHttpOperationParams(options: HTTPLinkOptions<any>, 
   return resolvedParams
 }
 
-export async function handleHttpRequest(options: HTTPLinkOptions<any>, op: Operation) {
+export async function handleHttpRequest<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+>(options: HTTPLinkOptions<TElysia, TKey>, op: Operation) {
   const resolvedParams = await resolveHttpOperationParams(options, op)
   const result = await resolveEdenRequest(resolvedParams)
   return result
