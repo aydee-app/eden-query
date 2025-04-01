@@ -1,17 +1,9 @@
-/**
- * Regarding locations of type-safety implentation...
- *
- * Type-safety for transformers is implemented in {@link EdenResolverConfig} since transformers
- * are applied per request.
- *
- * Type-safety for batching is implemented in {@link _httpBatchLink} since batching is applied
- * via the specific link.
- */
 import type { BatchMethod } from '../batch/shared'
+import type { EDEN_STATE_KEY } from '../constants'
 import type { InternalContext, InternalElysia } from '../elysia'
 import { httpBatchLink as _httpBatchLink } from '../links/http-batch-link'
 import type { DataTransformerOptions } from '../trpc/server/transformer'
-import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
+import type { MaybeArray, MaybePromise } from '../utils/types'
 import type { FetchEsque } from './fetch'
 import type { EdenRequestParams } from './request'
 import type {
@@ -20,121 +12,160 @@ import type {
   EdenResponseTransformer,
   EdenResultTransformer,
 } from './resolve'
-import type { EdenClientTransformerOptions, TransformersOptions } from './transform'
+import type {
+  EdenClientAllowedTransformer,
+  TransformerOptionsFromTransformerConfig,
+  TransformersOptions,
+} from './transform'
 
 /**
- * Global/general settings that influence the behavior of the resolver.
+ * General, base configuration for eden interfaces that integrate with Elysia.js.
+ */
+export interface EdenConfig<TKey = undefined> {
+  /**
+   * Throughout the eden project, a "key" is provided as an opt-in mechanism to type-safety features.
+   *
+   * The key is used to access {@link InternalElysia.store} in order to introspect plugin configurations.
+   * Eden plugins may write to the Elysia.js application state, and the resulting configurations
+   * may be introspected by client-side plugins.
+   *
+   * @see https://elysiajs.com/essential/handler.html#state
+   *
+   * If a key is falsy, then it will be ignored and type-safety is **not** active.
+   * If a key is `true`, then the default key, {@link _EDEN_STATE_KEY}, will be used.
+   * If a key is a valid PropertyKey, then that key will be used.
+   *
+   * @default undefined Usually the key will be `undefined` and type-safety is **not** active.
+   */
+  key?: TKey
+}
+
+/**
+ * @template TStore Elysia.js server application state.
  *
- * @template TElysia The type definition of the Elysia.js server application.
- *
- * @template TKey A unique key to index the server application state to try to find a transformer configuration.
+ * @template TKey A unique key to index the server application state to try to find transformer configuration.
  *   Possible values:
  *   - falsy: disable type checking, and it is completely optional.
- *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link Elysia.store.eden}.
- *   - PropertyKey: any valid property key will be used to index {@link Elysia.store}.
+ *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link InternalElysia.store.eden}.
+ *   - PropertyKey: any valid property key will be used to index {@link InternalElysia.store}.
  *
  *   Defaults to undefined, indicating to turn type-checking off.
+ *
+ * Based on tRPC checking for transformer.
+ *
+ * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/internals/transformer.ts#L37
+ */
+export type EdenTransformerOptions<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+> = TKey extends false
+  ? EdenClientAllowedTransformer
+  : TKey extends keyof TElysia['store']
+    ? TransformerOptionsFromTransformerConfig<TElysia['store'][TKey]>
+    : TKey extends true
+      ? TransformerOptionsFromTransformerConfig<TElysia['store'][typeof EDEN_STATE_KEY]>
+      : EdenClientAllowedTransformer
+
+/**
+ * Configure the behavior of the resolver.
  */
 export type EdenResolverConfig<
   TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
-> = EdenClientTransformerOptions<TElysia, TKey> & {
-  /**
-   * Global query parameters for requests.
-   */
-  query?: Record<string, any>
+> = EdenConfig<TKey> &
+  EdenTransformerOptions<TElysia, TKey> & {
+    /**
+     * Global query parameters for requests.
+     */
+    query?: Record<string, any>
 
-  /**
-   * Global fetch options that are merged with request-specific options before being
-   * passed to {@link EdenResolverConfig.fetcher}.
-   */
-  fetch?: Omit<RequestInit, 'headers' | 'method'>
+    /**
+     * Global fetch options.
+     */
+    fetch?: Omit<RequestInit, keyof EdenResolverConfig>
 
-  /**
-   * Ponyfill for fetch.
-   *
-   * Feature is available in both tRPC and eden (official).
-   *
-   * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L29
-   * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/index.ts#L164
-   */
-  fetcher?: FetchEsque
+    /**
+     * Ponyfill for fetch.
+     *
+     * Feature is available in both tRPC and eden (official).
+     *
+     * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L29
+     * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/index.ts#L164
+     */
+    fetcher?: FetchEsque
 
-  headers?: EdenRequestHeaders
+    /**
+     * Global headers.
+     */
+    headers?: EdenRequestHeaders<TElysia, TKey>
 
-  onRequest?: MaybeArray<EdenRequestTransformer>
+    /**
+     * Function(s) that can transform the request before it gets resolved.
+     *
+     * @default Eden provides a default that will apply transformers serializers with JSON or FormData bodies.
+     */
+    onRequest?: MaybeArray<EdenRequestTransformer<TElysia, TKey>>
 
-  onResponse?: MaybeArray<EdenResponseTransformer>
+    /**
+     * Function(s) that can transform the response before processing the result.
+     * Each function will be called in sequence, stopping at the first one that returns data or an error.
+     * The returned data or error will be used as the result.
+     *
+     * @default Eden provides a default that will attempt to parse the data from the {@link Response}.
+     */
+    onResponse?: MaybeArray<EdenResponseTransformer<TElysia, TKey>>
 
-  onResult?: MaybeArray<EdenResultTransformer>
+    /**
+     * Function(s) that can transform the result before the resolver resolves.
+     *
+     * @default Eden provides a default that will apply transformer deserializations to the response data.
+     */
+    onResult?: MaybeArray<EdenResultTransformer<TElysia, TKey>>
 
-  /**
-   * Whether to dynamically resolve the domain.
-   *
-   * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/index.ts#L477
-   */
-  keepDomain?: boolean
+    /**
+     * Whether to dynamically resolve the domain.
+     *
+     * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/index.ts#L477
+     */
+    keepDomain?: boolean
 
-  /**
-   * Either an origin or the Elysia.js application.
-   */
-  domain?: TElysia | string
+    /**
+     * Either an origin or the Elysia.js application.
+     */
+    domain?: TElysia | string
 
-  /**
-   */
-  transformers?: TransformersOptions
+    /**
+     * If multiple transformers should be supported, they should be provided as either an array or object mapping.
+     */
+    transformers?: TransformersOptions
 
-  /**
-   * Passed as second argument to new URL if applicable.
-   *
-   * Basically {@link EdenRequestInit.domain} but always a string representing the "origin" of the request.
-   *
-   * @example
-   *
-   * ```ts
-   * const base = 'http://e.ly'
-   * const path = '/posts/123'
-   *
-   * const url = new URL(path, base)
-   * ```
-   */
-  base?: string
+    /**
+     * Passed as second argument to new URL if applicable.
+     *
+     * Basically {@link EdenRequestInit.domain} but always a string representing the "origin" of the request.
+     *
+     * @example
+     *
+     * ```ts
+     * const base = 'http://e.ly'
+     * const path = '/posts/123'
+     *
+     * const url = new URL(path, base)
+     * ```
+     */
+    base?: string
 
-  /**
-   * Default HTTP method for the request.
-   *
-   * Based on `methodOverride` from tRPC.
-   *
-   * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L35
-   */
-  method?: string
-}
+    /**
+     * Default HTTP method for the request.
+     *
+     * Based on `methodOverride` from tRPC.
+     *
+     * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L35
+     */
+    method?: string
+  }
 
-/**
- * Base configuration available to all eden plugins.
- */
-export interface EdenPluginBaseConfig {
-  /**
-   * A custom key to store the configuration within Elysia.js state.
-   *
-   * @see https://elysiajs.com/essential/handler.html#state
-   *
-   * @default "eden"
-   *
-   * WARNING!!
-   *
-   * Be careful if using Symbols in conjunction with declaration or declarationMap on.
-   * The type will be added to the server application directly, i.e. {@link AnyElysia.store}
-   * and the resulting object may not be serializable.
-   *
-   * TS error code: 4118
-   * @see https://www.typescriptlang.org/tsconfig/#declaration
-   * @see https://www.typescriptlang.org/tsconfig/#declarationMap
-   */
-  key?: PropertyKey | Nullish | true
-}
-
-export interface TransformerPluginConfig extends EdenPluginBaseConfig {
+export interface TransformerPluginConfig<TKey = undefined> extends EdenConfig<TKey> {
   /**
    * Use the same transformer for all requests.
    */
@@ -160,7 +191,7 @@ export type BatchDeserializer = (
 /**
  * Server application batch plugin configuration.
  */
-export interface BatchPluginConfig extends EdenPluginBaseConfig {
+export interface BatchPluginConfig<TKey = undefined> extends EdenConfig<TKey> {
   /**
    * The endpoint for batch requests.
    */

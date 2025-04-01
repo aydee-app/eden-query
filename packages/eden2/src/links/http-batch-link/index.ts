@@ -4,7 +4,7 @@ import type { BatchMethod } from '../../batch/shared'
 import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../../constants'
 import type { EdenFetchError } from '../../core/errors'
 import type { EdenRequestParams } from '../../core/request'
-import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
+import { defaultOnResult, type EdenResultTransformer,resolveEdenRequest } from '../../core/resolve'
 import type { EdenResult } from '../../core/response'
 import type { InternalElysia } from '../../elysia'
 import { Observable } from '../../observable'
@@ -87,7 +87,7 @@ export function httpBatchLink<
 
   const endpoint = options.endpoint ?? BATCH_ENDPOINT
 
-  const edenParamsResolver = resolveHttpOperationParams.bind(null, options)
+  const edenParamsResolver = (op: Operation) => resolveHttpOperationParams(options, op)
 
   const batchLoader: BatchLoader<Operation, EdenResult<any, EdenFetchError>> = {
     async validate(batchOps) {
@@ -123,9 +123,9 @@ export function httpBatchLink<
 
       const resolvedBatchOps = await Promise.all(batchOps.map(edenParamsResolver))
 
-      const resolvedBatchParams = await batchSerializer[method](resolvedBatchOps)
+      const resolvedBatchParams = await batchSerializer[method](resolvedBatchOps as any)
 
-      const resolvedParams: EdenRequestParams = {
+      const resolvedParams = {
         ...options,
         // Batch requests either use FormData (POST) or URL query (GET), no transformer needed.
         transformer: undefined,
@@ -139,7 +139,7 @@ export function httpBatchLink<
         },
         body: resolvedBatchParams.body,
         headers: resolvedBatchParams.headers,
-      }
+      } as EdenRequestParams
 
       const result = await resolveEdenRequest(resolvedParams)
 
@@ -154,7 +154,10 @@ export function httpBatchLink<
 
         if (op == null) return batchedResult
 
-        const onResult = [...toArray(op?.onResult), defaultOnResult]
+        const onResult = [
+          ...toArray(op?.onResult),
+          defaultOnResult as EdenResultTransformer<TElysia, TConfig['key']>,
+        ]
 
         for (const handler of onResult) {
           const newResult = await handler(result, op)

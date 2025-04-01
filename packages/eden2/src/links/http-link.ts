@@ -75,7 +75,10 @@ export type HTTPLinkOptions<
  * The parameters will be resolved further by {@link resolveFetchOptions}, but
  * those will only be with respect to the specific request.
  */
-export async function resolveHttpOperationParams(options: HTTPLinkOptions<any>, op: Operation) {
+export async function resolveHttpOperationParams<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+>(options: HTTPLinkOptions<TElysia, TKey>, op: Operation) {
   const { path, params } = op
 
   const fetch = { ...options.fetch, ...params?.fetch }
@@ -99,12 +102,15 @@ export async function resolveHttpOperationParams(options: HTTPLinkOptions<any>, 
     onResponse,
     onResult,
     headers,
-  } satisfies EdenRequestParams
+  } as EdenRequestParams<TElysia, TKey>
 
   return resolvedParams
 }
 
-export async function handleHttpRequest(options: HTTPLinkOptions<any>, op: Operation) {
+export async function handleHttpRequest<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+>(options: HTTPLinkOptions<TElysia, TKey>, op: Operation) {
   const resolvedParams = await resolveHttpOperationParams(options, op)
   const result = await resolveEdenRequest(resolvedParams)
   return result
