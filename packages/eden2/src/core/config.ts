@@ -19,7 +19,7 @@ import type {
 } from './transform'
 
 /**
- * General, base configuration for eden interfaces that integrate with Elysia.js.
+ * Shared configuration for eden entities that interface with Elysia.js.
  */
 export interface EdenConfig<TKey = undefined> {
   /**
@@ -41,19 +41,14 @@ export interface EdenConfig<TKey = undefined> {
 }
 
 /**
- * @template TStore Elysia.js server application state.
- *
- * @template TKey A unique key to index the server application state to try to find transformer configuration.
- *   Possible values:
- *   - falsy: disable type checking, and it is completely optional.
- *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link InternalElysia.store.eden}.
- *   - PropertyKey: any valid property key will be used to index {@link InternalElysia.store}.
- *
- *   Defaults to undefined, indicating to turn type-checking off.
- *
  * Based on tRPC checking for transformer.
  *
  * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/internals/transformer.ts#L37
+ *
+ * Possible outputs:
+ * - Allowed transformer: A generic {@link DataTransformerOptions} is allowed and optional.
+ * - Required transformer: A specific type of transformer is required to be provided.
+ * - Prohibited transformer: No transformer is allowed.
  */
 export type EdenTransformerOptions<
   TElysia extends InternalElysia = InternalElysia,
@@ -67,7 +62,7 @@ export type EdenTransformerOptions<
       : EdenClientAllowedTransformer
 
 /**
- * Configure the behavior of the resolver.
+ * Configure the global behavior of the request resolver.
  */
 export type EdenResolverConfig<
   TElysia extends InternalElysia = InternalElysia,
@@ -95,7 +90,7 @@ export type EdenResolverConfig<
     fetcher?: FetchEsque
 
     /**
-     * Global headers.
+     * Global headers, provide a function to compute headers based on the request.
      */
     headers?: EdenRequestHeaders<TElysia, TKey>
 
@@ -136,6 +131,11 @@ export type EdenResolverConfig<
 
     /**
      * If multiple transformers should be supported, they should be provided as either an array or object mapping.
+     *
+     * @todo
+     * Add this property to {@link EdenClientAllowedTransformer} and {@link TransformerOptionsFromTransformerConfig}.
+     * If type-checking is disabled, then it will be optional and the of the generic type {@link TransformersOptions}.
+     * If type-checking is enabled, it will either be prohibited or required to be the same as the value found on the server.
      */
     transformers?: TransformersOptions
 
@@ -165,7 +165,23 @@ export type EdenResolverConfig<
     method?: string
   }
 
-export interface TransformerPluginConfig<TKey = undefined> extends EdenConfig<TKey> {
+/**
+ * On the client, multiple requests are grouped and serialized into a single batch of params.
+ * A deserializer function will run on the server to parse out the individual requests.
+ *
+ * The client-side serializer function can be customized through the HTTP-batch-link (TODO).
+ */
+export type BatchDeserializer = <TElysia extends InternalElysia = InternalElysia, TKey = any>(
+  context: InternalContext,
+  config: BatchPluginConfig<TElysia, TKey>,
+) => MaybePromise<Array<EdenRequestParams<TElysia, TKey>>>
+
+/**
+ */
+export interface TransformerPluginConfig<
+  _TElysia extends InternalElysia = InternalElysia,
+  TKey = any,
+> extends EdenConfig<TKey> {
   /**
    * Use the same transformer for all requests.
    */
@@ -178,20 +194,9 @@ export interface TransformerPluginConfig<TKey = undefined> extends EdenConfig<TK
 }
 
 /**
- * On the client, multiple requests are grouped and serialized into a single batch of params.
- * A deserializer function will run on the server to parse out the individual requests.
- *
- * The client-side serializer function can be customized through the HTTP-batch-link (TODO).
  */
-export type BatchDeserializer = (
-  context: InternalContext,
-  config: BatchPluginConfig,
-) => MaybePromise<Array<EdenRequestParams>>
-
-/**
- * Server application batch plugin configuration.
- */
-export interface BatchPluginConfig<TKey = undefined> extends EdenConfig<TKey> {
+export interface BatchPluginConfig<_TElysia extends InternalElysia = InternalElysia, TKey = any>
+  extends EdenConfig<TKey> {
   /**
    * The endpoint for batch requests.
    */
@@ -211,24 +216,4 @@ export interface BatchPluginConfig<TKey = undefined> extends EdenConfig<TKey> {
    * On the server, each individual request needs to be parsed from the bundle.
    */
   deserializer?: BatchDeserializer
-}
-
-/**
- * This configuration will be stored within {@link AnyElysia.store} and introspected by the client.
- *
- * Roughly correlates with tRPC RootConfig.
- *
- * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/server/src/unstable-core-do-not-import/rootConfig.ts#L32
- */
-export interface EdenPluginConfig {
-  /**
-   * Options for transforming JSON inputs and outputs.
-   */
-  transformer?: TransformerPluginConfig
-
-  /**
-   * Batching can be supported by using the batch plugin.
-   * The batch plugin will populate this property; batching is assumed to be enabled if it is defined.
-   */
-  batch?: BatchPluginConfig
 }

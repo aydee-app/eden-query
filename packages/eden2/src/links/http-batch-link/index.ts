@@ -4,7 +4,7 @@ import type { BatchMethod } from '../../batch/shared'
 import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../../constants'
 import type { EdenFetchError } from '../../core/errors'
 import type { EdenRequestParams } from '../../core/request'
-import { defaultOnResult, type EdenResultTransformer,resolveEdenRequest } from '../../core/resolve'
+import { defaultOnResult, type EdenResultTransformer, resolveEdenRequest } from '../../core/resolve'
 import type { EdenResult } from '../../core/response'
 import type { InternalElysia } from '../../elysia'
 import { Observable } from '../../observable'
@@ -55,7 +55,7 @@ export type HTTPBatchLinkOptions<
   method?: BatchMethod
 }
 
-const batchSerializer = {
+const batchSerializers = {
   GET: serializeBatchGetParams,
   POST: serializeBatchPostParams,
 }
@@ -123,7 +123,9 @@ export function httpBatchLink<
 
       const resolvedBatchOps = await Promise.all(batchOps.map(edenParamsResolver))
 
-      const resolvedBatchParams = await batchSerializer[method](resolvedBatchOps as any)
+      const serializer = batchSerializers[method]
+
+      const resolvedBatchParams = await serializer(resolvedBatchOps)
 
       const resolvedParams = {
         ...options,

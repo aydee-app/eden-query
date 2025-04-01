@@ -1,9 +1,13 @@
-import type { BatchDeserializer } from '../../core/config'
+import type { BatchPluginConfig } from '../../core/config'
 import type { EdenRequestParams } from '../../core/request'
+import type { InternalContext, InternalElysia } from '../../elysia'
 import { set } from '../../utils/set'
 import { BODY_KEYS, BODY_TYPES, IGNORED_HEADERS } from '../shared'
 
-export const deserializeBatchPostParams: BatchDeserializer = async (context, _config) => {
+export async function deserializeBatchPostParams<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = any,
+>(context: InternalContext, _config: BatchPluginConfig<TElysia, TKey>) {
   const request = context.request
 
   const result: Array<EdenRequestParams & { body_type?: string }> = []
@@ -132,5 +136,5 @@ export const deserializeBatchPostParams: BatchDeserializer = async (context, _co
     }
   }
 
-  return definedResults
+  return definedResults as Array<EdenRequestParams<TElysia, TKey> & { body_type?: string }>
 }
