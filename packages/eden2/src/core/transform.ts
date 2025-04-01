@@ -1,4 +1,5 @@
 import type { EDEN_STATE_KEY } from '../constants'
+import type { InternalElysia } from '../elysia'
 import type {
   CombinedDataTransformer,
   DataTransformer,
@@ -198,12 +199,12 @@ export type TransformerOptionsFromTransformerConfig<TConfig> = TConfig extends C
  * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/internals/transformer.ts#L37
  */
 export type EdenClientTransformerOptions<
-  TStore extends Record<string, any> = {},
+  TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
 > = TKey extends Falsy
   ? EdenClientAllowedTransformer
-  : TKey extends keyof TStore
-    ? TransformerOptionsFromTransformerConfig<TStore[TKey]>
+  : TKey extends keyof TElysia['store']
+    ? TransformerOptionsFromTransformerConfig<TElysia['store'][TKey]>
     : TKey extends true
-      ? TransformerOptionsFromTransformerConfig<TStore[typeof EDEN_STATE_KEY]>
+      ? TransformerOptionsFromTransformerConfig<TElysia['store'][typeof EDEN_STATE_KEY]>
       : EdenClientAllowedTransformer

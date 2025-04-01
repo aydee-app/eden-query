@@ -38,7 +38,7 @@ import type { EdenClientTransformerOptions, TransformersOptions } from './transf
 export type EdenResolverConfig<
   TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
-> = EdenClientTransformerOptions<TElysia['store'], TKey> & {
+> = EdenClientTransformerOptions<TElysia, TKey> & {
   /**
    * Global query parameters for requests.
    */
