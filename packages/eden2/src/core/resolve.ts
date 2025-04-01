@@ -6,7 +6,7 @@ import { toArray } from '../utils/to-array'
 import type { MaybePromise, Nullish } from '../utils/types'
 import { EdenFetchError } from './errors'
 import { getFetch } from './fetch'
-import { type HeadersEsque,processHeaders } from './headers'
+import { type HeadersEsque, processHeaders } from './headers'
 import type { EdenRequestParams } from './request'
 import { type EdenResult, getResponseData } from './response'
 import { matchTransformer, resolveTransformers } from './transform'
@@ -17,22 +17,31 @@ import { matchTransformer, resolveTransformers } from './transform'
  * The callback can return header-esque objects to merge with the params, or mutate the params directly.
  * An array of the previously mentioned types can be provided, and each will be handled accordingly.
  */
-export type EdenRequestHeaders = HeadersEsque<[EdenRequestParams]>
+export type EdenRequestHeaders<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+> = HeadersEsque<[EdenRequestParams<TElysia, TKey>]>
 
-export type EdenRequestTransformer = (
+export type EdenRequestTransformer<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+> = (
   path: string,
   options: RequestInit,
-  params: EdenRequestParams,
+  params: EdenRequestParams<TElysia, TKey>,
 ) => MaybePromise<RequestInit | void>
 
-export type EdenResponseTransformer = (
-  response: Response,
-  params: EdenRequestParams,
-) => MaybePromise<unknown>
+export type EdenResponseTransformer<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+> = (response: Response, params: EdenRequestParams<TElysia, TKey>) => MaybePromise<unknown>
 
-export type EdenResultTransformer = (
+export type EdenResultTransformer<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+> = (
   result: EdenResult<any, EdenFetchError>,
-  params: EdenRequestParams,
+  params: EdenRequestParams<TElysia, TKey>,
 ) => MaybePromise<EdenResult<any, EdenFetchError> | Nullish>
 
 /**
