@@ -14,7 +14,7 @@ import { transformPlugin } from '../../src/plugins/transform'
 import type { DataTransformerOptions } from '../../src/trpc/server/transformer'
 
 describe('transformPlugin', () => {
-  describe.only('types', () => {
+  describe('types', () => {
     const devalue = {
       serialize: (object) => uneval(object),
       deserialize: (object) => eval(`(${object})`),
