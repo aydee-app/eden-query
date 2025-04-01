@@ -1,7 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import type { EdenRequestParams } from '../../src/core/request'
-import type { InternalElysia } from '../../src/elysia'
 import { createChain } from '../../src/links/internal/create-chain'
 import type { Operation } from '../../src/links/internal/operation'
 import { splitLink } from '../../src/links/split-link'
@@ -11,7 +9,7 @@ describe('splitLink', () => {
   test('calls true link', async () => {
     const spy = vi.fn()
 
-    const op: Operation<EdenRequestParams<InternalElysia>> = {
+    const op: Operation = {
       id: 0,
       type: 'query',
       path: '',
@@ -61,7 +59,7 @@ describe('splitLink', () => {
   test('calls false link', async () => {
     const spy = vi.fn()
 
-    const op: Operation<EdenRequestParams<InternalElysia>> = {
+    const op: Operation = {
       id: 0,
       type: 'query',
       path: '',

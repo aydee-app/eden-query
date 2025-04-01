@@ -6,23 +6,23 @@ import { inputWithTrackedEventId } from './internal/input-with-tracked-event-id'
 import type { Operation } from './internal/operation'
 import type { OperationLink } from './internal/operation-link'
 
-interface RetryLinkOptions<T extends InternalElysia> {
+interface RetryLinkOptions<TElysia extends InternalElysia = InternalElysia, TKey = undefined> {
   /**
    * The retry function
    */
-  retry: (opts: RetryFnOptions<T>) => boolean
+  retry: (opts: RetryFnOptions<TElysia, TKey>) => boolean
 }
 
-interface RetryFnOptions<T extends InternalElysia> {
+interface RetryFnOptions<TElysia extends InternalElysia = InternalElysia, TKey = undefined> {
   /**
    * The operation that failed
    */
-  op: Operation
+  op: Operation<TElysia, TKey>
 
   /**
    * The error that occurred
    */
-  error: EdenClientError<T>
+  error: EdenClientError<TElysia>
 
   /**
    * The number of attempts that have been made (including the first call)
@@ -33,11 +33,11 @@ interface RetryFnOptions<T extends InternalElysia> {
 /**
  * @see https://trpc.io/docs/v11/client/links/retryLink
  */
-export function retryLink<T extends InternalElysia>(options: RetryLinkOptions<T>): EdenLink<T> {
-  // Initialized config.
-  const link: EdenLink<T> = () => {
-    // Initialized in app.
-    const operationLink: OperationLink<T> = (callOptions) => {
+export function retryLink<TElysia extends InternalElysia = InternalElysia, TKey = undefined>(
+  options: RetryLinkOptions<TElysia, TKey>,
+): EdenLink<TElysia, TKey> {
+  const link = (() => {
+    const operationLink = ((callOptions) => {
       // Initialized for request.
       return new Observable((observer) => {
         let next$: Unsubscribable
@@ -97,10 +97,10 @@ export function retryLink<T extends InternalElysia>(options: RetryLinkOptions<T>
           next$.unsubscribe()
         }
       })
-    }
+    }) satisfies OperationLink<TElysia, TKey>
 
     return operationLink
-  }
+  }) satisfies EdenLink<TElysia, TKey>
 
   return link
 }

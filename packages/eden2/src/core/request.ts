@@ -34,6 +34,6 @@ export interface EdenRequestInit {
  * than the global resolver configuration options.
  */
 export type EdenRequestParams<
-  T extends InternalElysia = InternalElysia,
+  TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
-> = EdenResolverConfig<T, TKey> & EdenRequestInit
+> = EdenResolverConfig<TElysia, TKey> & EdenRequestInit

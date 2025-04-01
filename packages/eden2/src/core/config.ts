@@ -39,7 +39,7 @@ export type EdenResolverConfig<
   TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
 > = EdenClientTransformerOptions<TElysia, TKey> & {
-  key?: PropertyKey | Nullish | true
+  key?: TKey
 
   /**
    * Global query parameters for requests.
@@ -62,13 +62,13 @@ export type EdenResolverConfig<
    */
   fetcher?: FetchEsque
 
-  headers?: EdenRequestHeaders
+  headers?: EdenRequestHeaders<TElysia, TKey>
 
-  onRequest?: MaybeArray<EdenRequestTransformer>
+  onRequest?: MaybeArray<EdenRequestTransformer<TElysia, TKey>>
 
-  onResponse?: MaybeArray<EdenResponseTransformer>
+  onResponse?: MaybeArray<EdenResponseTransformer<TElysia, TKey>>
 
-  onResult?: MaybeArray<EdenResultTransformer>
+  onResult?: MaybeArray<EdenResultTransformer<TElysia, TKey>>
 
   /**
    * Whether to dynamically resolve the domain.

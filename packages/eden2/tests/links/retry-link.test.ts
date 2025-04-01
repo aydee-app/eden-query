@@ -1,7 +1,5 @@
-import type { AnyElysia } from 'elysia'
 import { describe, expect, test, vi } from 'vitest'
 
-import type { EdenRequestParams } from '../../src/core/request'
 import { createChain } from '../../src/links/internal/create-chain'
 import type { Operation } from '../../src/links/internal/operation'
 import type { OperationLinkResult } from '../../src/links/internal/operation-link'
@@ -10,7 +8,7 @@ import { Observable, promisifyObservable } from '../../src/observable'
 
 describe('retryLink', () => {
   test('throws error if unable to resolve after retrying', async () => {
-    const op: Operation<EdenRequestParams<AnyElysia>> = {
+    const op: Operation = {
       id: 0,
       type: 'query',
       path: '',
@@ -41,7 +39,7 @@ describe('retryLink', () => {
   })
 
   test('invokes retry function the correct number of times', async () => {
-    const op: Operation<EdenRequestParams<AnyElysia>> = {
+    const op: Operation = {
       id: 0,
       type: 'query',
       path: '',
@@ -79,7 +77,7 @@ describe('retryLink', () => {
   })
 
   test('resolves correctly', async () => {
-    const op: Operation<EdenRequestParams<AnyElysia>> = {
+    const op: Operation = {
       id: 0,
       type: 'query',
       path: '',
@@ -127,7 +125,7 @@ describe('retryLink', () => {
   })
 
   test('resolves with event ID', async () => {
-    const op: Operation<EdenRequestParams<AnyElysia>> = {
+    const op: Operation = {
       id: 0,
       type: 'query',
       path: '',

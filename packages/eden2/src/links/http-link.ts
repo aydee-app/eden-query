@@ -64,7 +64,9 @@ export type HTTPLinkOptions<
    *
    * @see http://trpc.io/docs/client/headers
    */
-  headers?: MaybeArray<CallbackOrValue<MaybePromise<HTTPHeaders | Nullish>, [Operation]>>
+  headers?: MaybeArray<
+    CallbackOrValue<MaybePromise<HTTPHeaders | Nullish>, [Operation<TElysia, TKey>]>
+  >
 }
 
 /**
@@ -73,7 +75,10 @@ export type HTTPLinkOptions<
  * The parameters will be resolved further by {@link resolveFetchOptions}, but
  * those will only be with respect to the specific request.
  */
-export async function resolveHttpOperationParams(options: HTTPLinkOptions<any>, op: Operation) {
+export async function resolveHttpOperationParams<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+>(options: HTTPLinkOptions<TElysia, TKey>, op: Operation<TElysia, TKey>) {
   const { path, params } = op
 
   const fetch = { ...options.fetch, ...params?.fetch }
@@ -97,7 +102,7 @@ export async function resolveHttpOperationParams(options: HTTPLinkOptions<any>, 
     onResponse,
     onResult,
     headers,
-  } satisfies EdenRequestParams
+  } as EdenRequestParams<TElysia, TKey>
 
   return resolvedParams
 }
@@ -105,7 +110,7 @@ export async function resolveHttpOperationParams(options: HTTPLinkOptions<any>, 
 export async function handleHttpRequest<
   TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
->(options: HTTPLinkOptions<TElysia, TKey>, op: Operation) {
+>(options: HTTPLinkOptions<TElysia, TKey>, op: Operation<TElysia, TKey>) {
   const resolvedParams = await resolveHttpOperationParams(options, op)
   const result = await resolveEdenRequest(resolvedParams)
   return result
@@ -142,7 +147,7 @@ export function httpLink<
             observer.error(err)
           })
       })
-    }) satisfies OperationLink<TElysia>
+    }) satisfies OperationLink<TElysia, TConfig['key']>
 
     return operationLink
   }) satisfies EdenLink<TElysia>

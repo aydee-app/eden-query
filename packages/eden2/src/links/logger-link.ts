@@ -17,31 +17,36 @@ type ConsoleEsque = {
 /**
  * @se https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L21
  */
-type EnableFnOptions<T extends InternalElysia> =
+type EnableFnOptions<TElysia extends InternalElysia = InternalElysia, TKey = undefined> =
   | {
       direction: 'down'
-      result: OperationLinkResult<unknown, EdenClientError<T>> | EdenClientError<T>
+      result: OperationLinkResult<unknown, EdenClientError<TElysia>> | EdenClientError<TElysia>
     }
-  | (Operation & {
+  | (Operation<TElysia, TKey> & {
       direction: 'up'
     })
 
 /**
  * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L31
  */
-type EnabledFn<T extends InternalElysia> = (opts: EnableFnOptions<T>) => boolean
+type EnabledFn<TElysia extends InternalElysia = InternalElysia, TKey = undefined> = (
+  opts: EnableFnOptions<TElysia, TKey>,
+) => boolean
 
 /**
  * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L35
  */
-type LoggerLinkFnOptions<T extends InternalElysia> = Operation &
+type LoggerLinkFnOptions<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+> = Operation<TElysia, TKey> &
   (
     | {
         /**
          * Request result
          */
         direction: 'down'
-        result: OperationLinkResult<unknown, EdenClientError<T>> | EdenClientError<T>
+        result: OperationLinkResult<unknown, EdenClientError<TElysia>> | EdenClientError<TElysia>
         elapsedMs: number
       }
     | {
@@ -52,17 +57,22 @@ type LoggerLinkFnOptions<T extends InternalElysia> = Operation &
       }
   )
 
-type LoggerLinkFn<T extends InternalElysia> = (opts: LoggerLinkFnOptions<T>) => void
+type LoggerLinkFn<TElysia extends InternalElysia = InternalElysia, TKey = undefined> = (
+  opts: LoggerLinkFnOptions<TElysia, TKey>,
+) => void
 
 type ColorMode = 'ansi' | 'css' | 'none'
 
 /**
  * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L61
  */
-export interface LoggerLinkOptions<T extends InternalElysia> {
-  logger?: LoggerLinkFn<T>
+export interface LoggerLinkOptions<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+> {
+  logger?: LoggerLinkFn<TElysia, TKey>
 
-  enabled?: EnabledFn<T>
+  enabled?: EnabledFn<TElysia, TKey>
 
   /**
    * Used in the built-in defaultLogger
@@ -109,12 +119,17 @@ const palettes = {
 /**
  * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L112-L115
  */
-export type ExtendedLoggerFnOptions = LoggerLinkFnOptions<any> & {
+export type ExtendedLoggerFnOptions<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+> = LoggerLinkFnOptions<TElysia, TKey> & {
   colorMode: ColorMode
   withContext?: boolean
 }
 
-function constructPartsAndArgs(opts: ExtendedLoggerFnOptions) {
+function constructPartsAndArgs<TElysia extends InternalElysia = InternalElysia, TKey = undefined>(
+  opts: ExtendedLoggerFnOptions<TElysia, TKey>,
+) {
   const { direction, type, withContext, id, params } = opts
 
   const parts: string[] = []
@@ -195,7 +210,9 @@ export type LoggerOptions = {
 /**
  * Maybe this should be moved to it's own package?
  */
-function defaultLogger<T extends InternalElysia>(options: LoggerOptions): LoggerLinkFn<T> {
+function defaultLogger<TElysia extends InternalElysia = InternalElysia, TKey = undefined>(
+  options: LoggerOptions,
+): LoggerLinkFn<TElysia, TKey> {
   const { c = console, colorMode = 'css', withContext } = options
 
   return (props) => {
@@ -217,7 +234,9 @@ function defaultLogger<T extends InternalElysia>(options: LoggerOptions): Logger
 /**
  * @see https://trpc.io/docs/v11/client/links/loggerLink
  */
-export function loggerLink<T extends InternalElysia>(options?: LoggerLinkOptions<T>): EdenLink<T> {
+export function loggerLink<TElysia extends InternalElysia = InternalElysia, TKey = undefined>(
+  options?: LoggerLinkOptions<TElysia, TKey>,
+): EdenLink<TElysia, TKey> {
   const enabled = options?.enabled ?? constNoop(true)
 
   const colorMode = options?.colorMode ?? (typeof window === 'undefined' ? 'ansi' : 'css')
@@ -227,9 +246,9 @@ export function loggerLink<T extends InternalElysia>(options?: LoggerLinkOptions
   const logger = options?.logger ?? defaultLogger({ c: options?.console, colorMode, withContext })
 
   const logResult = (
-    op: Operation,
+    op: Operation<TElysia, TKey>,
     requestStartTime: number,
-    result: OperationLinkResult<unknown, EdenClientError<T>> | EdenClientError<T>,
+    result: OperationLinkResult<unknown, EdenClientError<TElysia>> | EdenClientError<TElysia>,
   ) => {
     const elapsedMs = Date.now() - requestStartTime
 
@@ -238,8 +257,8 @@ export function loggerLink<T extends InternalElysia>(options?: LoggerLinkOptions
     }
   }
 
-  const link: EdenLink<T> = (_runtime) => {
-    const operationLink: OperationLink<T> = ({ op, next }) => {
+  const link = ((_runtime) => {
+    const operationLink = (({ op, next }) => {
       return new Observable((observer) => {
         if (enabled({ ...op, direction: 'up' })) {
           logger({ ...op, direction: 'up' })
@@ -260,10 +279,10 @@ export function loggerLink<T extends InternalElysia>(options?: LoggerLinkOptions
           )
           .subscribe(observer)
       })
-    }
+    }) satisfies OperationLink<TElysia, TKey>
 
     return operationLink
-  }
+  }) satisfies EdenLink<TElysia, TKey>
 
   return link
 }

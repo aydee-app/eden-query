@@ -141,7 +141,10 @@ export const defaultOnResult = (async (result, params) => {
   }
 }) satisfies EdenResultTransformer
 
-export function resolveEdenFetchPath(params: EdenRequestParams) {
+export function resolveEdenFetchPath<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+>(params: EdenRequestParams<TElysia, TKey>) {
   if (!params.options?.params || !params.path) return params.path
 
   const paramEntries = Object.entries(params.options.params)
@@ -153,7 +156,10 @@ export function resolveEdenFetchPath(params: EdenRequestParams) {
   return path
 }
 
-export async function resolveFetchOptions(params: EdenRequestParams = {}) {
+export async function resolveFetchOptions<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+>(params: EdenRequestParams<TElysia, TKey> = {} as any) {
   const path = resolveEdenFetchPath(params) ?? ''
 
   const query = buildQueryString({ ...params.query, ...params.options?.query })
@@ -168,7 +174,10 @@ export async function resolveFetchOptions(params: EdenRequestParams = {}) {
     fetchInit.body = params.body as any
   }
 
-  const onRequest = [...toArray(params.onRequest), defaultOnRequest]
+  const onRequest = [
+    ...toArray(params.onRequest),
+    defaultOnRequest as EdenRequestTransformer<TElysia, TKey>,
+  ]
 
   for (const value of onRequest) {
     const temp = await value(path, fetchInit, params)
@@ -185,9 +194,15 @@ export async function resolveFetchOptions(params: EdenRequestParams = {}) {
     }
   }
 
-  const onResponse = [...toArray(params.onResponse), defaultOnResponse]
+  const onResponse = [
+    ...toArray(params.onResponse),
+    defaultOnResponse as EdenResponseTransformer<TElysia, TKey>,
+  ]
 
-  const onResult = [...toArray(params.onResult), defaultOnResult]
+  const onResult = [
+    ...toArray(params.onResult),
+    defaultOnResult as EdenResultTransformer<TElysia, TKey>,
+  ]
 
   return { path, query, fetchInit, onResponse, onResult }
 }
@@ -200,9 +215,10 @@ export async function resolveFetchOptions(params: EdenRequestParams = {}) {
  * - universalRequester {@see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/httpLink.ts#L90}
  * - transformResult {@see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/httpLink.ts#L112}
  */
-export async function resolveEdenRequest<T extends InternalElysia>(
-  params: EdenRequestParams<T> = {},
-) {
+export async function resolveEdenRequest<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+>(params: EdenRequestParams<TElysia, TKey> = {} as any) {
   const { path, query, fetchInit, onResult, onResponse } = await resolveFetchOptions(params)
 
   const domain = typeof params.domain === 'string' ? params.domain : ''

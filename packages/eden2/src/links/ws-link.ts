@@ -5,12 +5,17 @@ import type { DataTransformerOptions } from '../trpc/server/transformer'
 import type { WebSocketClient } from '../ws/client'
 import type { EdenLink } from './internal/eden-link'
 
-export type WebSocketLinkOptions<_T extends InternalElysia = InternalElysia> = {
+export type WebSocketLinkOptions<
+  _TElysia extends InternalElysia = InternalElysia,
+  _TKey = undefined,
+> = {
   client: WebSocketClient
   transformer?: DataTransformerOptions
 }
 
-export function wsLink<T extends InternalElysia>(options: WebSocketLinkOptions<T>): EdenLink<T> {
+export function wsLink<TElysia extends InternalElysia = InternalElysia, TKey = undefined>(
+  options: WebSocketLinkOptions<TElysia>,
+): EdenLink<TElysia, TKey> {
   const { client } = options
 
   const transformer = getTransformer(options.transformer)

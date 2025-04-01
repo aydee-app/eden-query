@@ -29,8 +29,11 @@ export interface EdenSubscriptionObserver<TValue, TError> {
 
 /**
  */
-export interface EdenCreateClientOptions<T extends InternalElysia> {
-  links: EdenLink<T>[]
+export interface EdenCreateClientOptions<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+> {
+  links: EdenLink<TElysia, TKey>[]
   transformer?: TypeError<'The transformer property has moved to httpLink/httpBatchLink/wsLink'>
 }
 
@@ -46,14 +49,14 @@ export interface EdenRequestOptions {
   signal?: AbortSignal
 }
 
-export class EdenClient<T extends InternalElysia> {
-  private readonly links: OperationLink<T>[]
+export class EdenClient<TElysia extends InternalElysia = InternalElysia, TKey = undefined> {
+  private readonly links: OperationLink<TElysia, TKey>[]
 
   public readonly runtime: EdenClientRuntime
 
   private requestId: number
 
-  constructor(opts: EdenCreateClientOptions<T>) {
+  constructor(opts: EdenCreateClientOptions<TElysia, TKey>) {
     this.requestId = 0
 
     this.runtime = {}
@@ -61,11 +64,9 @@ export class EdenClient<T extends InternalElysia> {
     this.links = opts.links.map((link) => link(this.runtime))
   }
 
-  private $request<TInput extends EdenRequestParams = any, TOutput = unknown>(
-    options: OperationOptions<TInput>,
-  ) {
-    const chain$ = createChain<InternalElysia, TInput, TOutput>({
-      links: this.links as OperationLink<any, any, any>[],
+  private $request(options: OperationOptions<TElysia, TKey>) {
+    const chain$ = createChain({
+      links: this.links,
       op: {
         ...options,
         context: options.context ?? {},
@@ -76,20 +77,20 @@ export class EdenClient<T extends InternalElysia> {
     return observable
   }
 
-  private async requestAsPromise<
-    TInput extends EdenRequestParams = EdenRequestParams,
-    TOutput = unknown,
-  >(options: OperationOptions<TInput>): Promise<TOutput> {
-    const req$ = this.$request<TInput, TOutput>(options)
+  private async requestAsPromise<TOutput = unknown>(
+    options: OperationOptions<TElysia, TKey>,
+  ): Promise<TOutput> {
+    const req$ = this.$request(options)
     const promise = await promisifyObservable(req$)
-    return promise.result as TOutput
+    return promise.result as any
   }
 
-  public query<
-    TInput extends EdenRequestParams = EdenRequestParams,
-    TOutput extends EdenResult = EdenResult,
-  >(path: string, params: TInput = {} as any, options?: EdenRequestOptions) {
-    const promise = this.requestAsPromise<TInput, TOutput>({
+  public query<TOutput extends EdenResult = EdenResult>(
+    path: string,
+    params: EdenRequestParams<TElysia, TKey> = {} as any,
+    options?: EdenRequestOptions,
+  ) {
+    const promise = this.requestAsPromise<TOutput>({
       type: 'query',
       path,
       params,
@@ -99,11 +100,12 @@ export class EdenClient<T extends InternalElysia> {
     return promise
   }
 
-  public mutation<
-    TInput extends EdenRequestParams = EdenRequestParams,
-    TOutput extends EdenResult = EdenResult,
-  >(path: string, params: TInput = {} as any, options?: EdenRequestOptions) {
-    const promise = this.requestAsPromise<TInput, TOutput>({
+  public mutation<TOutput extends EdenResult = EdenResult>(
+    path: string,
+    params: EdenRequestParams<TElysia, TKey> = {} as any,
+    options?: EdenRequestOptions,
+  ) {
+    const promise = this.requestAsPromise<TOutput>({
       type: 'mutation',
       path,
       params,
@@ -114,12 +116,12 @@ export class EdenClient<T extends InternalElysia> {
     return promise
   }
 
-  public subscription<TInput extends EdenRequestParams = EdenRequestParams, TOutput = unknown>(
+  public subscription(
     path: string,
-    params: TInput = {} as any,
+    params: EdenRequestParams<TElysia, TKey> = {} as any,
     options?: EdenClientSubscriptionOptions,
   ): Unsubscribable {
-    const observable$ = this.$request<TInput, TOutput>({
+    const observable$ = this.$request({
       type: 'subscription',
       path,
       params,

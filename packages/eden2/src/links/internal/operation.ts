@@ -1,4 +1,5 @@
 import type { EdenRequestParams } from '../../core/request'
+import type { InternalElysia } from '../../elysia'
 import type { JSONRPC2 } from '../../json-rpc'
 import type { Procedure } from '../../trpc/procedure'
 import type { Nullish } from '../../utils/types'
@@ -116,8 +117,8 @@ export interface OperationContext extends Record<string, unknown> {}
  *
  * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/types.ts#L26
  */
-export interface Operation<T extends EdenRequestParams = EdenRequestParams>
-  extends OperationOptions<T> {
+export interface Operation<TElysia extends InternalElysia = InternalElysia, TKey = undefined>
+  extends OperationOptions<TElysia, TKey> {
   id: number
   context: OperationContext
 }
@@ -128,10 +129,13 @@ export interface Operation<T extends EdenRequestParams = EdenRequestParams>
  *
  * @see https://github.com/trpc/trpc/blob/187dfb41c28ef88117fd289859f84e4b101e3e34/packages/client/src/links/types.ts#L26
  */
-export interface OperationOptions<T extends EdenRequestParams = EdenRequestParams> {
+export interface OperationOptions<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+> {
   type: Procedure
   path: string
   context?: OperationContext
   signal?: AbortSignal | Nullish
-  params: T
+  params: EdenRequestParams<TElysia, TKey>
 }

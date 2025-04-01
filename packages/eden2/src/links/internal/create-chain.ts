@@ -1,25 +1,22 @@
-import type { EdenRequestParams } from '../../core/request'
 import type { InternalElysia } from '../../elysia'
 import { Observable } from '../../observable'
 import type { Operation } from './operation'
 import type { OperationLink, OperationLinkResultObservable } from './operation-link'
 
 export type ChainOptions<
-  TElysia extends InternalElysia,
-  TInput extends EdenRequestParams = any,
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
   TOutput = unknown,
 > = {
-  links: OperationLink<TElysia, TInput, TOutput>[]
-  op: Operation<TInput>
+  links: OperationLink<TElysia, TKey, TOutput>[]
+  op: Operation<TElysia, TKey>
 }
 
 export function createChain<
-  TElysia extends InternalElysia,
-  TInput extends EdenRequestParams = any,
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
   TOutput = unknown,
->(
-  options: ChainOptions<TElysia, TInput, TOutput>,
-): OperationLinkResultObservable<TElysia, TOutput> {
+>(options: ChainOptions<TElysia, TKey, TOutput>): OperationLinkResultObservable<TElysia, TOutput> {
   const observable = new Observable((observer) => {
     const execute = (index = 0, op = options.op) => {
       const next = options.links[index]
