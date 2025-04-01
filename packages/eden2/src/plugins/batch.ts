@@ -8,6 +8,7 @@ import type { BatchDeserializer, BatchPluginConfig } from '../core/config'
 import { resolveEdenRequest } from '../core/resolve'
 import type { InternalContext } from '../elysia'
 import { toArray } from '../utils/to-array'
+import type { Falsy } from '../utils/types'
 
 export const batchDeserializers = {
   GET: deserializeBatchGetParams,
@@ -16,8 +17,14 @@ export const batchDeserializers = {
 
 /**
  */
-export function safeBatchPlugin<const T extends BatchPluginConfig>(config: T = {} as any) {
-  type TResolvedKey = T['key'] extends PropertyKey ? T['key'] : typeof EDEN_STATE_KEY
+export function batchPlugin<T extends BatchPluginConfig>(config: T = {} as any) {
+  type TResolvedKey = T['key'] extends Falsy
+    ? never
+    : T['key'] extends true
+      ? typeof EDEN_STATE_KEY
+      : T['key'] extends PropertyKey
+        ? T['key']
+        : never
 
   const endpoint = config?.endpoint ?? BATCH_ENDPOINT
 
@@ -91,25 +98,11 @@ export function safeBatchPlugin<const T extends BatchPluginConfig>(config: T = {
     const appWithState = app.state((state) => {
       type TResolvedState = typeof state & { [K in TResolvedKey]: T }
       const eden = { batch: config }
-      const result = { ...state, [key]: eden }
+      const result = { ...state, [key.toString()]: eden }
       return result as TResolvedState
     })
 
     return appWithState
-  }
-
-  return plugin
-}
-
-/**
- * Adding the type-safety is an opt-in feature.
- */
-export function batchPlugin(config: BatchPluginConfig = {}) {
-  const safePlugin = safeBatchPlugin(config)
-
-  const plugin = (app: Elysia) => {
-    safePlugin(app)
-    return app
   }
 
   return plugin

@@ -9,8 +9,8 @@ import type {
   EdenClientTransformerOptions,
   ResolveTransformerFromConfig,
 } from '../../src/core/transform'
-import { safeBatchPlugin } from '../../src/plugins/batch'
-import { safeTransformerPlugin,transformerPlugin } from '../../src/plugins/transform'
+import { batchPlugin } from '../../src/plugins/batch'
+import { transformerPlugin } from '../../src/plugins/transform'
 import type { DataTransformerOptions } from '../../src/trpc/server/transformer'
 
 describe('ResolveTransformerFromConfig', () => {
@@ -223,12 +223,13 @@ describe('works with live application', () => {
   test('key is added with the safe plugin', () => {
     const _app = new Elysia()
       .use(
-        safeBatchPlugin({
+        batchPlugin({
           endpoint: '/batch',
         }),
       )
       .use(
-        safeTransformerPlugin({
+        transformerPlugin({
+          key: true,
           transformer: SuperJSON,
         }),
       )
@@ -247,12 +248,13 @@ describe('works with live application', () => {
 
     const _app = new Elysia()
       .use(
-        safeBatchPlugin({
+        batchPlugin({
+          key,
           endpoint: '/batch',
         }),
       )
       .use(
-        safeTransformerPlugin({
+        transformerPlugin({
           key,
           transformer: SuperJSON,
         }),

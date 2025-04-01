@@ -152,7 +152,7 @@ export interface EdenPluginBaseConfig {
    * @see https://www.typescriptlang.org/tsconfig/#declaration
    * @see https://www.typescriptlang.org/tsconfig/#declarationMap
    */
-  key?: PropertyKey
+  key?: PropertyKey | Nullish | true
 }
 
 export interface TransformerPluginConfig extends EdenPluginBaseConfig {
