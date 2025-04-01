@@ -1,5 +1,6 @@
 import { processHeaders } from '../../core/headers'
 import type { EdenRequestParams } from '../../core/request'
+import type { InternalElysia } from '../../elysia'
 
 /**
  * Get the parameters for a batch GET request.
@@ -13,7 +14,10 @@ import type { EdenRequestParams } from '../../core/request'
  *
  * batch=1&0.path=/api/b&0.method=GET&0.query.name=elysia
  */
-export async function serializeBatchGetParams(batchParams: EdenRequestParams[]) {
+export async function serializeBatchGetParams<
+  TElysia extends InternalElysia = {},
+  TKey = undefined,
+>(batchParams: EdenRequestParams<TElysia, TKey>[]) {
   const query: Record<string, any> = {}
 
   const headers = new Headers()

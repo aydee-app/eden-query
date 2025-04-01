@@ -62,7 +62,7 @@ export class EdenClient<T extends InternalElysia> {
   }
 
   private $request<TInput extends EdenRequestParams = any, TOutput = unknown>(
-    options: OperationOptions<TInput>,
+    options: OperationOptions<T, never>,
   ) {
     const chain$ = createChain<InternalElysia, TInput, TOutput>({
       links: this.links as OperationLink<any, any, any>[],

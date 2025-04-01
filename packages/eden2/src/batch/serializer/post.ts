@@ -1,9 +1,13 @@
 import type { EdenRequestParams } from '../../core/request'
 import { resolveFetchOptions } from '../../core/resolve'
+import type { InternalElysia } from '../../elysia'
 import { extractFiles } from '../../utils/file'
-import { BODY_KEYS,BODY_TYPES } from '../shared'
+import { BODY_KEYS, BODY_TYPES } from '../shared'
 
-export async function serializeBatchPostParams(batchParams: EdenRequestParams[]) {
+export async function serializeBatchPostParams<
+  TElysia extends InternalElysia = {},
+  TKey = undefined,
+>(batchParams: EdenRequestParams<TElysia, TKey>[]) {
   const body = new FormData()
 
   const headers = new Headers()

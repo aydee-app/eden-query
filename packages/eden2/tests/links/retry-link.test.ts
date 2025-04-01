@@ -1,4 +1,3 @@
-import type { AnyElysia } from 'elysia'
 import { describe, expect, test, vi } from 'vitest'
 
 import type { EdenRequestParams } from '../../src/core/request'
@@ -10,7 +9,7 @@ import { Observable, promisifyObservable } from '../../src/observable'
 
 describe('retryLink', () => {
   test('throws error if unable to resolve after retrying', async () => {
-    const op: Operation<EdenRequestParams<AnyElysia>> = {
+    const op: Operation<EdenRequestParams> = {
       id: 0,
       type: 'query',
       path: '',
@@ -41,7 +40,7 @@ describe('retryLink', () => {
   })
 
   test('invokes retry function the correct number of times', async () => {
-    const op: Operation<EdenRequestParams<AnyElysia>> = {
+    const op: Operation<EdenRequestParams> = {
       id: 0,
       type: 'query',
       path: '',
@@ -79,7 +78,7 @@ describe('retryLink', () => {
   })
 
   test('resolves correctly', async () => {
-    const op: Operation<EdenRequestParams<AnyElysia>> = {
+    const op: Operation<EdenRequestParams> = {
       id: 0,
       type: 'query',
       path: '',
@@ -127,7 +126,7 @@ describe('retryLink', () => {
   })
 
   test('resolves with event ID', async () => {
-    const op: Operation<EdenRequestParams<AnyElysia>> = {
+    const op: Operation<EdenRequestParams> = {
       id: 0,
       type: 'query',
       path: '',

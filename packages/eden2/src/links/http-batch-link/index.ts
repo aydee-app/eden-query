@@ -4,7 +4,7 @@ import type { BatchMethod } from '../../batch/shared'
 import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../../constants'
 import type { EdenFetchError } from '../../core/errors'
 import type { EdenRequestParams } from '../../core/request'
-import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
+import { defaultOnResult, type EdenResultTransformer,resolveEdenRequest } from '../../core/resolve'
 import type { EdenResult } from '../../core/response'
 import type { InternalElysia } from '../../elysia'
 import { Observable } from '../../observable'
@@ -74,7 +74,7 @@ export type HTTPBatchLinkOptions<
   method?: BatchMethod
 }
 
-const batchSerializer = {
+const batchSerializers = {
   GET: serializeBatchGetParams,
   POST: serializeBatchPostParams,
 }
@@ -100,9 +100,13 @@ export function httpBatchLink<
 
   const endpoint = options.endpoint ?? BATCH_ENDPOINT
 
-  const edenParamsResolver = resolveHttpOperationParams.bind(null, options)
+  const edenParamsResolver = async (op: Operation<TElysia, TConfig['key']>) =>
+    await resolveHttpOperationParams(options, op)
 
-  const batchLoader: BatchLoader<Operation, EdenResult<any, EdenFetchError>> = {
+  const batchLoader: BatchLoader<
+    Operation<TElysia, TConfig['key']>,
+    EdenResult<any, EdenFetchError>
+  > = {
     async validate(batchOps) {
       // If not a GET request, then we don't care about size limits.
       if (options.method !== 'GET') return true
@@ -136,9 +140,11 @@ export function httpBatchLink<
 
       const resolvedBatchOps = await Promise.all(batchOps.map(edenParamsResolver))
 
-      const resolvedBatchParams = await batchSerializer[method](resolvedBatchOps)
+      const n: EdenRequestParams<TElysia, TConfig['key']>[] = resolvedBatchOps
 
-      const resolvedParams: EdenRequestParams = {
+      const resolvedBatchParams = await batchSerializers[method](n)
+
+      const resolvedParams = {
         ...options,
         // Batch requests either use FormData (POST) or URL query (GET), no transformer needed.
         transformer: undefined,
@@ -152,7 +158,7 @@ export function httpBatchLink<
         },
         body: resolvedBatchParams.body,
         headers: resolvedBatchParams.headers,
-      }
+      } as EdenRequestParams
 
       const result = await resolveEdenRequest(resolvedParams)
 
@@ -167,7 +173,10 @@ export function httpBatchLink<
 
         if (op == null) return batchedResult
 
-        const onResult = [...toArray(op?.onResult), defaultOnResult]
+        const onResult = [
+          ...toArray(op?.onResult),
+          defaultOnResult as EdenResultTransformer<TElysia, TConfig['key']>,
+        ]
 
         for (const handler of onResult) {
           const newResult = await handler(result, op)
@@ -186,7 +195,7 @@ export function httpBatchLink<
   const loader = dataLoader(batchLoader)
 
   const link = (() => {
-    const operationLink: OperationLink<TElysia> = ({ op }) => {
+    const operationLink: OperationLink<TElysia, TConfig['key']> = ({ op }) => {
       return new Observable((observer) => {
         if (op.type === 'subscription') {
           throw new Error(
@@ -211,7 +220,7 @@ export function httpBatchLink<
     }
 
     return operationLink
-  }) satisfies EdenLink<TElysia>
+  }) satisfies EdenLink<TElysia, TConfig['key']>
 
   return link as any
 }

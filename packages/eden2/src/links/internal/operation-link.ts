@@ -1,5 +1,4 @@
 import type { EdenClientError } from '../../core/errors'
-import type { EdenRequestParams } from '../../core/request'
 import type { InternalElysia } from '../../elysia'
 import type { Observable, Observer } from '../../observable'
 import type { Operation, OperationContext, OperationResult } from './operation'
@@ -15,23 +14,19 @@ export type OperationLinkResult<TOutput = any, TError = any> = {
 /**
  */
 export type OperationLinkOptions<
-  TElysia extends InternalElysia,
-  TInput extends EdenRequestParams = EdenRequestParams,
+  TElysia extends InternalElysia = {},
+  TKey = undefined,
   TOutput = unknown,
 > = {
-  op: Operation<TInput>
-  next: (op: Operation<TInput>) => OperationLinkResultObservable<TElysia, TOutput>
+  op: Operation<TElysia, TKey>
+  next: (op: Operation<TElysia, TKey>) => OperationLinkResultObservable<TElysia, TOutput>
 }
 
 /**
  * @internal
  */
-export type OperationLink<
-  TElysia extends InternalElysia,
-  TInput extends EdenRequestParams = EdenRequestParams,
-  TOutput = unknown,
-> = (
-  options: OperationLinkOptions<TElysia, TInput, TOutput>,
+export type OperationLink<TElysia extends InternalElysia, TKey = undefined, TOutput = unknown> = (
+  options: OperationLinkOptions<TElysia, TKey, TOutput>,
 ) => OperationLinkResultObservable<TElysia, TOutput>
 
 /**
