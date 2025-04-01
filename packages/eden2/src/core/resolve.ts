@@ -3,17 +3,37 @@ import { extractFiles } from '../utils/file'
 import { buildQueryString } from '../utils/http'
 import { jsonToFormData } from '../utils/json-to-formdata'
 import { toArray } from '../utils/to-array'
-import type {
-  EdenRequestTransformer,
-  EdenResponseTransformer,
-  EdenResultTransformer,
-} from './config'
+import type { MaybePromise, Nullish } from '../utils/types'
 import { EdenFetchError } from './errors'
 import { getFetch } from './fetch'
-import { processHeaders } from './headers'
+import { type HeadersEsque,processHeaders } from './headers'
 import type { EdenRequestParams } from './request'
 import { type EdenResult, getResponseData } from './response'
 import { matchTransformer, resolveTransformers } from './transform'
+
+/**
+ * Accepted headers includes any object that resembles headers, or a promise that resolves to one.
+ * If a callback is provided, it will be called with the current params.
+ * The callback can return header-esque objects to merge with the params, or mutate the params directly.
+ * An array of the previously mentioned types can be provided, and each will be handled accordingly.
+ */
+export type EdenRequestHeaders = HeadersEsque<[EdenRequestParams]>
+
+export type EdenRequestTransformer = (
+  path: string,
+  options: RequestInit,
+  params: EdenRequestParams,
+) => MaybePromise<RequestInit | void>
+
+export type EdenResponseTransformer = (
+  response: Response,
+  params: EdenRequestParams,
+) => MaybePromise<unknown>
+
+export type EdenResultTransformer = (
+  result: EdenResult<any, EdenFetchError>,
+  params: EdenRequestParams,
+) => MaybePromise<EdenResult<any, EdenFetchError> | Nullish>
 
 /**
  * Default request transformer just handles transforming the body.
