@@ -5,11 +5,11 @@ import queryString from 'query-string'
 import SuperJSON from 'superjson'
 import { describe, expect, test, vi } from 'vitest'
 
-import type { EdenResponseTransformer } from '../../src/core/config'
 import {
   defaultOnRequest,
   defaultOnResponse,
   defaultOnResult,
+  type EdenResponseTransformer,
   resolveEdenFetchPath,
   resolveEdenRequest,
   resolveFetchOptions,

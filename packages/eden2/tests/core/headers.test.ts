@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
-import type { EdenRequestHeaders } from '../../src/core/config'
 import { processHeaders } from '../../src/core/headers'
+import type { EdenRequestHeaders } from '../../src/core/resolve'
 
 describe('headers', () => {
   test('returns empty object if nothing provided', async () => {
