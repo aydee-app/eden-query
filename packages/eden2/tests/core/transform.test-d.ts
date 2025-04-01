@@ -2,11 +2,11 @@ import Elysia from 'elysia'
 import SuperJSON from 'superjson'
 import { describe, expectTypeOf, test } from 'vitest'
 
+import type { EdenTransformerOptions } from '../../src/core/config'
 import type {
   EdenClientAllowedTransformer,
   EdenClientProhibitedTransformer,
   EdenClientRequiredTransformer,
-  EdenClientTransformerOptions,
   ResolveTransformerFromConfig,
 } from '../../src/core/transform'
 import { batchPlugin } from '../../src/plugins/batch'
@@ -70,34 +70,34 @@ describe('ResolveTransformerFromConfig', () => {
 
 describe('EdenClientTransformerOptions', () => {
   test('will not perform type-checking by default', () => {
-    type Result = EdenClientTransformerOptions
+    type Result = EdenTransformerOptions
     expectTypeOf<Result>().toEqualTypeOf<EdenClientAllowedTransformer>()
   })
 
   describe('does not perform type checking with falsy keys', () => {
     test('false', () => {
-      type Result = EdenClientTransformerOptions<{}, false>
+      type Result = EdenTransformerOptions<{}, false>
       expectTypeOf<Result>().toEqualTypeOf<EdenClientAllowedTransformer>()
     })
 
     test('undefined', () => {
-      type Result = EdenClientTransformerOptions<{}, undefined>
+      type Result = EdenTransformerOptions<{}, undefined>
       expectTypeOf<Result>().toEqualTypeOf<EdenClientAllowedTransformer>()
     })
 
     test('null', () => {
-      type Result = EdenClientTransformerOptions<{}, null>
+      type Result = EdenTransformerOptions<{}, null>
       expectTypeOf<Result>().toEqualTypeOf<EdenClientAllowedTransformer>()
     })
 
     test('void', () => {
-      type Result = EdenClientTransformerOptions<{}, void>
+      type Result = EdenTransformerOptions<{}, void>
       expectTypeOf<Result>().toEqualTypeOf<EdenClientAllowedTransformer>()
     })
   })
 
   test('disables type checking if invalid key is provided', () => {
-    type Result = EdenClientTransformerOptions<{}, 'invalid-key'>
+    type Result = EdenTransformerOptions<{}, 'invalid-key'>
     expectTypeOf<Result>().toEqualTypeOf<EdenClientAllowedTransformer>()
   })
 
@@ -108,7 +108,7 @@ describe('EdenClientTransformerOptions', () => {
       [K in Key]: {}
     }
 
-    type Result = EdenClientTransformerOptions<{ store: Config }, Key>
+    type Result = EdenTransformerOptions<{ store: Config }, Key>
 
     expectTypeOf<Result>().toEqualTypeOf<EdenClientProhibitedTransformer>()
   })
@@ -124,7 +124,7 @@ describe('EdenClientTransformerOptions', () => {
       [K in Key]: TransformerConfig
     }
 
-    type Result = EdenClientTransformerOptions<{ store: Config }, Key>
+    type Result = EdenTransformerOptions<{ store: Config }, Key>
 
     expectTypeOf<Result>().toEqualTypeOf<EdenClientRequiredTransformer<TransformerConfig>>()
   })
@@ -140,7 +140,7 @@ describe('EdenClientTransformerOptions', () => {
       [K in Key]: TransformerConfig
     }
 
-    type Result = EdenClientTransformerOptions<{ store: Config }, Key>
+    type Result = EdenTransformerOptions<{ store: Config }, Key>
 
     expectTypeOf<Result>().toEqualTypeOf<EdenClientRequiredTransformer<TransformerConfig>>()
   })
@@ -160,7 +160,7 @@ describe('EdenClientTransformerOptions', () => {
       [K in Key]: TransformerConfig
     }
 
-    type Result = EdenClientTransformerOptions<{ store: Config }, Key>
+    type Result = EdenTransformerOptions<{ store: Config }, Key>
 
     expectTypeOf<Result['transformer']>().toEqualTypeOf<Transformer>()
   })
@@ -178,7 +178,7 @@ describe('EdenClientTransformerOptions', () => {
       [K in Key]: TransformerConfig
     }
 
-    type Result = EdenClientTransformerOptions<{ store: Config }, Key>
+    type Result = EdenTransformerOptions<{ store: Config }, Key>
 
     expectTypeOf<Result['transformer']>().toEqualTypeOf<Transformers[number]>()
   })
@@ -201,7 +201,7 @@ describe('EdenClientTransformerOptions', () => {
       [K in Key]: TransformerConfig
     }
 
-    type Result = EdenClientTransformerOptions<{ store: Config }, Key>
+    type Result = EdenTransformerOptions<{ store: Config }, Key>
 
     expectTypeOf<Result['transformer']>().toEqualTypeOf<Transformers[keyof Transformers]>()
   })
@@ -215,7 +215,7 @@ describe('works with live application', () => {
 
     type Store = App['store']
 
-    type Result = EdenClientTransformerOptions<Store, true>
+    type Result = EdenTransformerOptions<Store, true>
 
     expectTypeOf<Result>().toEqualTypeOf<EdenClientProhibitedTransformer>()
   })
@@ -236,7 +236,7 @@ describe('works with live application', () => {
 
     type App = typeof _app
 
-    type Result = EdenClientTransformerOptions<App, true>
+    type Result = EdenTransformerOptions<App, true>
 
     expectTypeOf<Result['transformer']>().toEqualTypeOf<typeof SuperJSON>()
   })
@@ -260,7 +260,7 @@ describe('works with live application', () => {
 
     type App = typeof _app
 
-    type Result = EdenClientTransformerOptions<App, typeof key>
+    type Result = EdenTransformerOptions<App, typeof key>
 
     expectTypeOf<Result['transformer']>().toEqualTypeOf<typeof SuperJSON>()
   })

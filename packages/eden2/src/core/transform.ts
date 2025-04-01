@@ -1,12 +1,10 @@
-import type { EDEN_STATE_KEY } from '../constants'
-import type { InternalElysia } from '../elysia'
 import type {
   CombinedDataTransformer,
   DataTransformer,
   DataTransformerOptions,
 } from '../trpc/server/transformer'
 import { notNull } from '../utils/null'
-import type { Falsy, MaybeArray, TypeError } from '../utils/types'
+import type { MaybeArray, TypeError } from '../utils/types'
 
 /**
  * Provide a single transformer to use the same transformer on all requests.
@@ -116,13 +114,6 @@ export function matchTransformer(
 }
 
 /**
- * A client-side transformer is required because it was found on the server application.
- */
-export interface EdenClientRequiredTransformer<T = {}> {
-  transformer: ResolveTransformerFromConfig<T>
-}
-
-/**
  * Given a configuration, e.g. one that may look like {@link ConfigWithTransformer}, try
  * to infer the type of allowed transformers.
  *
@@ -142,6 +133,13 @@ export type ResolveTransformerFromConfig<T = {}> = T extends {
   : T extends { transformer: infer IndividualTransformer }
     ? IndividualTransformer
     : DataTransformerOptions
+
+/**
+ * A client-side transformer is required because it was found on the server application.
+ */
+export interface EdenClientRequiredTransformer<T = {}> {
+  transformer: ResolveTransformerFromConfig<T>
+}
 
 /**
  * A client-side transformer is prohibited until one is found on the server application.
@@ -182,29 +180,3 @@ export type ConfigWithTransformer = { transformer: any } | { transformers: any }
 export type TransformerOptionsFromTransformerConfig<TConfig> = TConfig extends ConfigWithTransformer
   ? EdenClientRequiredTransformer<TConfig>
   : EdenClientProhibitedTransformer
-
-/**
- * @template TStore Elysia.js server application state.
- *
- * @template TKey A unique key to index the server application state to try to find transformer configuration.
- *   Possible values:
- *   - falsy: disable type checking, and it is completely optional.
- *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link InternalElysia.store.eden}.
- *   - PropertyKey: any valid property key will be used to index {@link InternalElysia.store}.
- *
- *   Defaults to undefined, indicating to turn type-checking off.
- *
- * Based on tRPC checking for transformer.
- *
- * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/internals/transformer.ts#L37
- */
-export type EdenClientTransformerOptions<
-  TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
-> = TKey extends Falsy
-  ? EdenClientAllowedTransformer
-  : TKey extends keyof TElysia['store']
-    ? TransformerOptionsFromTransformerConfig<TElysia['store'][TKey]>
-    : TKey extends true
-      ? TransformerOptionsFromTransformerConfig<TElysia['store'][typeof EDEN_STATE_KEY]>
-      : EdenClientAllowedTransformer
