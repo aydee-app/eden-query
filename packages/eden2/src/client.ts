@@ -1,8 +1,7 @@
-import type { AnyElysia } from 'elysia'
-
 import type { EdenClientError } from './core/errors'
 import type { EdenRequestParams } from './core/request'
 import type { EdenResult } from './core/response'
+import type { InternalElysia } from './elysia'
 import { createChain } from './links/internal/create-chain'
 import type { EdenClientRuntime, EdenLink } from './links/internal/eden-link'
 import type {
@@ -30,7 +29,7 @@ export interface EdenSubscriptionObserver<TValue, TError> {
 
 /**
  */
-export interface EdenCreateClientOptions<T extends AnyElysia> {
+export interface EdenCreateClientOptions<T extends InternalElysia> {
   links: EdenLink<T>[]
   transformer?: TypeError<'The transformer property has moved to httpLink/httpBatchLink/wsLink'>
 }
@@ -39,7 +38,7 @@ export interface EdenCreateClientOptions<T extends AnyElysia> {
  * @internal
  */
 export interface EdenClientSubscriptionOptions
-  extends Partial<EdenSubscriptionObserver<unknown, EdenClientError<AnyElysia>>>,
+  extends Partial<EdenSubscriptionObserver<unknown, EdenClientError<InternalElysia>>>,
     EdenRequestOptions {}
 
 export interface EdenRequestOptions {
@@ -47,7 +46,7 @@ export interface EdenRequestOptions {
   signal?: AbortSignal
 }
 
-export class EdenClient<T extends AnyElysia> {
+export class EdenClient<T extends InternalElysia> {
   private readonly links: OperationLink<T>[]
 
   public readonly runtime: EdenClientRuntime
@@ -65,7 +64,7 @@ export class EdenClient<T extends AnyElysia> {
   private $request<TInput extends EdenRequestParams = any, TOutput = unknown>(
     options: OperationOptions<TInput>,
   ) {
-    const chain$ = createChain<AnyElysia, TInput, TOutput>({
+    const chain$ = createChain<InternalElysia, TInput, TOutput>({
       links: this.links as OperationLink<any, any, any>[],
       op: {
         ...options,

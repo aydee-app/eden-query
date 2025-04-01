@@ -1,9 +1,8 @@
-import type { AnyElysia } from 'elysia'
-
 import type { EdenResolverConfig } from '../core/config'
 import { type HTTPHeaders, processHeaders } from '../core/headers'
 import type { EdenRequestParams } from '../core/request'
 import { resolveEdenRequest } from '../core/resolve'
+import type { InternalElysia } from '../elysia'
 import { Observable } from '../observable'
 import type { CallbackOrValue } from '../utils/resolve-callback-or-value'
 import { toArray } from '../utils/to-array'
@@ -29,10 +28,10 @@ import type { OperationLink } from './internal/operation-link'
  *
  *   Defaults to undefined, indicating to turn type-checking off.
  */
-export type HTTPLinkBaseOptions<TElysia extends AnyElysia = AnyElysia, TKey = undefined> = Omit<
-  EdenResolverConfig<TElysia, TKey>,
-  'headers'
->
+export type HTTPLinkBaseOptions<
+  TElysia extends InternalElysia = InternalElysia,
+  TKey = undefined,
+> = Omit<EdenResolverConfig<TElysia, TKey>, 'headers'>
 
 /**
  * An extremely flexible resolver for HTTP Headers.
@@ -56,7 +55,7 @@ export type HTTPLinkHeaders = CallbackOrValue<MaybePromise<HTTPHeaders | Nullish
  *   Defaults to undefined, indicating to turn type-checking off.
  */
 export type HTTPLinkOptions<
-  TElysia extends AnyElysia = AnyElysia,
+  TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
 > = HTTPLinkBaseOptions<TElysia, TKey> & {
   /**
@@ -112,7 +111,9 @@ export async function handleHttpRequest(options: HTTPLinkOptions<any>, op: Opera
 /**
  * @see https://trpc.io/docs/client/links/httpLink
  */
-export function httpLink<T extends AnyElysia = AnyElysia>(options: HTTPLinkOptions<T> = {}) {
+export function httpLink<T extends InternalElysia = InternalElysia>(
+  options: HTTPLinkOptions<T> = {},
+) {
   const link = (() => {
     const operationLink = (({ op }) => {
       if (op.type === 'subscription') {

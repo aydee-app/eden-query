@@ -1,5 +1,4 @@
-import type { AnyElysia } from 'elysia'
-
+import type { InternalElysia } from '../elysia'
 import type { DefaultErrorShape } from './errors'
 
 /**
@@ -53,10 +52,10 @@ type RootConfigLike = {
 /**
  * Anything that can be inferred to the root config types needed for a TRPC client
  *
- * @remarks Add {@link AnyElysia} to the possible client types for cross-compatibility.
+ * @remarks Add {@link InternalElysia} to the possible client types for cross-compatibility.
  */
 export type InferrableClientTypes =
-  | AnyElysia
+  | InternalElysia
   | RouterLike
   | InitLike
   | RootConfigLike

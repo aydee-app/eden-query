@@ -1,4 +1,4 @@
-import { type Context, Elysia } from 'elysia'
+import { Elysia } from 'elysia'
 
 import { deserializeBatchGetParams } from '../batch/deserializer/get'
 import { deserializeBatchPostParams } from '../batch/deserializer/post'
@@ -6,6 +6,7 @@ import type { BatchMethod } from '../batch/shared'
 import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../constants'
 import type { BatchDeserializer, BatchPluginConfig } from '../core/config'
 import { resolveEdenRequest } from '../core/resolve'
+import type { InternalContext } from '../elysia'
 import { toArray } from '../utils/to-array'
 
 export const batchDeserializers = {
@@ -22,7 +23,11 @@ export function safeBatchPlugin<const T extends BatchPluginConfig>(config: T = {
 
   const key = config.key ?? EDEN_STATE_KEY
 
-  const resolveBatchRequest = async (method: BatchMethod, domain: Elysia, context: Context) => {
+  const resolveBatchRequest = async (
+    method: BatchMethod,
+    domain: Elysia,
+    context: InternalContext,
+  ) => {
     const url = new URL(context.request.url)
 
     const base = url.origin

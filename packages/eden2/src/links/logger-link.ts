@@ -1,6 +1,5 @@
-import type { AnyElysia } from 'elysia'
-
 import type { EdenClientError } from '../core/errors'
+import type { InternalElysia } from '../elysia'
 import { Observable, tap } from '../observable'
 import { constNoop } from '../utils/noop'
 import type { EdenLink } from './internal/eden-link'
@@ -18,7 +17,7 @@ type ConsoleEsque = {
 /**
  * @se https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L21
  */
-type EnableFnOptions<T extends AnyElysia> =
+type EnableFnOptions<T extends InternalElysia> =
   | {
       direction: 'down'
       result: OperationLinkResult<unknown, EdenClientError<T>> | EdenClientError<T>
@@ -30,12 +29,12 @@ type EnableFnOptions<T extends AnyElysia> =
 /**
  * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L31
  */
-type EnabledFn<T extends AnyElysia> = (opts: EnableFnOptions<T>) => boolean
+type EnabledFn<T extends InternalElysia> = (opts: EnableFnOptions<T>) => boolean
 
 /**
  * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L35
  */
-type LoggerLinkFnOptions<T extends AnyElysia> = Operation &
+type LoggerLinkFnOptions<T extends InternalElysia> = Operation &
   (
     | {
         /**
@@ -53,14 +52,14 @@ type LoggerLinkFnOptions<T extends AnyElysia> = Operation &
       }
   )
 
-type LoggerLinkFn<T extends AnyElysia> = (opts: LoggerLinkFnOptions<T>) => void
+type LoggerLinkFn<T extends InternalElysia> = (opts: LoggerLinkFnOptions<T>) => void
 
 type ColorMode = 'ansi' | 'css' | 'none'
 
 /**
  * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/client/src/links/loggerLink.ts#L61
  */
-export interface LoggerLinkOptions<T extends AnyElysia> {
+export interface LoggerLinkOptions<T extends InternalElysia> {
   logger?: LoggerLinkFn<T>
 
   enabled?: EnabledFn<T>
@@ -196,7 +195,7 @@ export type LoggerOptions = {
 /**
  * Maybe this should be moved to it's own package?
  */
-function defaultLogger<T extends AnyElysia>(options: LoggerOptions): LoggerLinkFn<T> {
+function defaultLogger<T extends InternalElysia>(options: LoggerOptions): LoggerLinkFn<T> {
   const { c = console, colorMode = 'css', withContext } = options
 
   return (props) => {
@@ -218,7 +217,7 @@ function defaultLogger<T extends AnyElysia>(options: LoggerOptions): LoggerLinkF
 /**
  * @see https://trpc.io/docs/v11/client/links/loggerLink
  */
-export function loggerLink<T extends AnyElysia>(options?: LoggerLinkOptions<T>): EdenLink<T> {
+export function loggerLink<T extends InternalElysia>(options?: LoggerLinkOptions<T>): EdenLink<T> {
   const enabled = options?.enabled ?? constNoop(true)
 
   const colorMode = options?.colorMode ?? (typeof window === 'undefined' ? 'ansi' : 'css')

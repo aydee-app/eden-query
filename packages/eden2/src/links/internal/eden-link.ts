@@ -1,5 +1,4 @@
-import type { AnyElysia } from 'elysia'
-
+import type { InternalElysia } from '../../elysia'
 import type { OperationLink } from './operation-link'
 
 /**
@@ -13,4 +12,4 @@ export type EdenClientRuntime = {}
 /**
  * @public
  */
-export type EdenLink<T extends AnyElysia> = (opts: EdenClientRuntime) => OperationLink<T>
+export type EdenLink<T extends InternalElysia> = (opts: EdenClientRuntime) => OperationLink<T>

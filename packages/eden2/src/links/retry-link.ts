@@ -1,20 +1,19 @@
-import type { AnyElysia } from 'elysia'
-
 import type { EdenClientError } from '../core/errors'
+import type { InternalElysia } from '../elysia'
 import { Observable, type Unsubscribable } from '../observable'
 import type { EdenLink } from './internal/eden-link'
 import { inputWithTrackedEventId } from './internal/input-with-tracked-event-id'
 import type { Operation } from './internal/operation'
 import type { OperationLink } from './internal/operation-link'
 
-interface RetryLinkOptions<T extends AnyElysia> {
+interface RetryLinkOptions<T extends InternalElysia> {
   /**
    * The retry function
    */
   retry: (opts: RetryFnOptions<T>) => boolean
 }
 
-interface RetryFnOptions<T extends AnyElysia> {
+interface RetryFnOptions<T extends InternalElysia> {
   /**
    * The operation that failed
    */
@@ -34,7 +33,7 @@ interface RetryFnOptions<T extends AnyElysia> {
 /**
  * @see https://trpc.io/docs/v11/client/links/retryLink
  */
-export function retryLink<T extends AnyElysia>(options: RetryLinkOptions<T>): EdenLink<T> {
+export function retryLink<T extends InternalElysia>(options: RetryLinkOptions<T>): EdenLink<T> {
   // Initialized config.
   const link: EdenLink<T> = () => {
     // Initialized in app.

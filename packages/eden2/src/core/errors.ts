@@ -1,5 +1,4 @@
-import type { AnyElysia } from 'elysia'
-
+import type { InternalElysia } from '../elysia'
 import type { inferErrorShape } from '../trpc/infer'
 import type { IsNever } from '../utils/types'
 
@@ -62,5 +61,5 @@ export class EdenFetchError<TStatus extends number = number, TValue = unknown> e
  * @template TErrorShape should always be never,
  * so {@link EdenClientError} and {@link EdenFetchError} are basically synonymous.
  */
-export type EdenClientError<T extends AnyElysia, TErrorShape = inferErrorShape<T>> =
+export type EdenClientError<T extends InternalElysia, TErrorShape = inferErrorShape<T>> =
   IsNever<TErrorShape> extends true ? EdenFetchError : TErrorShape

@@ -1,5 +1,4 @@
-import type { RouteSchema } from 'elysia'
-
+import type { InternalRouteSchema } from '../elysia'
 import type {
   IsNever,
   IsUnknown,
@@ -10,7 +9,7 @@ import type {
 import type { EdenFetchError } from './errors'
 
 /**
- * The following types assume a Elysia.js {@link RouteSchema} that looks like the following.
+ * The following types assume a Elysia.js {@link InternalRouteSchema} that looks like the following.
  *
  * ```json
  * {
@@ -42,11 +41,11 @@ import type { EdenFetchError } from './errors'
  */
 
 /**
- * An object with the `params` property representing strongly-typed {@link RouteSchema.params}.
+ * An object with the `params` property representing strongly-typed {@link InternalRouteSchema.params}.
  *
- * @template T The Elysia.js {@link RouteSchema}.
+ * @template T The Elysia.js {@link InternalRouteSchema}.
  */
-export type EdenRouteParams<T extends RouteSchema> =
+export type EdenRouteParams<T extends InternalRouteSchema> =
   IsNever<keyof T['params']> extends true
     ? {
         params?: Record<never, string>
@@ -56,9 +55,9 @@ export type EdenRouteParams<T extends RouteSchema> =
       }
 
 /**
- * An object with the `query` property representing strongly-typed {@link RouteSchema.query}.
+ * An object with the `query` property representing strongly-typed {@link InternalRouteSchema.query}.
  *
- * @template TRoute The Elysia.js {@link RouteSchema}.
+ * @template TRoute The Elysia.js {@link InternalRouteSchema}.
  *
  * @template TOmitInput
  *   Helper type to exclude certain keys from the query input.
@@ -66,7 +65,7 @@ export type EdenRouteParams<T extends RouteSchema> =
  *   This is because the cursor will be managed by tanstack-query and the user does not pass it in manually.
  */
 export type EdenRouteQuery<
-  TRoute extends RouteSchema,
+  TRoute extends InternalRouteSchema,
   TOmitInput extends string | number | symbol = never,
 > =
   IsNever<keyof TRoute['query']> extends true
@@ -79,11 +78,12 @@ export type EdenRouteQuery<
 
 /**
  * An object with the `headers` property representing strongly-typed {@link RouteSchema.headers}.
+ * query?: any
  *
- * @template T The Elysia.js {@link RouteSchema}.
+ * @template T The Elysia.js {@link InternalRouteSchema}.
  *
  */
-export type EdenRouteHeaders<T extends RouteSchema> = undefined extends T['headers']
+export type EdenRouteHeaders<T extends InternalRouteSchema> = undefined extends T['headers']
   ? {
       headers?: Record<string, string>
     }
@@ -92,7 +92,7 @@ export type EdenRouteHeaders<T extends RouteSchema> = undefined extends T['heade
     }
 
 /**
- * @template TRoute The Elysia.js {@link RouteSchema}.
+ * @template TRoute The Elysia.js {@link InternalRouteSchema}.
  *
  * @template TOmitInput
  *   Helper type to exclude certain keys from the query input.
@@ -100,14 +100,14 @@ export type EdenRouteHeaders<T extends RouteSchema> = undefined extends T['heade
  *   This is because the cursor will be managed by tanstack-query and the user does not pass it in manually.
  */
 export type EdenRouteOptions<
-  TRoute extends RouteSchema = RouteSchema,
+  TRoute extends InternalRouteSchema = InternalRouteSchema,
   TOmitInput extends string | number | symbol = never,
 > = EdenRouteParams<TRoute> & EdenRouteQuery<TRoute, TOmitInput> & EdenRouteHeaders<TRoute>
 
 /**
- * @template T The Elysia.js {@link RouteSchema}.
+ * @template T The Elysia.js {@link InternalRouteSchema}.
  */
-export type EdenRouteBody<T extends RouteSchema = RouteSchema> =
+export type EdenRouteBody<T extends InternalRouteSchema = InternalRouteSchema> =
   IsUnknown<T['body']> extends false
     ? undefined extends T['body']
       ? ReplaceBlobWithFiles<T['body']> | undefined
@@ -124,7 +124,7 @@ export type EdenRouteBody<T extends RouteSchema = RouteSchema> =
 export type EdenSuccessStatusCodeString = `${1 | 2 | 3}${string}`
 
 /**
- * Extract the keys from the {@link RouteSchema.response} that correspond to success responses.
+ * Extract the keys from the {@link InternalRouteSchema.response} that correspond to success responses.
  *
  * @example
  *
@@ -156,7 +156,7 @@ export type EdenSuccessStatusCodeString = `${1 | 2 | 3}${string}`
  * responses. This differs from errors because those will be wrapped with an {@link EdenFetchError},
  * and each one contains the original status of the error response.
  */
-export type EdenRouteSuccessResponses<T extends RouteSchema = RouteSchema> =
+export type EdenRouteSuccessResponses<T extends InternalRouteSchema = InternalRouteSchema> =
   T['response'] extends Record<number, unknown>
     ? ReplaceGeneratorWithAsyncGenerator<{
         [K in keyof T as `${Extract<K, Stringable>}` extends EdenSuccessStatusCodeString
@@ -174,12 +174,12 @@ export type EdenRouteSuccessResponses<T extends RouteSchema = RouteSchema> =
  * and each one contains the original status of the error response.
  */
 export type EdenRouteSuccess<
-  TRoute extends RouteSchema = RouteSchema,
+  TRoute extends InternalRouteSchema = InternalRouteSchema,
   TSuccessResponses = EdenRouteSuccessResponses<TRoute>,
 > = TSuccessResponses[keyof TSuccessResponses]
 
 /**
- * Extract the keys from the {@link RouteSchema.response} that correspond to error responses.
+ * Extract the keys from the {@link InternalRouteSchema.response} that correspond to error responses.
  *
  * @example
  *
@@ -203,7 +203,7 @@ export type EdenRouteSuccess<
  * Opposite to {@link EdenRouteSuccessResponses}, it will omit the key if it DOES
  * correlate with a success code.
  */
-export type EdenRouteErrorResponses<T extends RouteSchema = RouteSchema> =
+export type EdenRouteErrorResponses<T extends InternalRouteSchema = InternalRouteSchema> =
   T['response'] extends Record<number, unknown>
     ? ReplaceGeneratorWithAsyncGenerator<{
         [K in keyof T as `${Extract<K, Stringable>}` extends EdenSuccessStatusCodeString
@@ -213,7 +213,7 @@ export type EdenRouteErrorResponses<T extends RouteSchema = RouteSchema> =
     : never
 
 /**
- * Extract the keys from the {@link RouteSchema.response} that correspond to error responses.
+ * Extract the keys from the {@link InternalRouteSchema.response} that correspond to error responses.
  *
  * @example
  *
@@ -248,7 +248,7 @@ export type EdenRouteErrorResponses<T extends RouteSchema = RouteSchema> =
  * type-safe {@link EdenFetchError.status} that can be used to perform type discrimination.
  */
 export type EdenRouteError<
-  TRoute extends RouteSchema = RouteSchema,
+  TRoute extends InternalRouteSchema = InternalRouteSchema,
   TSuccessResponses = EdenRouteErrorResponses<TRoute>,
 > = {
   [K in keyof TSuccessResponses]: EdenFetchError<Extract<K, number>, TSuccessResponses[K]>

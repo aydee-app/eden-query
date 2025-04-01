@@ -1,5 +1,4 @@
-import type { AnyElysia } from 'elysia'
-
+import type { InternalElysia } from '../elysia'
 import { extractFiles } from '../utils/file'
 import { buildQueryString } from '../utils/http'
 import { jsonToFormData } from '../utils/json-to-formdata'
@@ -162,7 +161,9 @@ export async function resolveFetchOptions(params: EdenRequestParams = {}) {
  * - universalRequester {@see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/httpLink.ts#L90}
  * - transformResult {@see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/httpLink.ts#L112}
  */
-export async function resolveEdenRequest<T extends AnyElysia>(params: EdenRequestParams<T> = {}) {
+export async function resolveEdenRequest<T extends InternalElysia>(
+  params: EdenRequestParams<T> = {},
+) {
   const { path, query, fetchInit, onResult, onResponse } = await resolveFetchOptions(params)
 
   const domain = typeof params.domain === 'string' ? params.domain : ''
@@ -175,7 +176,7 @@ export async function resolveEdenRequest<T extends AnyElysia>(params: EdenReques
 
   const fetcher = getFetch(params.fetcher)
 
-  const request = elysia?.handle(new Request(url, fetchInit)) ?? fetcher(url, fetchInit)
+  const request = elysia?.handle?.(new Request(url, fetchInit)) ?? fetcher(url, fetchInit)
 
   const response = await request
 

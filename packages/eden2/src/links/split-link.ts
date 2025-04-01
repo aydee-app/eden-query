@@ -1,5 +1,4 @@
-import type { AnyElysia } from 'elysia'
-
+import type { InternalElysia } from '../elysia'
 import { Observable } from '../observable'
 import { toArray } from '../utils/to-array'
 import { createChain } from './internal/create-chain'
@@ -7,7 +6,7 @@ import type { EdenLink } from './internal/eden-link'
 import type { Operation } from './internal/operation'
 import type { OperationLink } from './internal/operation-link'
 
-export interface SplitLinkOptions<T extends AnyElysia = AnyElysia> {
+export interface SplitLinkOptions<T extends InternalElysia = InternalElysia> {
   condition: (op: Operation) => boolean
   /**
    * The link to execute next if the test function returns `true`.
@@ -22,7 +21,7 @@ export interface SplitLinkOptions<T extends AnyElysia = AnyElysia> {
 /**
  * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/splitLink.ts
  */
-export function splitLink<T extends AnyElysia = AnyElysia>(
+export function splitLink<T extends InternalElysia = InternalElysia>(
   options: SplitLinkOptions<T>,
 ): EdenLink<T> {
   const link: EdenLink<T> = (runtime) => {

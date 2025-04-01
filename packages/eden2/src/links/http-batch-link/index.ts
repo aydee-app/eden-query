@@ -1,5 +1,3 @@
-import type { AnyElysia } from 'elysia'
-
 import { serializeBatchGetParams } from '../../batch/serializer/get'
 import { serializeBatchPostParams } from '../../batch/serializer/post'
 import type { BatchMethod } from '../../batch/shared'
@@ -8,6 +6,7 @@ import type { EdenFetchError } from '../../core/errors'
 import type { EdenRequestParams } from '../../core/request'
 import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
 import type { EdenResult } from '../../core/response'
+import type { InternalElysia } from '../../elysia'
 import { Observable } from '../../observable'
 import { toArray } from '../../utils/to-array'
 import type { Falsy, TypeError } from '../../utils/types'
@@ -27,7 +26,7 @@ export type ConfigWithBatching = { batch: any }
  * the return to be incorrect.
  */
 export type HttpBatchLinkResult<
-  TElysia extends AnyElysia = AnyElysia,
+  TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
 > = TKey extends Falsy
   ? EdenLink<TElysia>
@@ -51,7 +50,7 @@ export type HttpBatchLinkResult<
  *   Defaults to undefined, indicating to turn type-checking off.
  */
 export type HTTPBatchLinkOptions<
-  TElysia extends AnyElysia = AnyElysia,
+  TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
 > = HTTPLinkOptions<TElysia, TKey> & {
   /**
@@ -91,7 +90,7 @@ const batchSerializer = {
  *
  *   Defaults to undefined, indicating to turn type-checking off.
  */
-export function httpBatchLink<TElysia extends AnyElysia = AnyElysia, TKey = undefined>(
+export function httpBatchLink<TElysia extends InternalElysia = InternalElysia, TKey = undefined>(
   options: HTTPBatchLinkOptions<TElysia, TKey> = {} as any,
 ): HttpBatchLinkResult<TElysia, TKey> {
   const maxURLLength = options.maxURLLength ?? Infinity

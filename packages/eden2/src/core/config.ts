@@ -7,9 +7,8 @@
  * Type-safety for batching is implemented in {@link _httpBatchLink} since batching is applied
  * via the specific link.
  */
-import type { AnyElysia, Context } from 'elysia'
-
 import type { BatchMethod } from '../batch/shared'
+import type { InternalContext, InternalElysia } from '../elysia'
 import { httpBatchLink as _httpBatchLink } from '../links/http-batch-link'
 import type { DataTransformerOptions } from '../trpc/server/transformer'
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
@@ -58,7 +57,7 @@ export type EdenResultTransformer = (
  *   Defaults to undefined, indicating to turn type-checking off.
  */
 export type EdenResolverConfig<
-  TElysia extends AnyElysia = AnyElysia,
+  TElysia extends InternalElysia = InternalElysia,
   TKey = undefined,
 > = EdenClientTransformerOptions<TElysia['store'], TKey> & {
   /**
@@ -175,7 +174,7 @@ export interface TransformerPluginConfig extends EdenPluginBaseConfig {
  * The client-side serializer function can be customized through the HTTP-batch-link (TODO).
  */
 export type BatchDeserializer = (
-  context: Context,
+  context: InternalContext,
   config: BatchPluginConfig,
 ) => MaybePromise<Array<EdenRequestParams>>
 

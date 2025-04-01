@@ -1,5 +1,4 @@
-import type { AnyElysia } from 'elysia'
-
+import type { InternalElysia } from '../elysia'
 import type { EdenResolverConfig } from './config'
 import type { EdenRouteBody, EdenRouteOptions } from './infer'
 
@@ -35,6 +34,6 @@ export interface EdenRequestInit {
  * than the global resolver configuration options.
  */
 export type EdenRequestParams<
-  T extends AnyElysia = AnyElysia,
+  T extends InternalElysia = InternalElysia,
   TKey = undefined,
 > = EdenResolverConfig<T, TKey> & EdenRequestInit
