@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test": "ATTEST_skipTypes=1 vitest",
-    "test:types": "vitest tests/plugins/transform.test-d"
+    "test:types": "vitest test-d"
   },
   "repository": {
     "type": "git",
@@ -18,6 +18,7 @@
     "@ark/attest": "^0.45.6",
     "@trpc/client": "^11.0.1",
     "@trpc/server": "^11.0.1",
+    "superjson": "^2.2.2",
     "typescript": "^5.8.2"
   },
   "peerDependencies": {
