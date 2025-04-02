@@ -1,0 +1,26 @@
+{
+  "name": "@ap0nia/eden",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Fully type-safe Elysia.js client",
+  "license": "MIT",
+  "scripts": {
+    "test": "ATTEST_skipTypes=1 vitest",
+    "test:types": "vitest tests/plugins/transform.test-d"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ap0nia/eden-query",
+    "directory": "packages/eden2"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@ark/attest": "^0.45.6",
+    "@trpc/client": "^11.0.1",
+    "@trpc/server": "^11.0.1",
+    "typescript": "^5.8.2"
+  },
+  "peerDependencies": {
+    "elysia": "^1.2.25"
+  }
+}
