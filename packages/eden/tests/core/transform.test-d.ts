@@ -11,7 +11,6 @@ import type {
   TransformerRequiredConfig,
   TransformerUnrestrictedConfig,
 } from '../../src/core/transform'
-// import { attest } from '@ark/attest'
 
 describe('ResolveTransformer', () => {
   describe('returns generic options if transformer not found', () => {
