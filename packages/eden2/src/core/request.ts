@@ -1,5 +1,5 @@
 import type { InternalElysia } from '../elysia'
-import type { EdenResolverConfig } from './config'
+import type { EdenResolverConfig, EdenTypeConfig } from './config'
 import type { EdenRouteBody, EdenRouteOptions } from './infer'
 
 /**
@@ -35,5 +35,5 @@ export interface EdenRequestInit {
  */
 export type EdenRequestParams<
   T extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 > = EdenResolverConfig<T, TKey> & EdenRequestInit

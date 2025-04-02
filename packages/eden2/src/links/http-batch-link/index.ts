@@ -60,6 +60,19 @@ const batchSerializers = {
   POST: serializeBatchPostParams,
 }
 
+export type HttpBatchLinkResult<
+  TElysia extends InternalElysia,
+  TConfig extends HTTPBatchLinkOptions<any, any>,
+> = TConfig['key'] extends PropertyKey
+  ? ConfigWithBatching extends TElysia['store'][Extract<TConfig['key'], keyof TElysia['store']>]
+    ? EdenLink<TElysia>
+    : BatchingNotDetectedError
+  : TConfig['key'] extends true
+    ? TElysia['store'][typeof EDEN_STATE_KEY] extends ConfigWithBatching
+      ? EdenLink<TElysia>
+      : BatchingNotDetectedError
+    : EdenLink<TElysia>
+
 /**
  * @see https://trpc.io/docs/client/links/httpLink
  *
@@ -70,17 +83,7 @@ const batchSerializers = {
 export function httpBatchLink<
   TElysia extends InternalElysia,
   TConfig extends HTTPBatchLinkOptions<TElysia, TConfig['key']>,
->(
-  options: TConfig = {} as any,
-): TConfig['key'] extends PropertyKey
-  ? ConfigWithBatching extends TElysia['store'][Extract<TConfig['key'], keyof TElysia['store']>]
-    ? EdenLink<TElysia>
-    : BatchingNotDetectedError
-  : TConfig['key'] extends true
-    ? TElysia['store'][typeof EDEN_STATE_KEY] extends ConfigWithBatching
-      ? EdenLink<TElysia>
-      : BatchingNotDetectedError
-    : EdenLink<TElysia> {
+>(options: TConfig = {} as any): HttpBatchLinkResult<TElysia, TConfig> {
   const maxURLLength = options.maxURLLength ?? Infinity
 
   const maxItems = options.maxItems ?? Infinity
@@ -156,10 +159,7 @@ export function httpBatchLink<
 
         if (op == null) return batchedResult
 
-        const onResult = [
-          ...toArray(op?.onResult),
-          defaultOnResult as EdenResultTransformer<TElysia, TConfig['key']>,
-        ]
+        const onResult = [...toArray(op?.onResult), defaultOnResult as EdenResultTransformer]
 
         for (const handler of onResult) {
           const newResult = await handler(result, op)

@@ -18,10 +18,12 @@ import type {
   TransformersOptions,
 } from './transform'
 
+export type EdenTypeConfig = PropertyKey | undefined | boolean
+
 /**
  * Shared configuration for eden entities that interface with Elysia.js.
  */
-export interface EdenConfig<TKey = undefined> {
+export interface EdenConfig<TKey extends EdenTypeConfig = undefined> {
   /**
    * Throughout the eden project, a "key" is provided as an opt-in mechanism to type-safety features.
    *
@@ -66,7 +68,7 @@ export type EdenTransformerOptions<
  */
 export type EdenResolverConfig<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 > = EdenConfig<TKey> &
   EdenTransformerOptions<TElysia, TKey> & {
     /**
@@ -171,7 +173,10 @@ export type EdenResolverConfig<
  *
  * The client-side serializer function can be customized through the HTTP-batch-link (TODO).
  */
-export type BatchDeserializer = <TElysia extends InternalElysia = InternalElysia, TKey = any>(
+export type BatchDeserializer = <
+  TElysia extends InternalElysia = InternalElysia,
+  TKey extends EdenTypeConfig = any,
+>(
   context: InternalContext,
   config: BatchPluginConfig<TElysia, TKey>,
 ) => MaybePromise<Array<EdenRequestParams<TElysia, TKey>>>
@@ -180,7 +185,7 @@ export type BatchDeserializer = <TElysia extends InternalElysia = InternalElysia
  */
 export interface TransformerPluginConfig<
   _TElysia extends InternalElysia = InternalElysia,
-  TKey = any,
+  TKey extends EdenTypeConfig = any,
 > extends EdenConfig<TKey> {
   /**
    * Use the same transformer for all requests.
@@ -195,8 +200,10 @@ export interface TransformerPluginConfig<
 
 /**
  */
-export interface BatchPluginConfig<_TElysia extends InternalElysia = InternalElysia, TKey = any>
-  extends EdenConfig<TKey> {
+export interface BatchPluginConfig<
+  _TElysia extends InternalElysia = InternalElysia,
+  TKey extends EdenTypeConfig = any,
+> extends EdenConfig<TKey> {
   /**
    * The endpoint for batch requests.
    */

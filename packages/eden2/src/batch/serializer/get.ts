@@ -1,3 +1,4 @@
+import type { EdenTypeConfig } from '../../core/config'
 import { processHeaders } from '../../core/headers'
 import type { EdenRequestParams } from '../../core/request'
 import type { InternalElysia } from '../../elysia'
@@ -16,7 +17,7 @@ import type { InternalElysia } from '../../elysia'
  */
 export async function serializeBatchGetParams<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 >(batchParams: EdenRequestParams<TElysia, TKey>[]) {
   const query: Record<string, any> = {}
 

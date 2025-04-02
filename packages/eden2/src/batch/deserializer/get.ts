@@ -1,11 +1,11 @@
-import type { BatchPluginConfig } from '../../core/config'
+import type { BatchPluginConfig, EdenTypeConfig } from '../../core/config'
 import type { EdenRequestParams } from '../../core/request'
 import type { InternalContext, InternalElysia } from '../../elysia'
 import { IGNORED_HEADERS } from '../shared'
 
 export async function deserializeBatchGetParams<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 >(context: InternalContext, _config: BatchPluginConfig<TElysia, TKey>) {
   const result: Array<EdenRequestParams> = []
 

@@ -4,6 +4,7 @@ import { buildQueryString } from '../utils/http'
 import { jsonToFormData } from '../utils/json-to-formdata'
 import { toArray } from '../utils/to-array'
 import type { MaybePromise, Nullish } from '../utils/types'
+import type { EdenTypeConfig } from './config'
 import { EdenFetchError } from './errors'
 import { getFetch } from './fetch'
 import { type HeadersEsque, processHeaders } from './headers'
@@ -19,12 +20,12 @@ import { matchTransformer, resolveTransformers } from './transform'
  */
 export type EdenRequestHeaders<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 > = HeadersEsque<[EdenRequestParams<TElysia, TKey>]>
 
 export type EdenRequestTransformer<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 > = (
   path: string,
   options: RequestInit,
@@ -33,12 +34,12 @@ export type EdenRequestTransformer<
 
 export type EdenResponseTransformer<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 > = (response: Response, params: EdenRequestParams<TElysia, TKey>) => MaybePromise<unknown>
 
 export type EdenResultTransformer<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 > = (
   result: EdenResult<any, EdenFetchError>,
   params: EdenRequestParams<TElysia, TKey>,
@@ -143,7 +144,7 @@ export const defaultOnResult = (async (result, params) => {
 
 export function resolveEdenFetchPath<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 >(params: EdenRequestParams<TElysia, TKey>) {
   if (!params.options?.params || !params.path) return params.path
 
@@ -158,7 +159,7 @@ export function resolveEdenFetchPath<
 
 export async function resolveFetchOptions<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 >(params: EdenRequestParams<TElysia, TKey> = {} as any) {
   const path = resolveEdenFetchPath(params) ?? ''
 
@@ -217,7 +218,7 @@ export async function resolveFetchOptions<
  */
 export async function resolveEdenRequest<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 >(params: EdenRequestParams<TElysia, TKey> = {} as any) {
   const { path, query, fetchInit, onResult, onResponse } = await resolveFetchOptions(params)
 

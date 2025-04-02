@@ -1,3 +1,4 @@
+import type { EdenTypeConfig } from '../../core/config'
 import type { EdenRequestParams } from '../../core/request'
 import { resolveFetchOptions } from '../../core/resolve'
 import type { InternalElysia } from '../../elysia'
@@ -6,7 +7,7 @@ import { BODY_KEYS, BODY_TYPES } from '../shared'
 
 export async function serializeBatchPostParams<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
+  TKey extends EdenTypeConfig = undefined,
 >(batchParams: EdenRequestParams<TElysia, TKey>[]) {
   const body = new FormData()
 

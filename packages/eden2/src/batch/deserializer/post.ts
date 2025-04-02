@@ -1,4 +1,4 @@
-import type { BatchPluginConfig } from '../../core/config'
+import type { BatchPluginConfig, EdenTypeConfig } from '../../core/config'
 import type { EdenRequestParams } from '../../core/request'
 import type { InternalContext, InternalElysia } from '../../elysia'
 import { set } from '../../utils/set'
@@ -6,7 +6,7 @@ import { BODY_KEYS, BODY_TYPES, IGNORED_HEADERS } from '../shared'
 
 export async function deserializeBatchPostParams<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = any,
+  TKey extends EdenTypeConfig = any,
 >(context: InternalContext, _config: BatchPluginConfig<TElysia, TKey>) {
   const request = context.request
 

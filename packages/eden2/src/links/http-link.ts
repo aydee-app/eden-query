@@ -1,4 +1,4 @@
-import type { EdenResolverConfig } from '../core/config'
+import type { EdenResolverConfig, EdenTypeConfig } from '../core/config'
 import { type HTTPHeaders, processHeaders } from '../core/headers'
 import type { EdenRequestParams } from '../core/request'
 import { resolveEdenRequest } from '../core/resolve'
@@ -28,12 +28,11 @@ import type { OperationLink } from './internal/operation-link'
  *
  *   Defaults to undefined, indicating to turn type-checking off.
  */
-export type HTTPLinkBaseOptions<
-  TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
-> = Omit<EdenResolverConfig<TElysia, TKey>, 'headers'> & {
-  key?: PropertyKey | Nullish | true
-}
+export type HTTPLinkBaseOptions<TElysia extends InternalElysia = InternalElysia, TKey = undefined> =
+  // @ts-expect-error Allow any input configurations and assume that it has the correct shape.
+  Omit<EdenResolverConfig<TElysia, TKey>, 'key' | 'headers'> & {
+    key?: EdenTypeConfig
+  }
 
 /**
  * An extremely flexible resolver for HTTP Headers.
@@ -102,7 +101,7 @@ export async function resolveHttpOperationParams<
     onResponse,
     onResult,
     headers,
-  } as EdenRequestParams<TElysia, TKey>
+  } as EdenRequestParams
 
   return resolvedParams
 }
