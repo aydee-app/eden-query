@@ -1,6 +1,0 @@
-packages:
-  - fresh
-  - documentation
-  - rspress-documentation
-  - examples/**/*
-  - packages/**/*
