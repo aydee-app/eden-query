@@ -32,6 +32,9 @@ export const SHORTENED_DATE_REGEX =
 
 export const BATCH_ENDPOINT = '/batch'
 
+export const HTTP_SUBSCRIPTION_ERROR =
+  'Subscriptions are unsupported by `httpLink` - use `httpSubscriptionLink` or `wsLink`'
+
 /**
  * The default key that's used to store eden-related configuration within the
  * Elysia.js server application.

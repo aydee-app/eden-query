@@ -1,3 +1,4 @@
+import { HTTP_SUBSCRIPTION_ERROR } from '../constants'
 import type { EdenRequestParams, EdenResolverConfig } from '../core/config'
 import { processHeaders } from '../core/headers'
 import type { HTTPHeaders } from '../core/http'
@@ -17,19 +18,11 @@ import type { EdenLink, Operation, OperationLink } from './types'
  * provide different information to a callback.
  *
  * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L22
- *
- * @template TKey A unique key to index the server application state to try to find a transformer configuration.
- *   Possible values:
- *   - falsy: disable type checking, and it is completely optional.
- *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link Elysia.store.eden}.
- *   - PropertyKey: any valid property key will be used to index {@link Elysia.store}.
- *
- *   Defaults to undefined, indicating to turn type-checking off.
  */
 export type HTTPLinkBaseOptions<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
-> = Omit<EdenResolverConfig<TElysia, TKey>, 'key' | 'headers'> & {
+  TConfig extends TypeConfig = undefined,
+> = Omit<EdenResolverConfig<TElysia, TConfig>, 'types' | 'headers'> & {
   types?: TypeConfig
 }
 
@@ -46,7 +39,7 @@ export type HTTPLinkHeaders = CallbackOrValue<MaybePromise<HTTPHeaders | Nullish
 /**
  * @template TElysia Elysia.js server application.
  *
- * @template TKey A unique key to index the server application state to try to find a transformer configuration.
+ * @template TConfig A unique key to index the server application state to try to find a transformer configuration.
  *   Possible values:
  *   - falsy: disable type checking, and it is completely optional.
  *   - true: shorthand for "eden" or {@link EDEN_STATE_KEY}. Extract the config from {@link Elysia.store.eden}.
@@ -56,8 +49,8 @@ export type HTTPLinkHeaders = CallbackOrValue<MaybePromise<HTTPHeaders | Nullish
  */
 export type HTTPLinkOptions<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
-> = HTTPLinkBaseOptions<TElysia, TKey> & {
+  TConfig extends TypeConfig = undefined,
+> = HTTPLinkBaseOptions<TElysia, TConfig> & {
   /**
    * Headers to be set on outgoing requests or a callback that of said headers
    * Basically like {@link EdenResolverConfig.headers} but callbacks are provided with the entire operation.
@@ -75,8 +68,8 @@ export type HTTPLinkOptions<
  */
 export async function resolveHttpOperationParams<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
->(options: HTTPLinkOptions<TElysia, TKey>, op: Operation) {
+  TConfig extends TypeConfig = undefined,
+>(options: HTTPLinkOptions<TElysia, TConfig>, op: Operation) {
   const { path, params } = op
 
   const fetch = { ...options.fetch, ...params?.fetch }
@@ -123,11 +116,7 @@ export function httpLink<
 >(options: TConfig = {} as any) {
   const link = (() => {
     const operationLink = (({ op }) => {
-      if (op.type === 'subscription') {
-        throw new Error(
-          'Subscriptions are unsupported by `httpLink` - use `httpSubscriptionLink` or `wsLink`',
-        )
-      }
+      if (op.type === 'subscription') throw new Error(HTTP_SUBSCRIPTION_ERROR)
 
       return new Observable((observer) => {
         const request = handleHttpRequest(options, op)

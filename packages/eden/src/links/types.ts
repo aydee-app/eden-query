@@ -92,4 +92,6 @@ export type EdenClientRuntime = {}
 /**
  * @public
  */
-export type EdenLink<T extends InternalElysia> = (opts: EdenClientRuntime) => OperationLink<T>
+export type EdenLink<T extends InternalElysia = InternalElysia> = (
+  opts: EdenClientRuntime,
+) => OperationLink<T>
