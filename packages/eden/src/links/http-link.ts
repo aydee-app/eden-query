@@ -3,7 +3,7 @@ import type { EdenRequestParams, EdenResolverConfig } from '../core/config'
 import { processHeaders } from '../core/headers'
 import type { HTTPHeaders } from '../core/http'
 import { resolveEdenRequest } from '../core/resolve'
-import type { InternalElysia, TypeConfig } from '../core/types'
+import type { DefinedTypeConfig, InternalElysia, TypeConfig } from '../core/types'
 import { Observable } from '../observable'
 import { toArray } from '../utils/array'
 import type { CallbackOrValue } from '../utils/callback-or-value'
@@ -23,7 +23,7 @@ export type HTTPLinkBaseOptions<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
 > = Omit<EdenResolverConfig<TElysia, TConfig>, 'types' | 'headers'> & {
-  types?: TypeConfig
+  types?: DefinedTypeConfig
 }
 
 /**

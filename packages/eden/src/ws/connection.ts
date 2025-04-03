@@ -1,7 +1,6 @@
 import type { EdenWsConnectionParamsRequest } from '../core/dto'
 import { behaviorSubject } from '../observable/behavior-subject'
 import { resolveCallbackOrValue } from '../utils/callback-or-value'
-import { withResolvers } from '../utils/promise'
 import type { WebSocketUrlOptions } from './url'
 
 /**
@@ -10,16 +9,14 @@ import type { WebSocketUrlOptions } from './url'
  * The promise rejects if an error occurs during the connection attempt.
  */
 function asyncWsOpen(ws: WebSocket) {
-  const { promise, resolve, reject } = withResolvers<void>()
+  return new Promise<void>((resolve, reject) => {
+    ws.addEventListener('error', reject)
 
-  ws.addEventListener('open', () => {
-    ws.removeEventListener('error', reject)
-    resolve()
+    ws.addEventListener('open', () => {
+      ws.removeEventListener('error', reject)
+      resolve()
+    })
   })
-
-  ws.addEventListener('error', reject)
-
-  return promise
 }
 
 interface PingPongOptions {

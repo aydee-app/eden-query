@@ -2,9 +2,10 @@ import type { MaybeArray } from 'elysia'
 
 import type { EdenWsIncomingMessage, EdenWsOutgoingMessage, EdenWsStateResult } from '../core/dto'
 import { type EdenError, EdenWebSocketClosedError } from '../core/error'
-import { type AnyDataTransformer,matchTransformer } from '../core/transform'
+import { type AnyDataTransformer, matchTransformer } from '../core/transform'
 import type { Operation, OperationLinkResult } from '../links/types'
 import { type BehaviorSubject, behaviorSubject, Observable } from '../observable'
+import { toArray } from '../utils/array'
 import { ResettableTimeout } from '../utils/resettable-timeout'
 import { sleep } from '../utils/sleep'
 import { backwardCompatibility, type KeepAliveOptions, WebSocketConnection } from './connection'
@@ -358,19 +359,23 @@ export class WebSocketClient {
       })
     })
 
-    ws.addEventListener('message', (message) => {
+    ws.addEventListener('message', async (message) => {
       this.inactivityTimeout.reset()
 
       if (typeof message.data !== 'string' || ['PING', 'PONG'].includes(message.data)) return
 
-      const incomingMessage = JSON.parse(message.data) as EdenWsIncomingMessage
+      const incomingMessage: MaybeArray<EdenWsIncomingMessage> = JSON.parse(message.data)
 
-      if ('method' in incomingMessage) {
-        // Reconnections are communicated as results now.
-        // this.handleIncomingRequest(incomingMessage)
-      } else {
-        this.handleResponseMessage(incomingMessage)
-      }
+      const incomingMessages = toArray(incomingMessage)
+
+      await Promise.all(incomingMessages.map(this.handleResponseMessage))
+
+      // if ('method' in incomingMessage) {
+      //   // Reconnections are communicated as results now.
+      //   // this.handleIncomingRequest(incomingMessage)
+      // } else {
+      //   this.handleResponseMessage(incomingMessage)
+      // }
     })
 
     ws.addEventListener('close', (event) => {
@@ -402,7 +407,7 @@ export class WebSocketClient {
     })
   }
 
-  private handleResponseMessage(message: EdenWsIncomingMessage) {
+  private handleResponseMessage = (message: EdenWsIncomingMessage) => {
     // Special message that does not have an originating request.
     if (message.result?.type === 'reconnect') {
       const error = new EdenWebSocketClosedError({ message: 'Server requested reconnect' })

@@ -5,16 +5,21 @@ import { deserializeBatchGetParams } from '../batch/deserializers/get'
 import { deserializeBatchPostParams } from '../batch/deserializers/post'
 import type { BatchMethod } from '../batch/shared'
 import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../constants'
-import type { EdenTypeConfig } from '../core/config'
 import { resolveEdenRequest } from '../core/resolve'
-import type { InternalContext, InternalElysia, ResolveTypeConfig, TypeConfig } from '../core/types'
+import type {
+  DefinedTypeConfig,
+  InternalContext,
+  InternalElysia,
+  ResolveTypeConfig,
+  TypeConfig,
+} from '../core/types'
 import { toArray } from '../utils/array'
 
 export interface BatchPluginConfig<
   _TElysia extends InternalElysia = InternalElysia,
-  TConfig extends TypeConfig = any,
-> extends EdenTypeConfig<TConfig>,
-    BatchDeserializerConfig {
+  _TConfig extends TypeConfig = any,
+> extends BatchDeserializerConfig {
+  types?: DefinedTypeConfig
   deserializer?: BatchDeserializer
 }
 
@@ -96,11 +101,13 @@ export function createBatchResolvers(domain: InternalElysia, config: BatchPlugin
 export function batchPlugin<const T extends BatchPluginConfig>(config: T = {} as any) {
   type TResolvedConfig = ResolveTypeConfig<T['types']>
 
-  type TResolvedKey = TResolvedConfig['key']
+  type TResolvedKey = Extract<TResolvedConfig['key'], PropertyKey>
 
   const endpoint = config?.endpoint ?? BATCH_ENDPOINT
 
-  const key = config.types?.key ?? EDEN_STATE_KEY
+  const defaultKey = config.types === true ? EDEN_STATE_KEY : (config.types?.key ?? EDEN_STATE_KEY)
+
+  const key = config.types ? defaultKey : undefined
 
   /**
    * @todo
@@ -125,10 +132,15 @@ export function batchPlugin<const T extends BatchPluginConfig>(config: T = {} as
       app.post(endpoint, resolvers.POST, { parse: () => null })
     }
 
-    const appWithState = app.state((state) => {
-      type TResolvedState = typeof state & { [K in TResolvedKey]: T & { batch: true } }
-      const eden = { batch: config }
-      const result = { ...state, [key.toString()]: eden }
+    const appWithState = app.state(() => {
+      type TResolvedState = Record<TResolvedKey, { batch: T }>
+
+      const result = {}
+
+      if (key) {
+        result[key as never] = { batch: config } as never
+      }
+
       return result as TResolvedState
     })
 

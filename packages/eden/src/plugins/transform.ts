@@ -2,21 +2,27 @@ import { Elysia } from 'elysia'
 import { ElysiaCustomStatusResponse } from 'elysia/error'
 
 import { EDEN_STATE_KEY } from '../constants'
-import type { EdenTypeConfig } from '../core/config'
 import {
   type AnyDataTransformer,
   resolveTransformers,
   type TransformersMapping,
 } from '../core/transform'
-import type { InternalElysia, ResolveTypeConfig, TypeConfig } from '../core/types'
+import type {
+  DefinedTypeConfig,
+  InternalElysia,
+  ResolveTypeConfig,
+  TypeConfig,
+} from '../core/types'
 import { set } from '../utils/set'
 
 /**
  */
 export interface TransformerPluginConfig<
   _TElysia extends InternalElysia = InternalElysia,
-  TKey extends TypeConfig = any,
-> extends EdenTypeConfig<TKey> {
+  _TConfig extends TypeConfig = any,
+> {
+  types?: DefinedTypeConfig
+
   /**
    * Use the same transformer for all requests.
    */
@@ -31,9 +37,11 @@ export interface TransformerPluginConfig<
 export function transformPlugin<const T extends TransformerPluginConfig>(config: T = {} as any) {
   type TResolvedConfig = ResolveTypeConfig<T['types']>
 
-  type TResolvedKey = TResolvedConfig['key']
+  type TResolvedKey = Extract<TResolvedConfig['key'], PropertyKey>
 
-  const key = config.types?.key ?? EDEN_STATE_KEY
+  const defaultKey = config.types === true ? EDEN_STATE_KEY : (config.types?.key ?? EDEN_STATE_KEY)
+
+  const key = config.types ? defaultKey : undefined
 
   const transformers = resolveTransformers(config.transformer ?? config.transformers)
 
@@ -43,10 +51,15 @@ export function transformPlugin<const T extends TransformerPluginConfig>(config:
    * @todo Decide whether it is worth it to return an instance with strongly-typed batch routes.
    */
   const plugin = (app: Elysia) => {
-    const appWithState = app.state((state) => {
-      type TResolvedState = typeof state & { [K in TResolvedKey]: { transform: T } }
-      const eden = { transform: config }
-      const result = { ...state, [key.toString()]: eden }
+    const appWithState = app.state(() => {
+      type TResolvedState = Record<TResolvedKey, { transform: T }>
+
+      const result = {}
+
+      if (key) {
+        result[key as never] = { ws: config } as never
+      }
+
       return result as TResolvedState
     })
 

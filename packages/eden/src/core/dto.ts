@@ -5,6 +5,7 @@
  * @see https://github.com/trpc/trpc/blob/e543f3f3c86c9ad503a64d807ff4154ad6ec1637/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts
  */
 
+import type { EdenRequestParams } from './config'
 import type { JSONRPC2 } from './json-rpc'
 
 export const procedures = ['query', 'mutation', 'subscription'] as const
@@ -50,7 +51,7 @@ export interface EdenWsFetchRequest extends JSONRPC2.Request {
     /**
      * EdenRequestParams for the request.
      */
-    params?: unknown
+    params?: EdenRequestParams
   }
 }
 
