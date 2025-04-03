@@ -1,12 +1,12 @@
 import { serializeBatchGetParams } from '../../batch/serializers/get'
 import { serializeBatchPostParams } from '../../batch/serializers/post'
 import type { BatchMethod } from '../../batch/shared'
-import { BATCH_ENDPOINT, type EDEN_STATE_KEY,HTTP_SUBSCRIPTION_ERROR } from '../../constants'
+import { BATCH_ENDPOINT, type EDEN_STATE_KEY, HTTP_SUBSCRIPTION_ERROR } from '../../constants'
 import type { EdenRequestParams } from '../../core/config'
 import type { EdenResult } from '../../core/dto'
 import type { EdenError } from '../../core/error'
 import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
-import type { InternalElysia } from '../../core/types'
+import type { InternalElysia, TypeConfig } from '../../core/types'
 import { Observable } from '../../observable'
 import { toArray } from '../../utils/array'
 import {
@@ -15,7 +15,7 @@ import {
   resolveHttpOperationParams,
 } from '../http-link'
 import type { EdenLink, Operation, OperationLink } from '../types'
-import { type BatchLoader,dataLoader } from './data-loader'
+import { type BatchLoader, dataLoader } from './data-loader'
 
 export type BatchingNotDetectedError = 'Batch plugin not detected on Elysia.js server application'
 
@@ -26,8 +26,8 @@ export type ConfigWithBatching = { batch: any }
  */
 export type HTTPBatchLinkOptions<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
-> = HTTPLinkBaseOptions<TElysia, TKey> & {
+  TConfig extends TypeConfig = undefined,
+> = HTTPLinkBaseOptions<TElysia, TConfig> & {
   /**
    * Path for the batch endpoint.
    *
@@ -82,7 +82,7 @@ export type HTTPBatchLinkResult<
  */
 export function httpBatchLink<
   TElysia extends InternalElysia,
-  TConfig extends HTTPBatchLinkOptions<TElysia, TConfig['types']>,
+  const TConfig extends HTTPBatchLinkOptions<TElysia, TConfig['types']>,
 >(options: TConfig = {} as any): HTTPBatchLinkResult<TElysia, TConfig> {
   const maxURLLength = options.maxURLLength ?? Infinity
 

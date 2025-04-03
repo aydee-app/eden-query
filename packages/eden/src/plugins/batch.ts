@@ -96,7 +96,7 @@ export function createBatchResolvers(domain: InternalElysia, config: BatchPlugin
 export function batchPlugin<const T extends BatchPluginConfig>(config: T = {} as any) {
   type TResolvedConfig = ResolveTypeConfig<T['types']>
 
-  type TResolvedKey = TResolvedConfig['types']['key']
+  type TResolvedKey = TResolvedConfig['key']
 
   const endpoint = config?.endpoint ?? BATCH_ENDPOINT
 

@@ -72,3 +72,9 @@ export type Enumerate<
  * @internal
  */
 export type Range<From extends number, To extends number> = Exclude<Enumerate<To>, Enumerate<From>>
+
+/**
+ * @internal
+ * Infers the type of the value yielded by an async iterable
+ */
+export type inferAsyncIterableYield<T> = T extends AsyncIterable<infer U> ? U : T

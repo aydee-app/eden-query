@@ -157,7 +157,7 @@ export type ResolveTransformer<T> = T extends ConfigWithTransformer
  * @internal
  */
 export type ResolveTransformers<T> = T extends ConfigWithTransformers
-  ? { transformers: T['transformers'] }
+  ? { transformers?: T['transformers'] }
   : T extends ConfigWithTransformer
     ? { transformers?: [T['transformer']] }
     : Partial<ConfigWithTransformers>

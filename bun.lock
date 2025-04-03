@@ -36,6 +36,7 @@
         "@ark/attest": "^0.45.6",
         "@trpc/client": "^11.0.1",
         "@trpc/server": "^11.0.1",
+        "devalue": "^5.1.1",
         "superjson": "^2.2.2",
         "typescript": "^5.8.2",
       },
@@ -512,6 +513,8 @@
     "detect-indent": ["detect-indent@6.1.0", "", {}, "sha512-reYkTUJAZb9gUuZ2RvVCNhVHdg62RHnJ7WJl8ftMi4diZ6NWlciOzQN88pUhSELEwflJht4oQDv0F0BMlwaYtA=="],
 
     "detect-libc": ["detect-libc@2.0.3", "", {}, "sha512-bwy0MGW55bG41VqxxypOsdSdGqLwXPI/focwgTYCFMbdUiBAxLg9CFzG08sz2aqzknwiX7Hkl0bQENjg8iLByw=="],
+
+    "devalue": ["devalue@5.1.1", "", {}, "sha512-maua5KUiapvEwiEAe+XnlZ3Rh0GD+qI1J/nb9vrJc3muPXvcF/8gXYTWF76+5DAqHyDUtOIImEuo0YKE9mshVw=="],
 
     "devmoji": ["devmoji@2.3.0", "", { "dependencies": { "chalk": "^4.1.1", "commander": "7.2.0", "ts-interface-checker": "1.0.0" }, "bin": { "devmoji": "bin/devmoji.js" } }, "sha512-ErQdYUsE7tKxqDzQzRos6fKWaRIFUOJvMkQODq9iYDI3o5X6nxD78XEdGNYaW5AaJW4uxj+XQTkCuJkV86Qg6g=="],
 

@@ -139,7 +139,7 @@ describe('ResolveTransformers', () => {
 
       type Result = ResolveTransformers<Config>
 
-      expectTypeOf<Result>().toEqualTypeOf<Pick<Config, 'transformers'>>()
+      expectTypeOf<Result>().toEqualTypeOf<Partial<Pick<Config, 'transformers'>>>()
     })
 
     test('valid transformers object', () => {
@@ -147,7 +147,7 @@ describe('ResolveTransformers', () => {
 
       type Result = ResolveTransformers<Config>
 
-      expectTypeOf<Result>().toEqualTypeOf<Pick<Config, 'transformers'>>()
+      expectTypeOf<Result>().toEqualTypeOf<Partial<Pick<Config, 'transformers'>>>()
     })
 
     test('valid transformers object with multiple values', () => {
@@ -171,7 +171,7 @@ describe('ResolveTransformers', () => {
 
       type Result = ResolveTransformers<Config>
 
-      expectTypeOf<Result>().toEqualTypeOf<Pick<Config, 'transformers'>>()
+      expectTypeOf<Result>().toEqualTypeOf<Partial<Pick<Config, 'transformers'>>>()
     })
 
     test('valid transformers array with multiple values', () => {
@@ -195,7 +195,7 @@ describe('ResolveTransformers', () => {
 
       type Result = ResolveTransformers<Config>
 
-      expectTypeOf<Result>().toEqualTypeOf<Pick<Config, 'transformers'>>()
+      expectTypeOf<Result>().toEqualTypeOf<Partial<Pick<Config, 'transformers'>>>()
     })
   })
 
@@ -348,7 +348,7 @@ describe('TransformerConfig', () => {
 
       expectTypeOf<Result>().toEqualTypeOf<Expected>()
       expectTypeOf<Result>().toMatchObjectType<{ transformer: Config['transformers'][number] }>()
-      expectTypeOf<Result>().toMatchObjectType<{ transformers: Config['transformers'] }>()
+      expectTypeOf<Result>().toMatchObjectType<{ transformers?: Config['transformers'] }>()
     })
   })
 })

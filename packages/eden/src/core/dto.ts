@@ -63,6 +63,30 @@ export interface EdenWsStoppedResult {
   error?: never
 }
 
+export interface EdenWsBaseState {
+  type: 'state'
+}
+
+export interface EdenWsIdleState extends EdenWsBaseState {
+  state: 'idle'
+  data?: never
+  error?: never
+}
+
+export interface EdenWsConnectingState<T> extends EdenWsBaseState {
+  state: 'connecting'
+  error?: T
+  data?: never
+}
+
+export interface EdenWsPendingState extends EdenWsBaseState {
+  state: 'pending'
+  error?: never
+  data?: never
+}
+
+export type EdenWsStateResult<T> = EdenWsIdleState | EdenWsConnectingState<T> | EdenWsPendingState
+
 /**
  * Technically, the parameters can be narrowed to
  */
@@ -150,6 +174,7 @@ export type EdenSuccessResult<T> =
 export type EdenResult<TData = any, TError = any> =
   | EdenSuccessResult<TData>
   | EdenErrorResult<TError>
+  | EdenWsStateResult<TError>
 
 /**
  * For convenience, both error and result are defined in the interface for discrimination capabilities.
