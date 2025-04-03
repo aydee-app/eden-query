@@ -215,10 +215,11 @@ export type EdenRouteError<
 
 /**
  * Based on tRPC error inference.
- *
- * This gets an object mapping of
- *
  * @see https://github.com/trpc/trpc/blob/f6efa479190996c22bc1e541fdb1ad6a9c06f5b1/packages/client/src/TRPCClientError.ts#L12
+ *
+ * This returns an object mapping of errors. This only recognizes custom errors registered
+ * on the application.
+ * @see https://elysiajs.com/essential/life-cycle.html#custom-error
  */
 export type InferErrors<T extends InternalElysia = InternalElysia> = Get<
   T['_types'],
