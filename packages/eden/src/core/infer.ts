@@ -1,7 +1,7 @@
-import type { IsNever, NormalizeGenerator, ReplaceBlobWithFiles } from '../utils/types'
+import type { Get, IsNever, NormalizeGenerator, ReplaceBlobWithFiles } from '../utils/types'
 import type { EdenFetchError } from './error'
 import type { HttpNonErrorStatus, HttpSuccessStatus } from './http'
-import type { InternalRouteSchema } from './types'
+import type { InternalElysia, InternalRouteSchema } from './types'
 
 /**
  * The following types assume a Elysia.js {@link InternalRouteSchema} that looks like the following.
@@ -44,7 +44,7 @@ import type { InternalRouteSchema } from './types'
 export type EdenRouteParams<T extends InternalRouteSchema> =
   IsNever<keyof T['params']> extends true
     ? {
-        params?: Record<never, string>
+        params?: Record<string, string>
       }
     : {
         params: T['params']
@@ -65,7 +65,7 @@ export type EdenRouteQuery<
 > =
   IsNever<keyof TRoute['query']> extends true
     ? {
-        query?: Record<never, string>
+        query?: Record<string, string>
       }
     : {
         query: Omit<TRoute['query'], TOmitInput>
@@ -110,7 +110,7 @@ export type EdenRouteBody<T extends InternalRouteSchema = InternalRouteSchema> =
  * @example
  *
  * ```ts
- * type Response = {
+ * type Responses = {
  *   100: 'Information',
  *   200: 'OK',
  *   201: 'Success',
@@ -119,7 +119,7 @@ export type EdenRouteBody<T extends InternalRouteSchema = InternalRouteSchema> =
  *   500: 'Server error',
  * }
  *
- * type Result = EdenRouteSuccessOutput<Response>
+ * type Result = RouteSuccessResponses<Responses>
  * //   ^?  Result = { 200: 'OK', 201: 'Success' }
  *
  * function handleSuccess(possibleSuccessResponses: Result[keyof Result]) {
@@ -128,7 +128,7 @@ export type EdenRouteBody<T extends InternalRouteSchema = InternalRouteSchema> =
  * ```
  *
  */
-export type EdenRouteSuccessResponses<
+export type RouteSuccessResponses<
   T extends InternalRouteSchema = InternalRouteSchema,
   TSuccessStatuses extends keyof T['response'] = Extract<keyof T['response'], HttpSuccessStatus>,
 > = {
@@ -145,7 +145,7 @@ export type EdenRouteSuccessResponses<
  */
 export type EdenRouteSuccess<
   TRoute extends InternalRouteSchema = InternalRouteSchema,
-  TSuccessResponses = EdenRouteSuccessResponses<TRoute>,
+  TSuccessResponses = RouteSuccessResponses<TRoute>,
 > = TSuccessResponses[keyof TSuccessResponses]
 
 /**
@@ -164,12 +164,12 @@ export type EdenRouteSuccess<
  *   600: 'Custom error',
  * }
  *
- * type Result = EdenRouteErrorOutput<Response>
+ * type Result = RouteErrorResponses<Response>
  * //   ^?  Result = { 400: 'Client error', 500: 'Server error', 600: 'Custom error' }
  * ```
  *
  */
-export type EdenRouteErrorResponses<
+export type RouteErrorResponses<
   T extends InternalRouteSchema = InternalRouteSchema,
   TErrorStatuses extends keyof T['response'] = Exclude<keyof T['response'], HttpNonErrorStatus>,
 > = {
@@ -208,7 +208,19 @@ export type EdenRouteErrorResponses<
  */
 export type EdenRouteError<
   TRoute extends InternalRouteSchema = InternalRouteSchema,
-  TSuccessResponses = EdenRouteErrorResponses<TRoute>,
+  TSuccessResponses = RouteErrorResponses<TRoute>,
 > = {
   [K in keyof TSuccessResponses]: EdenFetchError<Extract<K, number>, TSuccessResponses[K]>
 }[keyof TSuccessResponses]
+
+/**
+ * Based on tRPC error inference.
+ *
+ * This gets an object mapping of
+ *
+ * @see https://github.com/trpc/trpc/blob/f6efa479190996c22bc1e541fdb1ad6a9c06f5b1/packages/client/src/TRPCClientError.ts#L12
+ */
+export type InferErrors<T extends InternalElysia = InternalElysia> = Get<
+  T['_types'],
+  ['Definitions', 'error']
+>

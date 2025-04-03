@@ -1,6 +1,6 @@
 import { describe, expectTypeOf, test } from 'vitest'
 
-import type { EdenRouteErrorResponses, EdenRouteSuccessResponses } from '../../src/core/infer'
+import type { RouteErrorResponses, RouteSuccessResponses } from '../../src/core/infer'
 
 describe('EdenRouteSuccessResponses', () => {
   test('returns only 200 status codes', () => {
@@ -15,7 +15,7 @@ describe('EdenRouteSuccessResponses', () => {
       }
     }
 
-    type Result = EdenRouteSuccessResponses<Route>
+    type Result = RouteSuccessResponses<Route>
 
     expectTypeOf<Result>().toMatchObjectType<Pick<Route['response'], 200 | 201>>()
     expectTypeOf<Result>().not.toMatchObjectType<Pick<Route['response'], 100 | 300 | 400 | 500>>()
@@ -35,7 +35,7 @@ describe('EdenRouteErrorResponse', () => {
       }
     }
 
-    type Result = EdenRouteErrorResponses<Route>
+    type Result = RouteErrorResponses<Route>
 
     expectTypeOf<Result>().toMatchObjectType<Pick<Route['response'], 400 | 500>>()
     expectTypeOf<Result>().not.toMatchObjectType<Pick<Route['response'], 100 | 200 | 201 | 300>>()

@@ -1,3 +1,6 @@
+import type { InferErrors } from './infer'
+import type { InternalElysia } from './types'
+
 /**
  * Type-safe wrapper around the basic {@link Error}.
  *
@@ -41,21 +44,30 @@ export class EdenFetchError<TStatus extends number = number, TValue = unknown> e
 /**
  * Placeholder class for WebSocket client errors.
  */
-export class EdenWsError<_T = any> extends Error {}
+export class EdenWsError<TStatus extends number = number, TValue = unknown> extends Error {
+  constructor(
+    public status: TStatus,
+    public value: TValue,
+  ) {
+    super(value + '')
+  }
+}
 
 /**
  * Placeholder class for Eden client errors.
  */
-export class EdenClientError<_T = any> extends Error {}
+export class EdenClientError<TStatus extends number = number, TValue = unknown> extends Error {
+  constructor(
+    public status: TStatus,
+    public value: TValue,
+  ) {
+    super(value + '')
+  }
+}
 
 /**
- * All possible errors.
- *
- * Since Eden and Elysia.js are inherently REST and not JSON-RPC, we don't have
- * have strong opinions on the types of permitted errors
- *
- * This type will be used as a central source of truth for the foreseeable future.
- * e.g. If there were ever a decision to tighten the restrictions on permitted errors,
- * this type would help facilitate that.
  */
-export type EdenError = EdenFetchError | EdenWsError | EdenClientError | any
+export type EdenError<T extends InternalElysia = InternalElysia, TErrors = InferErrors<T>> =
+  | EdenFetchError<number, TErrors[keyof TErrors]>
+  | EdenWsError<number, TErrors[keyof TErrors]>
+  | EdenClientError<number, TErrors[keyof TErrors]>

@@ -288,7 +288,7 @@ export type TransformerRequiredConfig<T extends ConfigWithAnyTransformer> = Reso
 export type TransformerStrictConfig<
   TElysia extends InternalElysia = InternalElysia,
   TTypeConfig extends InternalTypeConfig = {},
-  TStore = Get<TElysia['store'], [TTypeConfig['key']]>,
+  TStore = Get<TElysia, ['store', TTypeConfig['key']]>,
 > =
   TStore extends StateWithTransformerConfig<infer TTransformerConfig>
     ? TransformerRequiredConfig<TTransformerConfig>

@@ -1,8 +1,44 @@
 import type { EDEN_STATE_KEY } from '../constants'
 
+/**
+ * In order to reduce the possibility of breaking with upstream changes,
+ * the types are extremely loose, but their general shape is documented via comments.
+ */
 export interface InternalElysia {
-  store?: any
+  /**
+   * This property is updated with calls to state.
+   */
+  store?: any // Record<string, any>
+
+  /**
+   * Type information. Needed for inferring custom error declarations.
+   *
+   * @see https://elysiajs.com/essential/life-cycle.html#custom-error
+   */
+  _types?: any // InternalTypes
+
+  /**
+   * All registered routes.
+   */
+  _routes?: any // InternalRoutes
+
+  /**
+   * WinterCG, web-standard compliant request handler.
+   * @see https://elysiajs.com/patterns/mount.html#mount-1
+   */
   handle?: (request: Request) => Promise<Response>
+}
+
+export type InternalRoutes = {
+  [K: string]: InternalRouteSchema | InternalRoutes
+}
+
+export interface InternalTypes {
+  Definitions?: InternalDefinitions
+}
+
+export interface InternalDefinitions {
+  error?: Record<string, Error>
 }
 
 export interface InternalContext {
