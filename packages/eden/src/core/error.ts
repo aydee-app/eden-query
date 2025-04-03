@@ -41,12 +41,12 @@ export class EdenFetchError<TStatus extends number = number, TValue = unknown> e
 /**
  * Placeholder class for WebSocket client errors.
  */
-export class EdenWsError extends Error {}
+export class EdenWsError<_T = any> extends Error {}
 
 /**
  * Placeholder class for Eden client errors.
  */
-export class EdenClientError extends Error {}
+export class EdenClientError<_T = any> extends Error {}
 
 /**
  * All possible errors.
