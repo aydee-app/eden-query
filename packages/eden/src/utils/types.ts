@@ -78,3 +78,15 @@ export type Range<From extends number, To extends number> = Exclude<Enumerate<To
  * Infers the type of the value yielded by an async iterable
  */
 export type inferAsyncIterableYield<T> = T extends AsyncIterable<infer U> ? U : T
+
+/**
+ * @see https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/server/src/unstable-core-do-not-import/types.ts#L170C1-L170C31
+ */
+const _errorSymbol = Symbol()
+
+/**
+ * @se https://github.com/trpc/trpc/blob/0abf82448043f49c09dcdbb557b5a2b5344faf18/packages/server/src/unstable-core-do-not-import/types.ts#L172
+ */
+export type TypeError<TMessage extends string> = TMessage & {
+  _: typeof _errorSymbol
+}

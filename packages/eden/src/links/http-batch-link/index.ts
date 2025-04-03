@@ -9,6 +9,7 @@ import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
 import type { InternalElysia, TypeConfig } from '../../core/types'
 import { Observable } from '../../observable'
 import { toArray } from '../../utils/array'
+import type { TypeError } from '../../utils/types'
 import {
   handleHttpRequest,
   type HTTPLinkBaseOptions,
@@ -17,7 +18,8 @@ import {
 import type { EdenLink, Operation, OperationLink } from '../types'
 import { type BatchLoader, dataLoader } from './data-loader'
 
-export type BatchingNotDetectedError = 'Batch plugin not detected on Elysia.js server application'
+export type BatchingNotDetectedError =
+  TypeError<'Batch plugin not detected on Elysia.js server application'>
 
 export type ConfigWithBatching = { batch: any }
 
