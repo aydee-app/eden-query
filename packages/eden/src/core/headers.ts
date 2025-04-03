@@ -1,24 +1,4 @@
-import type { CallbackOrValue } from '../utils/callback-or-value'
-import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
-
-export interface HeadersInitEsque {
-  [Symbol.iterator](): IterableIterator<[string, string]>
-}
-
-/**
- * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/types.ts#L42
- */
-export type HTTPHeaders =
-  | HeadersInitEsque
-  | Record<string, string[] | string | Nullish>
-  | Array<[string, string]>
-  | [string, string]
-  // Technically not a valid header, but specified here to since `toArray` includes it in the resulting type...
-  | string
-
-export type HeadersEsque<T extends any[] = []> = MaybeArray<
-  CallbackOrValue<MaybePromise<HTTPHeaders | Nullish>, T>
->
+import type { HeadersEsque } from './http'
 
 function isString(value: unknown): value is string {
   return typeof value === 'string'

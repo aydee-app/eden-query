@@ -39,6 +39,7 @@ export interface EdenWsConnectionParamsRequest extends JSONRPC2.Request {
 export interface EdenWsReconnectResult {
   type: 'reconnect'
   data?: never
+  error?: never
 }
 
 /**
@@ -49,6 +50,7 @@ export interface EdenWsReconnectResult {
 export interface EdenWsStartedResult {
   type: 'started'
   data?: never
+  error?: never
 }
 
 /**
@@ -59,6 +61,7 @@ export interface EdenWsStartedResult {
 export interface EdenWsStoppedResult {
   type: 'stopped'
   data?: never
+  error?: never
 }
 
 /**
@@ -136,6 +139,10 @@ export type EdenSuccessResult<T> =
   | EdenWsStartedResult
   | EdenWsStoppedResult
   | EdenWsReconnectResult
+
+export type EdenResult<TData = unknown, TError = unknown> =
+  | EdenSuccessResult<TData>
+  | EdenErrorResult<TError>
 
 /**
  * For convenience, both error and result are defined in the interface for discrimination capabilities.

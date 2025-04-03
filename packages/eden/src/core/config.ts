@@ -1,9 +1,8 @@
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
-import type { EdenResponse } from './dto'
+import type { EdenResult } from './dto'
 import type { EdenError } from './error'
-import type { FetchEsque, RequestInitEsque } from './fetch'
-import type { HeadersEsque } from './headers'
-import type { ResponseEsque } from './response'
+import type { FetchEsque, HeadersEsque } from './http'
+import type { EdenRouteBody, EdenRouteOptions } from './infer'
 import type { TransformerConfig } from './transform'
 import type { InternalElysia, TypeConfig } from './types'
 
@@ -31,14 +30,14 @@ export type EdenRequestTransformer<
   path: string,
   options: RequestInit,
   params: EdenRequestParams<TElysia, TConfig>,
-) => MaybePromise<RequestInitEsque | void>
+) => MaybePromise<RequestInit | void>
 
 /**
  */
 export type EdenResponseTransformer<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
-> = (response: ResponseEsque, params: EdenRequestParams<TElysia, TConfig>) => MaybePromise<unknown>
+> = (response: Response, params: EdenRequestParams<TElysia, TConfig>) => MaybePromise<unknown>
 
 /**
  */
@@ -46,9 +45,9 @@ export type EdenResultTransformer<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
 > = (
-  result: EdenResponse<any, EdenError>,
+  result: EdenResult<any, EdenError>,
   params: EdenRequestParams<TElysia, TConfig>,
-) => MaybePromise<EdenResponse<any, EdenError> | Nullish>
+) => MaybePromise<EdenResult<any, EdenError> | Nullish>
 
 /**
  * Configure the global behavior of the request resolver.
@@ -176,6 +175,6 @@ export interface EdenRequestInit {
  * than the global resolver configuration options.
  */
 export type EdenRequestParams<
-  T extends InternalElysia = InternalElysia,
+  TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
-> = EdenResolverConfig<T, TConfig> & EdenRequestInit
+> = EdenResolverConfig<TElysia, TConfig> & EdenRequestInit

@@ -9,68 +9,7 @@
  */
 
 import { parseStringifiedValue } from '../utils/parse'
-
-/**
- * @template T The data that is returned from a successful response.
- */
-export interface EdenSuccessResult<T> {
-  data: T
-  error: null
-  response: Response
-}
-
-/**
- * @template T The data that is returned from an unsuccessful response.
- */
-export interface EdenErrorResult<T> {
-  data: null
-  error: T
-  response: Response
-}
-
-/**
- * Untyped eden-treaty response. Will either return nullish data and defined error, or vice versa.
- * Look at concrete implementation of eden-treaty for strongly-typed variant.
- *
- * @template TData The data that is returned from a successul response.
- * @template TError The data that is returned from an unsuccessful response.
- */
-export type EdenResult<TData = unknown, TError = unknown> =
-  | EdenSuccessResult<TData>
-  | EdenErrorResult<TError>
-
-/**
- * A subset of the standard ReadableStream properties needed by tRPC internally.
- * @see ReadableStream from lib.dom.d.ts
- */
-export type WebReadableStreamEsque = {
-  getReader: () => ReadableStreamDefaultReader<Uint8Array>
-}
-
-export type NodeJSReadableStreamEsque = {
-  on(eventName: string | symbol, listener: (...args: any[]) => void): NodeJSReadableStreamEsque
-  getReader?: undefined
-}
-
-/**
- * A subset of the standard Response properties needed by tRPC internally.
- * @see Response from lib.dom.d.ts
- *
- * @remarks
- * This interpretation of a Response object does not really work with Eden or Elysia.js
- * with its REST-based conventions. Eden client will use a majority of the Response object,
- * so declaring a subset is not helpful.
- */
-export interface ResponseEsque {
-  readonly body?: NodeJSReadableStreamEsque | WebReadableStreamEsque | null
-  /**
-   * @remarks
-   * The built-in Response::json() method returns Promise<any>, but
-   * that's not as type-safe as unknown. We use unknown because we're
-   * more type-safe. You do want more type safety, right? 😉
-   */
-  json(): Promise<unknown>
-}
+import type { ResponseEsque } from './http'
 
 export async function* streamResponse(response: ResponseEsque) {
   const body = response.body
