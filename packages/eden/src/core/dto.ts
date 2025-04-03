@@ -134,6 +134,11 @@ export interface EdenFetchSuccessResult<T> extends EdenFetchBaseResult {
  */
 export interface EdenFetchErrorResult<T> extends EdenFetchBaseResult {
   /**
+   * The id of the message to keep track of in case of a reconnect
+   */
+  id?: string
+
+  /**
    * This property is added for type discrimination, and it is omitted in the actual result.
    */
   type?: never
