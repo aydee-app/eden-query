@@ -7,13 +7,19 @@
 
 import type { JSONRPC2 } from './json-rpc'
 
+export const procedures = ['query', 'mutation', 'subscription'] as const
+
+/**
+ * @public
+ */
+export type Procedure = (typeof procedures)[number]
+
 /**
  * Request that the WebSocket client can send to terminate the subscription.
  *
  * @see https://github.com/trpc/trpc/blob/e543f3f3c86c9ad503a64d807ff4154ad6ec1637/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L94
  */
 export interface EdenWsSubscriptionStopRequest extends JSONRPC2.Request {
-  id: null
   method: 'subscription.stop'
 }
 
@@ -26,6 +32,32 @@ export interface EdenWsConnectionParamsRequest extends JSONRPC2.Request {
   method: 'connection-params'
   params: Dict<string> | null
 }
+
+/**
+ * A fetch request that's sent over WebSockets.
+ *
+ * @see https://github.com/trpc/trpc/blob/f6efa479190996c22bc1e541fdb1ad6a9c06f5b1/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L87
+ */
+export interface EdenWsFetchRequest extends JSONRPC2.Request {
+  method: Procedure
+
+  params: {
+    /**
+     * The last event id that the client received
+     */
+    lastEventId?: string
+
+    /**
+     * EdenRequestParams for the request.
+     */
+    params?: unknown
+  }
+}
+
+export type EdenWsRequest =
+  | (EdenWsSubscriptionStopRequest & { id: JSONRPC2.RequestId })
+  | EdenWsConnectionParamsRequest
+  | EdenWsFetchRequest
 
 /**
  * This was originally a JSON-RPC 2.0 request object sent by the server.
@@ -86,11 +118,6 @@ export interface EdenWsPendingState extends EdenWsBaseState {
 }
 
 export type EdenWsStateResult<T> = EdenWsIdleState | EdenWsConnectingState<T> | EdenWsPendingState
-
-/**
- * Technically, the parameters can be narrowed to
- */
-export interface EdenFetchRequest extends JSONRPC2.Request {}
 
 /**
  * Based on the official eden treaty response.
@@ -211,8 +238,6 @@ export type EdenResponse<TData = unknown, TError = unknown> =
   | EdenSuccessResponse<TData>
   | EdenErrorResponse<TError>
 
-export type EdenRequest = EdenWsSubscriptionStopRequest | EdenWsConnectionParamsRequest
-
 /**
  * Basically like {@link EdenResponse} but with a defined ID.
  */
@@ -221,8 +246,8 @@ export type EdenWsIncomingMessage<TData = unknown, TError = unknown> = {
 } & EdenResponse<TData, TError>
 
 /**
- * Basically like {@link EdenRequest} but with a defined ID.
+ * Basically like {@link EdenWsRequest} but with a defined ID.
  */
 export type EdenWsOutgoingMessage = {
   id: JSONRPC2.RequestId
-} & EdenRequest
+} & EdenWsRequest

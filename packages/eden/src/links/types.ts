@@ -1,15 +1,8 @@
 import type { EdenRequestParams } from '../core/config'
-import type { EdenResult } from '../core/dto'
+import type { EdenResult, Procedure } from '../core/dto'
 import type { EdenError } from '../core/error'
 import type { InternalElysia } from '../core/types'
 import type { Observable } from '../observable'
-
-export const procedures = ['query', 'mutation', 'subscription'] as const
-
-/**
- * @public
- */
-export type Procedure = (typeof procedures)[number]
 
 /**
  * An {@link OperationLink} attaches additional metadata to a returned {@link OperationResult}

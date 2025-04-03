@@ -108,7 +108,7 @@ export const defaultOnResult = (async (result, params) => {
     result.data = await transformer.output.deserialize(result.data)
   }
 
-  if (result.error) {
+  if (result.error && 'value' in result.error) {
     result.error.value = await transformer.output.deserialize(result.error.value)
   }
 }) satisfies EdenResultTransformer
