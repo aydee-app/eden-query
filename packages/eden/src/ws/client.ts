@@ -1,18 +1,13 @@
 import type { MaybeArray } from 'elysia'
 
-import type {
-  EdenWsIncomingMessage,
-  EdenWsOutgoingMessage,
-  // EdenWsReconnectResult,
-  EdenWsStateResult,
-} from '../core/dto'
-import { type EdenError,EdenWebSocketClosedError } from '../core/error'
-import type { AnyDataTransformer } from '../core/transform'
-import type { Operation } from '../links/types'
+import type { EdenWsIncomingMessage, EdenWsOutgoingMessage, EdenWsStateResult } from '../core/dto'
+import { type EdenError, EdenWebSocketClosedError } from '../core/error'
+import { type AnyDataTransformer,matchTransformer } from '../core/transform'
+import type { Operation, OperationLinkResult } from '../links/types'
 import { type BehaviorSubject, behaviorSubject, Observable } from '../observable'
 import { ResettableTimeout } from '../utils/resettable-timeout'
 import { sleep } from '../utils/sleep'
-import { backwardCompatibility, type KeepAliveOptions,WebSocketConnection } from './connection'
+import { backwardCompatibility, type KeepAliveOptions, WebSocketConnection } from './connection'
 import { RequestManager, type WebSocketRequestCallbacks } from './request-manager'
 import type { WebSocketUrlOptions } from './url'
 
@@ -251,13 +246,17 @@ export class WebSocketClient {
    * @param lastEventId - Optional ID of the last received event for subscriptions
    *
    * @returns An observable that emits operation results and handles cleanup
+   *
+   * @see https://github.com/trpc/trpc/blob/f6efa479190996c22bc1e541fdb1ad6a9c06f5b1/packages/server/src/unstable-core-do-not-import/transformer.ts#L168
    */
   public request(options: WebSocketRequestOptions) {
     const { op, lastEventId } = options
 
     const { id, type, params, signal } = op
 
-    return new Observable<EdenWsIncomingMessage, EdenError>((observer) => {
+    const transformer = matchTransformer(params.transformers, params.transformer)
+
+    return new Observable<OperationLinkResult>((observer) => {
       const abort = this.batchSend(
         {
           id,
@@ -269,20 +268,22 @@ export class WebSocketClient {
         },
         {
           ...observer,
-          next(event) {
-            console.log({ event })
-            observer.next(event)
+          async next(event) {
+            if (transformer) {
+              if (event.error) {
+                event.error = await transformer.output.deserialize(event.error)
+              }
 
-            // const transformed = transformResult(event, transformer.output)
+              if (event.result?.data) {
+                event.result.data = await transformer.output.deserialize(event.result.data)
+              }
+            }
 
-            // if (!transformed.ok) {
-            //   observer.error(TRPCClientError.from(transformed.error))
-            //   return
-            // }
-
-            // observer.next({
-            //   result: transformed.result,
-            // })
+            if (event.error) {
+              observer.error(event.error)
+            } else {
+              observer.next(event)
+            }
           },
         },
       )
