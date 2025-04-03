@@ -110,6 +110,11 @@ export interface EdenFetchSuccessResult<T> extends EdenFetchBaseResult {
  */
 export interface EdenFetchErrorResult<T> extends EdenFetchBaseResult {
   /**
+   * This property is added for type discrimination, and it is omitted in the actual result.
+   */
+  type?: never
+
+  /**
    * There will be no top-level data for an error response.
    * However, {@link T} should be a custom error class that may contain additional information.
    *
@@ -142,7 +147,7 @@ export type EdenSuccessResult<T> =
 /**
  * Any valid result.
  */
-export type EdenResult<TData = unknown, TError = unknown> =
+export type EdenResult<TData = any, TError = any> =
   | EdenSuccessResult<TData>
   | EdenErrorResult<TError>
 

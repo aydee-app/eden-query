@@ -3,9 +3,11 @@ import { processHeaders } from '../core/headers'
 import type { HTTPHeaders } from '../core/http'
 import { resolveEdenRequest } from '../core/resolve'
 import type { InternalElysia, TypeConfig } from '../core/types'
+import { Observable } from '../observable'
 import { toArray } from '../utils/array'
 import type { CallbackOrValue } from '../utils/callback-or-value'
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
+import type { EdenLink, Operation, OperationLink } from './types'
 
 /**
  * HTTP-links basically have the same configuration as the eden resolver because
@@ -105,8 +107,8 @@ export async function resolveHttpOperationParams<
 
 export async function handleHttpRequest<
   TElysia extends InternalElysia = InternalElysia,
-  TKey = undefined,
->(options: HTTPLinkOptions<TElysia, TKey>, op: Operation) {
+  TConfig extends TypeConfig = undefined,
+>(options: HTTPLinkOptions<TElysia, TConfig>, op: Operation) {
   const resolvedParams = await resolveHttpOperationParams(options, op)
   const result = await resolveEdenRequest(resolvedParams)
   return result
@@ -117,7 +119,7 @@ export async function handleHttpRequest<
  */
 export function httpLink<
   TElysia extends InternalElysia,
-  TConfig extends HTTPLinkOptions<TElysia, TConfig['types']>,
+  const TConfig extends HTTPLinkOptions<TElysia, TConfig['types']>,
 >(options: TConfig = {} as any) {
   const link = (() => {
     const operationLink = (({ op }) => {

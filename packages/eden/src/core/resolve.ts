@@ -218,7 +218,7 @@ export async function resolveEdenRequest<
       const data = await value(currentResponse, params)
 
       if (data != null) {
-        result = { error: null, data, response }
+        result = { type: 'data', error: null, data, response }
         break
       }
     }
