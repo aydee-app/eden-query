@@ -13,7 +13,6 @@ export const server = setupServer()
 
 export function useApp(app: AnyElysia) {
   const proxy = http.all('*', async (info) => {
-    // const request = info.request.clone()
     const response = await app.handle(info.request)
     return response
   })
