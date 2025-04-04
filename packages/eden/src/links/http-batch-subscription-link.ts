@@ -15,5 +15,5 @@ import {
 export function httpBatchSubscriptionLink<TElysia extends InternalElysia, const TConfig>(
   options: HTTPBatchLinkOptions<TElysia, TConfig> = {} as any,
 ): HTTPBatchLinkResult<TElysia, TConfig> {
-  return httpBatchLink({ ...options, stream: true } as any) as any
+  return httpBatchLink({ ...options, stream: true })
 }
