@@ -391,14 +391,20 @@ describe('http-batch-link', () => {
     })
 
     test('batch stream', async () => {
-      let i = 0
+      vi.useFakeTimers()
+
+      let i = 1
+
+      const interval = 1_000
+
+      const values = Array.from({ length: 5 }, (_, index) => index)
 
       const app = new Elysia()
         .use(transformPlugin({ transformers: { SuperJSON, devalue } }))
         .use(batchPlugin())
         .get('/', async () => {
           const id = i++
-          await sleep(id * 1_000)
+          await sleep(id * interval)
           return id
         })
 
@@ -412,14 +418,32 @@ describe('http-batch-link', () => {
         ],
       })
 
-      await Promise.all([
-        client.query('/').then((result) => {
-          console.log({ result }, 1)
-        }),
-        client.query('/').then((result) => {
-          console.log({ result }, 2)
-        }),
-      ])
+      const listener = vi.fn()
+
+      const promises = values.map((_value) => client.query('/').then(listener))
+
+      for (const value of values) {
+        await vi.advanceTimersByTimeAsync(interval)
+        expect(listener).toHaveBeenCalledTimes(value + 1)
+        expect(listener).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            data: value + 1,
+          }),
+        )
+      }
+
+      await Promise.all(promises)
+
+      values.forEach((value) => {
+        expect(listener).toHaveBeenNthCalledWith(
+          value + 1,
+          expect.objectContaining({
+            data: value + 1,
+          }),
+        )
+      })
+
+      vi.useRealTimers()
     })
 
     test('stream', async () => {
