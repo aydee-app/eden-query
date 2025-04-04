@@ -5,13 +5,6 @@ import {
   type HTTPBatchLinkResult,
 } from './http-batch-link'
 
-/**
- * @see https://trpc.io/docs/client/links/httpLink
- *
- * Tried to extrapolate return type but was not able to get correct inference
- * when inside of object errors. e.g. If {@link TConfig} itself contained an array,
- * then introspection would fail...
- */
 export function httpBatchSubscriptionLink<TElysia extends InternalElysia, const TConfig>(
   options: HTTPBatchLinkOptions<TElysia, TConfig> = {} as any,
 ): HTTPBatchLinkResult<TElysia, TConfig> {

@@ -36,8 +36,18 @@ export type BatchingNotDetectedError =
 export type ConfigWithBatching = { batch: any }
 
 /**
- * @see https://github.com/trpc/trpc/blob/f6efa479190996c22bc1e541fdb1ad6a9c06f5b1/packages/client/src/links/HTTPBatchLinkOptions.ts#L6
+ * An extremely flexible resolver for HTTP Headers.
+ *
+ * Can either be the value itself, a promise of the value, a nullish value, or
+ * a callback that returns any of the previously mentioned types.
+ *
+ * In the context of {@link httpLink}, the callback is provided with the current operation.
  */
+export type HTTPBatchLinkHeaders = CallbackOrValue<
+  MaybePromise<HTTPHeaders | Nullish>,
+  [Operation[]]
+>
+
 export type HTTPBatchLinkOptions<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
@@ -74,7 +84,7 @@ export type HTTPBatchLinkOptions<
    *
    * @see http://trpc.io/docs/client/headers
    */
-  headers?: MaybeArray<CallbackOrValue<MaybePromise<HTTPHeaders | Nullish>, [Operation[]]>>
+  headers?: MaybeArray<HTTPBatchLinkHeaders>
 
   /**
    * Shorthand for declaring that the batch plugin should accept the event-stream response type.
@@ -111,8 +121,6 @@ export type HTTPBatchLinkResult<
     : BatchingNotDetectedError
   : EdenLink<TElysia>
 
-/**
- */
 export async function resolveBatchJson(result: EdenResult, ops: EdenRequestParams[]) {
   if (!Array.isArray(result.data)) return []
 
@@ -138,8 +146,6 @@ export async function resolveBatchJson(result: EdenResult, ops: EdenRequestParam
   return results
 }
 
-/**
- */
 export async function resolveBatchStream(result: EdenResult, ops: EdenRequestParams[]) {
   if (result.type !== 'data' || !result.response.body) return []
 
@@ -170,13 +176,6 @@ export async function resolveBatchStream(result: EdenResult, ops: EdenRequestPar
   return resultOperations
 }
 
-/**
- * @see https://trpc.io/docs/client/links/httpLink
- *
- * Tried to extrapolate return type but was not able to get correct inference
- * when inside of object errors. e.g. If {@link TConfig} itself contained an array,
- * then introspection would fail...
- */
 export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
   options: HTTPBatchLinkOptions<TElysia, TConfig> = {} as any,
 ): HTTPBatchLinkResult<TElysia, TConfig> {

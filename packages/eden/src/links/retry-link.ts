@@ -32,11 +32,8 @@ interface RetryFnOptions<T extends InternalElysia> {
  * @see https://trpc.io/docs/v11/client/links/retryLink
  */
 export function retryLink<T extends InternalElysia>(options: RetryLinkOptions<T>): EdenLink<T> {
-  // Initialized config.
-  const link: EdenLink<T> = () => {
-    // Initialized in app.
-    const operationLink: OperationLink<T> = (callOptions) => {
-      // Initialized for request.
+  const link = (() => {
+    const operationLink = ((callOptions) => {
       return new Observable((observer) => {
         let next$: Unsubscribable
 
@@ -95,10 +92,10 @@ export function retryLink<T extends InternalElysia>(options: RetryLinkOptions<T>
           next$.unsubscribe()
         }
       })
-    }
+    }) satisfies OperationLink<T>
 
     return operationLink
-  }
+  }) satisfies EdenLink<T>
 
   return link
 }

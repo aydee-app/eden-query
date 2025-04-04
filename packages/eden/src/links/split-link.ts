@@ -19,22 +19,21 @@ export interface SplitLinkOptions<T extends InternalElysia = InternalElysia> {
 /**
  * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/splitLink.ts
  */
-export function splitLink<T extends InternalElysia = InternalElysia>(
-  options: SplitLinkOptions<T>,
-): EdenLink<T> {
-  const link: EdenLink<T> = (runtime) => {
+export function splitLink<T extends InternalElysia = InternalElysia>(options: SplitLinkOptions<T>) {
+  const link = ((runtime) => {
     const yes = toArray(options.true).map((link) => link(runtime))
     const no = toArray(options.false).map((link) => link(runtime))
 
-    const operationLink: OperationLink<T> = (props) => {
+    const operationLink = ((props) => {
       const links = options.condition(props.op) ? yes : no
 
       return new Observable((observer) => {
         return createChain({ op: props.op, links }).subscribe(observer)
       })
-    }
+    }) satisfies OperationLink<T>
 
     return operationLink
-  }
+  }) satisfies EdenLink<T>
+
   return link
 }

@@ -55,7 +55,7 @@ export type HTTPLinkOptions<
    *
    * @see http://trpc.io/docs/client/headers
    */
-  headers?: MaybeArray<CallbackOrValue<MaybePromise<HTTPHeaders | Nullish>, [Operation]>>
+  headers?: MaybeArray<HTTPLinkHeaders>
 }
 
 /**

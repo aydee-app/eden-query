@@ -5,7 +5,7 @@ import type {
   ResolveTypeConfig,
   TypeConfig,
 } from '../core/types'
-import { Observable } from '../observable'
+import { Observable, type Unsubscribable } from '../observable'
 import type { TypeError } from '../utils/types'
 import type { WebSocketClient } from '../ws/client'
 import type { HTTPLinkBaseOptions } from './http-link'
@@ -43,23 +43,27 @@ export function wsLink<TElysia extends InternalElysia, const TConfig>(
   const link = (() => {
     const operationLink = (({ op }) => {
       return new Observable((observer) => {
-        const connStateSubscription =
-          op.type === 'subscription'
-            ? client.connectionState.subscribe({
-                next(result) {
-                  observer.next({
-                    result,
-                    context: op.context,
-                  })
-                },
+        const subscriptions: Unsubscribable[] = []
+
+        if (op.type === 'subscription') {
+          const connectionStateSubscription = client.connectionState.subscribe({
+            next(result) {
+              observer.next({
+                result,
+                context: op.context,
               })
-            : null
+            },
+          })
+
+          subscriptions.push(connectionStateSubscription)
+        }
 
         const requestSubscription = client.request({ op, transformer }).subscribe(observer)
 
+        subscriptions.push(requestSubscription)
+
         return () => {
-          requestSubscription.unsubscribe()
-          connStateSubscription?.unsubscribe()
+          subscriptions.forEach((subscription) => subscription.unsubscribe())
         }
       })
     }) satisfies OperationLink<TElysia>
