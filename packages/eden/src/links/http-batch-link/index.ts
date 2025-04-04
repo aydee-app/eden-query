@@ -1,3 +1,5 @@
+import { jsonlStreamConsumer } from '@trpc/server/unstable-core-do-not-import'
+
 import { serializeBatchGetParams } from '../../batch/serializers/get'
 import { serializeBatchPostParams } from '../../batch/serializers/post'
 import type { BatchMethod } from '../../batch/shared'
@@ -75,6 +77,69 @@ export type HTTPBatchLinkResult<
       ? EdenLink<TElysia>
       : BatchingNotDetectedError
     : EdenLink<TElysia>
+
+/**
+ */
+async function resolveBatchJson(result: EdenResult, ops: EdenRequestParams[]) {
+  if (!Array.isArray(result.data)) return []
+
+  const batchedData: EdenResult[] = result.data
+
+  const resultOperations = batchedData.map(async (batchedResult, index) => {
+    let result = batchedResult
+
+    const op = ops[index]
+
+    if (op == null) return batchedResult
+
+    const onResult = [...toArray(op?.onResult), defaultOnResult]
+
+    for (const handler of onResult) {
+      const newResult = await handler(result, op)
+      result = newResult || result
+    }
+
+    return result
+  })
+
+  const results = await Promise.all(resultOperations)
+
+  return results
+}
+
+/**
+ */
+async function resolveBatchStream(result: EdenResult, ops: EdenRequestParams[]) {
+  if (result.type !== 'data' || !result.response.body) return []
+
+  const abortController = new AbortController()
+
+  const [head] = await jsonlStreamConsumer<Record<string, Promise<any>>>({
+    from: result.response.body,
+    abortController,
+  })
+
+  const resultOperations = ops.map(async (batchedResult, index) => {
+    let result = await Promise.resolve(head[index])
+
+    const op = ops[index]
+
+    if (op == null) return batchedResult
+
+    const onResult = [...toArray(op?.onResult), defaultOnResult]
+
+    for (const handler of onResult) {
+      const newResult = await handler(result, op)
+      result = newResult || result
+    }
+
+    return result
+  })
+
+  const results = await Promise.all(resultOperations)
+
+  return results
+}
 
 /**
  * @see https://trpc.io/docs/client/links/httpLink
@@ -163,28 +228,13 @@ export function httpBatchLink<
 
       const result = await resolveEdenRequest(resolvedParams)
 
-      if (!Array.isArray(result.data)) return []
+      if (result.type !== 'data') return []
 
-      const batchedData: EdenResult[] = result.data
+      const contentType = result.response.headers.get('content-type')
 
-      const resultOperations = batchedData.map(async (batchedResult, index) => {
-        let result = batchedResult
+      const resolver = contentType?.includes('event-stream') ? resolveBatchStream : resolveBatchJson
 
-        const op = resolvedBatchOps[index]
-
-        if (op == null) return batchedResult
-
-        const onResult = [...toArray(op?.onResult), defaultOnResult]
-
-        for (const handler of onResult) {
-          const newResult = await handler(result, op)
-          result = newResult || result
-        }
-
-        return result
-      })
-
-      const results = await Promise.all(resultOperations)
+      const results = resolver(result, resolvedBatchOps)
 
       return results
     },

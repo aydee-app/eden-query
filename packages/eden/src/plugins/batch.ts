@@ -1,3 +1,4 @@
+import { jsonlStreamProducer } from '@trpc/server/unstable-core-do-not-import'
 import { Elysia } from 'elysia'
 
 import type { BatchDeserializer, BatchDeserializerConfig } from '../batch/deserializers/config'
@@ -5,6 +6,7 @@ import { deserializeBatchGetParams } from '../batch/deserializers/get'
 import { deserializeBatchPostParams } from '../batch/deserializers/post'
 import type { BatchMethod } from '../batch/shared'
 import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../constants'
+import type { EdenRequestParams } from '../core/config'
 import { resolveEdenRequest } from '../core/resolve'
 import type {
   DefinedTypeConfig,
@@ -27,6 +29,55 @@ export const batchDeserializers = {
   GET: deserializeBatchGetParams,
   POST: deserializeBatchPostParams,
 } satisfies Record<BatchMethod, BatchDeserializer>
+
+/**
+ * Stream individual batch responses.
+ */
+export async function resolveBatchAsStream(resolvedBatchParams: EdenRequestParams[]) {
+  const data = resolvedBatchParams.map(async (params) => {
+    const response = await resolveEdenRequest(params)
+    return response
+  })
+
+  const stream = jsonlStreamProducer({ data })
+
+  const response = new Response(stream)
+
+  return response
+}
+
+/**
+ * Resolve batch request as a single JSON response with all the individual responses.
+ */
+export async function resolveBatchAsJson(resolvedBatchParams: EdenRequestParams[]) {
+  const batchOperations = resolvedBatchParams.map(async (params) => {
+    const response = await resolveEdenRequest(params)
+    return response
+  })
+
+  const results = await Promise.all(batchOperations)
+
+  const headers = new Headers()
+
+  for (const result of results) {
+    switch (result.type) {
+      case 'data': {
+        for (const [key, value] of result.response.headers) {
+          headers.append(key, value)
+        }
+        break
+      }
+    }
+  }
+
+  headers.set('content-type', 'application/json')
+
+  const body = JSON.stringify(results)
+
+  const response = new Response(body, { headers })
+
+  return response
+}
 
 /**
  * A low-level function for manually creating the resolvers. This uses internal type definitions
@@ -61,31 +112,11 @@ export function createBatchResolvers(domain: InternalElysia, config: BatchPlugin
       return resolvedParams
     })
 
-    const batchOperations = resolvedBatchParams.map(async (params) => {
-      const response = await resolveEdenRequest(params)
-      return response
-    })
+    const accept = context.request.headers.get('Accept')
 
-    const results = await Promise.all(batchOperations)
+    const resolve = accept?.indexOf('event-stream') ? resolveBatchAsStream : resolveBatchAsJson
 
-    const headers = new Headers()
-
-    for (const result of results) {
-      switch (result.type) {
-        case 'data': {
-          for (const [key, value] of result.response.headers) {
-            headers.append(key, value)
-          }
-          break
-        }
-      }
-    }
-
-    headers.set('content-type', 'application/json')
-
-    const body = JSON.stringify(results)
-
-    const response = new Response(body, { headers })
+    const response = await resolve(resolvedBatchParams)
 
     return response
   }
