@@ -26,6 +26,11 @@ function throwFatalError() {
   )
 }
 
+export class BatchInputTooLargeErro extends Error {
+  public override message =
+    'Input is too large for a single dispatch, try using a different HTTP method'
+}
+
 /**
  * Dataloader that's very inspired by https://github.com/graphql/dataloader
  * Less configuration, no caching, and allows you to cancel requests
@@ -73,7 +78,7 @@ export function dataLoader<TKey, TValue>(batchLoader: BatchLoader<TKey, TValue>)
       }
 
       if (lastGroup.length === 0) {
-        item.reject?.(new Error('Input is too big for a single dispatch'))
+        item.reject?.(new BatchInputTooLargeErro())
         index++
         continue
       }
@@ -81,11 +86,12 @@ export function dataLoader<TKey, TValue>(batchLoader: BatchLoader<TKey, TValue>)
       // Create new group, next iteration will try to add the item to that
       groupedItems.push([])
     }
+
     return groupedItems
   }
 
   async function dispatch() {
-    const groupedItems = await groupItems(pendingItems!)
+    const groupedItems = await groupItems(pendingItems ?? [])
 
     destroyTimerAndPendingItems()
 

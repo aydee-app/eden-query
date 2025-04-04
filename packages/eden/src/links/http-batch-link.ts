@@ -235,6 +235,7 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
       }
 
       operationHeaders = await processHeaders(options.headers, batchOps)
+
       const postRequest = batchOps.find((op) => op.params?.method?.toUpperCase() === 'POST')
 
       const method = (postRequest && 'POST') || options.method || 'POST'

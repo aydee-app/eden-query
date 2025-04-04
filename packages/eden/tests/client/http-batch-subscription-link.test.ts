@@ -1,12 +1,13 @@
 import { Elysia } from 'elysia'
 import SuperJSON from 'superjson'
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
 import { EdenClient } from '../../src/client'
 import { httpBatchSubscriptionLink } from '../../src/links/http-batch-subscription-link'
 import { httpLink } from '../../src/links/http-link'
 import { batchPlugin } from '../../src/plugins/batch'
 import { transformPlugin } from '../../src/plugins/transform'
+import { BatchInputTooLargeErro as BatchInputTooLargeError } from '../../src/utils/data-loader'
 import { useApp } from '../setup'
 
 describe('httpBatchSubscriptionLink', () => {
@@ -64,11 +65,89 @@ describe('httpBatchSubscriptionLink', () => {
 
       const results = await Promise.all(promises)
 
-      console.log({ results })
-
       results.forEach((result, index) => {
         expect(result.data).toBe(values[index])
       })
+    })
+  })
+
+  describe('invariants', () => {
+    test('groups items properly and uses custom batch endpoint', async () => {
+      const maxItems = 2
+
+      const groups = 3
+
+      const length = maxItems * groups
+
+      const values = Array.from({ length }, (_, index) => index)
+
+      let i = 0
+
+      const listener = vi.fn()
+
+      const endpoint = '/custom-batch-endpoint'
+
+      const app = new Elysia()
+        .onRequest((context) => {
+          const url = new URL(context.request.url)
+          if (url.pathname === endpoint) listener()
+        })
+        .use(
+          batchPlugin({
+            types: true,
+            method: 'GET',
+            endpoint,
+          }),
+        )
+        .get('/', () => values[i++])
+
+      useApp(app)
+
+      const client = new EdenClient<typeof app>({
+        links: [
+          httpBatchSubscriptionLink({
+            types: true,
+            domain: 'http://localhost:3000',
+            method: 'GET',
+            maxItems,
+            endpoint,
+          }),
+        ],
+      })
+
+      const requester = client.query.bind(client, '/', undefined, undefined)
+
+      const promises = values.map(requester)
+
+      await Promise.all(promises)
+
+      expect(listener).toHaveBeenCalledTimes(groups)
+    })
+
+    test('throws error if too large', async () => {
+      const app = new Elysia().use(
+        batchPlugin({
+          types: true,
+          method: 'GET',
+        }),
+      )
+
+      useApp(app)
+
+      const client = new EdenClient<typeof app>({
+        links: [
+          httpBatchSubscriptionLink({
+            types: true,
+            domain: 'http://localhost:3000',
+            method: 'GET',
+            maxURLLength: 0,
+          }),
+        ],
+      })
+
+      const promises = [client.query('/'), client.query('/')]
+
+      await expect(async () => await Promise.all(promises)).rejects.toThrow(BatchInputTooLargeError)
     })
   })
 })
