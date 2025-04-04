@@ -5,7 +5,7 @@ import type { Nullish } from './types'
  * - When all signals have been aborted, the merged signal will be aborted
  * - If one signal is `null`, no signal will be aborted
  */
-export function allAbortSignals(...signals: Array<AbortSignal | Nullish>): AbortSignal {
+export function linkAbortSignals(...signals: Array<AbortSignal | Nullish>): AbortSignal {
   const ac = new AbortController()
 
   const count = signals.length

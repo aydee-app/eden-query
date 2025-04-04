@@ -1,14 +1,18 @@
+import assert from 'node:assert'
+
+import { jsonlStreamConsumer, jsonlStreamProducer } from '@trpc/server/unstable-core-do-not-import'
 import { uneval } from 'devalue'
 import { type Context, Elysia, t } from 'elysia'
 import SuperJSON from 'superjson'
 import { describe, expect, test, vi } from 'vitest'
 
 import { EdenClient } from '../../../src/client'
-import type { EdenResult } from '../../../src/core/dto'
+import type { EdenResponse, EdenResult } from '../../../src/core/dto'
 import type { AnyDataTransformer } from '../../../src/core/transform'
 import { httpBatchLink } from '../../../src/links/http-batch-link'
 import { batchPlugin } from '../../../src/plugins/batch'
 import { transformPlugin } from '../../../src/plugins/transform'
+import { sleep } from '../../../src/utils/sleep'
 import { useApp } from '../../setup'
 
 const devalue: AnyDataTransformer = {
@@ -384,5 +388,87 @@ describe('http-batch-link', () => {
         expect(result.error).toBeNull()
       })
     })
+
+    test.only('stream', async () => {
+      const results = Array.from({ length: 5 }, (_, index) => index)
+
+      const app = new Elysia()
+        .use(transformPlugin({ transformers: { SuperJSON, devalue } }))
+        .use(batchPlugin())
+        .get('/', (context) => {
+          context.set.headers['content-type'] = 'text/event-stream'
+          context.set.headers['transfer-encoding'] = 'chunked'
+
+          const data = results.map(async (value, index) => {
+            await sleep(index * 500)
+
+            const result: EdenResult = {
+              type: 'data',
+              data: value,
+              response: {} as any,
+            }
+
+            return { result }
+          })
+
+          const stream = jsonlStreamProducer({ data })
+
+          // const iterable = readableStreamToAsyncIterable(stream)
+
+          // for await (const item of iterable) {
+          //   yield item
+          // }
+
+          return new Response(stream)
+        })
+
+      useApp(app)
+
+      const link = httpBatchLink({
+        domain: 'http://localhost:3000',
+        transformers: { SuperJSON, devalue },
+      })
+
+      const client = new EdenClient({ links: [link] })
+
+      const result = await client.query('/')
+
+      assert(result.type === 'data' && result.response.body)
+
+      const abortController = new AbortController()
+
+      const [head] = await jsonlStreamConsumer<Record<string, Promise<any>>>({
+        from: result.response.body,
+        abortController,
+      })
+
+      const expects = results.map(async (result, index) => {
+        const response: EdenResponse = await Promise.resolve(head[index])
+
+        assert(response.result?.type === 'data')
+
+        expect(response.result.data).toBe(result)
+      })
+
+      await Promise.all(expects)
+    })
   })
 })
+
+export async function* readableStreamToAsyncIterable<T>(
+  stream: ReadableStream<T>,
+): AsyncIterable<T> {
+  const reader = stream.getReader()
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) {
+        return
+      }
+      yield value
+    }
+  } finally {
+    reader.releaseLock()
+  }
+}

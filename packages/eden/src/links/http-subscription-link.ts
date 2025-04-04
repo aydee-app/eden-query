@@ -95,6 +95,8 @@ export function httpSubscriptionLink<
 >(options: HTTPSubscriptionLinkOptions<TElysia, TEventSource>): EdenLink<TElysia> {
   const transformer = resolveTransformer(options.transformer)
 
+  const EventSource = options.EventSource ?? (globalThis.EventSource as any)
+
   const link = (() => {
     const operationLink = (({ op }) => {
       return new Observable((observer) => {
@@ -119,10 +121,7 @@ export function httpSubscriptionLink<
 
         type TConsumerConfig = {
           EventSource: TEventSource
-          data: Partial<{
-            id?: string
-            data: unknown
-          }>
+          data: Partial<{ id?: string; data: unknown }>
           error: any // TRPCErrorShape
         }
 
@@ -140,12 +139,10 @@ export function httpSubscriptionLink<
 
             return options.url + pathWithQuery
           },
-          init: () => {
-            return resolveCallbackOrValue(options.eventSourceOptions, op)
-          },
+          init: resolveCallbackOrValue.bind(null, options.eventSourceOptions, op),
           signal,
           deserialize: transformer?.output.deserialize,
-          EventSource: options.EventSource ?? (globalThis.EventSource as any),
+          EventSource,
         })
 
         const connectionState = behaviorSubject<EdenWsStateResult<EdenError>>({

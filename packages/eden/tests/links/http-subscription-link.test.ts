@@ -43,26 +43,14 @@ describe('httpSubscriptionLink', () => {
 
     const enqueued: any[] = []
 
-    const app = new Elysia().get('/', () => {
-      const stream = new ReadableStream({
-        async start(controller) {
-          const iterable = createIntervalIterable(interval, length)
+    const app = new Elysia().get('/', async function* () {
+      const iterable = createIntervalIterable(interval, length)
 
-          for await (const value of iterable) {
-            enqueued.push(value)
-            const data = JSON.stringify(value)
-            controller.enqueue(`data:${data}\n\n`)
-          }
-
-          controller.close()
-        },
-      })
-
-      return new Response(stream, {
-        headers: {
-          'Content-Type': 'text/event-stream',
-        },
-      })
+      for await (const value of iterable) {
+        enqueued.push(value)
+        const data = JSON.stringify(value)
+        yield `data:${data}\n\n`
+      }
     })
 
     useApp(app)

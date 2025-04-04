@@ -1,23 +1,25 @@
-import { serializeBatchGetParams } from '../../batch/serializers/get'
-import { serializeBatchPostParams } from '../../batch/serializers/post'
-import type { BatchMethod } from '../../batch/shared'
-import { BATCH_ENDPOINT, type EDEN_STATE_KEY, HTTP_SUBSCRIPTION_ERROR } from '../../constants'
-import type { EdenRequestParams } from '../../core/config'
-import type { EdenResult } from '../../core/dto'
-import type { EdenError } from '../../core/error'
-import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
-import type { InternalElysia, TypeConfig } from '../../core/types'
-import { Observable } from '../../observable'
-import { toArray } from '../../utils/array'
-import { linkAbortSignals, raceAbortSignals } from '../../utils/signal'
-import type { TypeError } from '../../utils/types'
+import { jsonlStreamConsumer } from '@trpc/server/unstable-core-do-not-import'
+
+import { serializeBatchGetParams } from '../batch/serializers/get'
+import { serializeBatchPostParams } from '../batch/serializers/post'
+import type { BatchMethod } from '../batch/shared'
+import { BATCH_ENDPOINT, type EDEN_STATE_KEY, HTTP_SUBSCRIPTION_ERROR } from '../constants'
+import type { EdenRequestParams } from '../core/config'
+import type { EdenResult } from '../core/dto'
+import type { EdenError } from '../core/error'
+import { resolveEdenRequest } from '../core/resolve'
+import { matchTransformer } from '../core/transform'
+import type { InternalElysia, TypeConfig } from '../core/types'
+import { Observable } from '../observable'
+import { linkAbortSignals, raceAbortSignals } from '../utils/signal'
+import type { TypeError } from '../utils/types'
+import { type BatchLoader, dataLoader } from './http-batch-link/data-loader'
 import {
   handleHttpRequest,
   type HTTPLinkBaseOptions,
   resolveHttpOperationParams,
-} from '../http-link'
-import type { EdenLink, Operation, OperationLink } from '../types'
-import { type BatchLoader, dataLoader } from './data-loader'
+} from './http-link'
+import type { EdenLink, Operation, OperationLink } from './types'
 
 export type BatchingNotDetectedError =
   TypeError<'Batch plugin not detected on Elysia.js server application'>
@@ -95,6 +97,10 @@ export function httpBatchLink<
 
   const edenParamsResolver = (op: Operation) => resolveHttpOperationParams(options, op)
 
+  const internalConfig = options as HTTPBatchLinkOptions
+
+  const transformer = matchTransformer(internalConfig.transformers, internalConfig.transformer)
+
   const batchLoader: BatchLoader<Operation, EdenResult<any, EdenError>> = {
     async validate(batchOps) {
       // If not a GET request, then we don't care about size limits.
@@ -149,12 +155,12 @@ export function httpBatchLink<
         headers: resolvedBatchParams.headers,
       } as EdenRequestParams
 
+      const abortController = new AbortController()
+
       const batchSignals = batchOps.map((op) => op.signal)
 
       if (batchSignals.length) {
         const linkedBatchSignals = linkAbortSignals(...batchSignals)
-
-        const abortController = new AbortController()
 
         const signal = raceAbortSignals(linkedBatchSignals, abortController.signal)
 
@@ -163,30 +169,70 @@ export function httpBatchLink<
 
       const result = await resolveEdenRequest(resolvedParams)
 
-      if (!Array.isArray(result.data)) return []
+      if (result.type !== 'data') return []
 
-      const batchedData: EdenResult[] = result.data
+      if (!result.response.body) return []
 
-      const resultOperations = batchedData.map(async (batchedResult, index) => {
-        let result = batchedResult
-
-        const op = resolvedBatchOps[index]
-
-        if (op == null) return batchedResult
-
-        const onResult = [...toArray(op?.onResult), defaultOnResult]
-
-        for (const handler of onResult) {
-          const newResult = await handler(result, op)
-          result = newResult || result
-        }
-
-        return result
+      const [head] = await jsonlStreamConsumer<Record<string, Promise<any>>>({
+        from: result.response.body,
+        deserialize: transformer?.output.deserialize,
+        // formatError(opts) {
+        //   const error = opts.error as TRPCErrorShape
+        //   return TRPCClientError.from({ error })
+        // },
+        abortController,
       })
 
-      const results = await Promise.all(resultOperations)
+      // if (!Array.isArray(result.data)) return []
 
-      return results
+      // const batchedData: EdenResult[] = result.data
+
+      // const resultOperations = batchedData.map(async (batchedResult, index) => {
+      //   let result = batchedResult
+
+      //   const op = resolvedBatchOps[index]
+
+      //   if (op == null) return batchedResult
+
+      //   const onResult = [...toArray(op?.onResult), defaultOnResult]
+
+      //   for (const handler of onResult) {
+      //     const newResult = await handler(result, op)
+      //     result = newResult || result
+      //   }
+
+      //   return result
+      // })
+
+      // const results = await Promise.all(resultOperations)
+
+      // return results
+      const promises = Object.keys(batchOps).map(async (key): Promise<EdenResult> => {
+        const json = await Promise.resolve(head[key])
+
+        console.log({ json })
+
+        // if ('result' in json) {
+        //   /**
+        //    * Not very pretty, but we need to unwrap nested data as promises
+        //    * Our stream producer will only resolve top-level async values or async values that are directly nested in another async value
+        //    */
+        //   const result = await Promise.resolve(json.result)
+        //   json = {
+        //     result: {
+        //       data: await Promise.resolve(result.data),
+        //     },
+        //   }
+        // }
+
+        return {
+          type: 'data',
+          data: json,
+          response: result.response,
+        }
+      })
+
+      return promises
     },
   }
 
