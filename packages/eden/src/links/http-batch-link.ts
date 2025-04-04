@@ -116,8 +116,10 @@ export type HTTPBatchLinkResult<
   TConfig extends TypeConfig,
   TResolvedConfig extends InternalTypeConfig = ResolveTypeConfig<TConfig>,
 > = TResolvedConfig['key'] extends PropertyKey
-  ? TElysia['store'][TResolvedConfig['key']] extends ConfigWithBatching
-    ? EdenLink<TElysia>
+  ? TResolvedConfig['key'] extends keyof TElysia['store']
+    ? TElysia['store'][TResolvedConfig['key']] extends ConfigWithBatching
+      ? EdenLink<TElysia>
+      : BatchingNotDetectedError
     : BatchingNotDetectedError
   : EdenLink<TElysia>
 
@@ -177,7 +179,7 @@ export async function resolveBatchStream(result: EdenResult, ops: EdenRequestPar
 }
 
 export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
-  options: HTTPBatchLinkOptions<TElysia, TConfig> = {} as any,
+  options: HTTPBatchLinkOptions<NoInfer<TElysia>, TConfig> = {} as any,
 ): HTTPBatchLinkResult<TElysia, TConfig> {
   const maxURLLength = options.maxURLLength ?? Infinity
 

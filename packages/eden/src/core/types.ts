@@ -8,7 +8,7 @@ export interface InternalElysia {
   /**
    * This property is updated with calls to state.
    */
-  store?: any // Record<string, any>
+  store?: Record<string, unknown> // Record<string, any>
 
   /**
    * Type information. Needed for inferring custom error declarations.

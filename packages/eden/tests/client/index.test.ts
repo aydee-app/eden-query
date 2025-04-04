@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
-import { EdenClient } from '../src/client'
-import type { EdenRequestParams } from '../src/core/config'
-import { Observable } from '../src/observable'
+import { EdenClient } from '../../src/client'
+import type { EdenRequestParams } from '../../src/core/config'
+import { Observable } from '../../src/observable'
 
 describe('EdenClient', () => {
   const response = new Response()

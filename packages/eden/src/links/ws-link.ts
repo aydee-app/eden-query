@@ -28,13 +28,13 @@ export type WsLinkResult<
   TConfig extends TypeConfig,
   TResolvedConfig extends InternalTypeConfig = ResolveTypeConfig<TConfig>,
 > = TResolvedConfig['key'] extends PropertyKey
-  ? TElysia['store'][TResolvedConfig['key']] extends ConfigWithWs
+  ? TElysia['store'][Extract<TResolvedConfig['key'], keyof TElysia['store']>] extends ConfigWithWs
     ? EdenLink<TElysia>
     : WsNotDetectedError
   : EdenLink<TElysia>
 
 export function wsLink<TElysia extends InternalElysia, const TConfig>(
-  options: WsLinkOptions<TElysia, TConfig>,
+  options: WsLinkOptions<NoInfer<TElysia>, TConfig>,
 ): WsLinkResult<TElysia, TConfig> {
   const { client } = options
 

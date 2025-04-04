@@ -92,7 +92,7 @@ type HTTPSubscriptionLinkOptions<
 export function httpSubscriptionLink<
   TElysia extends InternalElysia,
   TEventSource extends EventSourceLike.AnyConstructor,
->(options: HTTPSubscriptionLinkOptions<TElysia, TEventSource>): EdenLink<TElysia> {
+>(options: HTTPSubscriptionLinkOptions<NoInfer<TElysia>, TEventSource>): EdenLink<TElysia> {
   const transformer = resolveTransformer(options.transformer)
 
   const EventSource = options.EventSource ?? (globalThis.EventSource as any)

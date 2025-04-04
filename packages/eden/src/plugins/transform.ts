@@ -37,7 +37,7 @@ export interface TransformerPluginConfig<
 export function transformPlugin<const T extends TransformerPluginConfig>(config: T = {} as any) {
   type TResolvedConfig = ResolveTypeConfig<T['types']>
 
-  type TResolvedKey = Extract<TResolvedConfig['key'], PropertyKey>
+  type TResolvedKey = TResolvedConfig['key'] extends PropertyKey ? TResolvedConfig['key'] : never
 
   const defaultKey = config.types === true ? EDEN_STATE_KEY : (config.types?.key ?? EDEN_STATE_KEY)
 

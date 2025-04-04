@@ -25,7 +25,7 @@ export interface WsPluginConfig<
 export function wsPlugin<const T extends WsPluginConfig>(config: T = {} as any) {
   type TResolvedConfig = ResolveTypeConfig<T['types']>
 
-  type TResolvedKey = Extract<TResolvedConfig['key'], PropertyKey>
+  type TResolvedKey = TResolvedConfig['key'] extends PropertyKey ? TResolvedConfig['key'] : never
 
   const endpoint = config?.endpoint ?? WS_ENDPOINT
 

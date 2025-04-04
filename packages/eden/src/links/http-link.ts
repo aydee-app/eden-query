@@ -112,7 +112,7 @@ export async function handleHttpRequest<
  * @see https://trpc.io/docs/client/links/httpLink
  */
 export function httpLink<TElysia extends InternalElysia, const TConfig>(
-  options: HTTPLinkOptions<TElysia, TConfig> = {} as any,
+  options: HTTPLinkOptions<NoInfer<TElysia>, TConfig> = {} as any,
 ) {
   const link = (() => {
     const operationLink = (({ op }) => {
