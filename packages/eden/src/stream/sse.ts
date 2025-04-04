@@ -1,6 +1,7 @@
+import { Unpromise } from '@trpc/server/unstable-core-do-not-import'
+
 import type { DataTransformer } from '../core/transform'
 import type { MaybePromise } from '../utils/types'
-import { Unpromise } from '../vendor/unpromise'
 import type { ConsumerConfig, SSEClientOptions } from './config'
 import type { ConsumerStreamResult } from './dto'
 import type { inferTrackedOutput } from './tracked'
