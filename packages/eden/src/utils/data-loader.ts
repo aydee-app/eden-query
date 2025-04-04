@@ -1,4 +1,4 @@
-import type { MaybePromise } from '../../utils/types'
+import type { MaybePromise } from './types'
 
 type BatchItem<TKey, TValue> = {
   aborted: boolean

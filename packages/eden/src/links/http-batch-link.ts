@@ -1,34 +1,34 @@
 import { jsonlStreamConsumer } from '@trpc/server/unstable-core-do-not-import'
 
-import { serializeBatchGetParams } from '../../batch/serializers/get'
-import { serializeBatchPostParams } from '../../batch/serializers/post'
-import type { BatchMethod } from '../../batch/shared'
-import { BATCH_ENDPOINT, HTTP_SUBSCRIPTION_ERROR } from '../../constants'
-import type { EdenRequestParams } from '../../core/config'
-import type { EdenResult } from '../../core/dto'
-import type { EdenError } from '../../core/error'
-import { processHeaders } from '../../core/headers'
-import type { HTTPHeaders } from '../../core/http'
-import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
+import { serializeBatchGetParams } from '../batch/serializers/get'
+import { serializeBatchPostParams } from '../batch/serializers/post'
+import type { BatchMethod } from '../batch/shared'
+import { BATCH_ENDPOINT, HTTP_SUBSCRIPTION_ERROR } from '../constants'
+import type { EdenRequestParams } from '../core/config'
+import type { EdenResult } from '../core/dto'
+import type { EdenError } from '../core/error'
+import { processHeaders } from '../core/headers'
+import type { HTTPHeaders } from '../core/http'
+import { defaultOnResult, resolveEdenRequest } from '../core/resolve'
 import type {
   InternalElysia,
   InternalTypeConfig,
   ResolveTypeConfig,
   TypeConfig,
-} from '../../core/types'
-import { Observable } from '../../observable'
-import { toArray } from '../../utils/array'
-import type { CallbackOrValue } from '../../utils/callback-or-value'
-import { linkAbortSignals, raceAbortSignals } from '../../utils/signal'
-import type { MaybeArray, MaybePromise, Nullish, TypeError } from '../../utils/types'
+} from '../core/types'
+import { Observable } from '../observable'
+import { toArray } from '../utils/array'
+import type { CallbackOrValue } from '../utils/callback-or-value'
+import { type BatchLoader, dataLoader } from '../utils/data-loader'
+import { linkAbortSignals, raceAbortSignals } from '../utils/signal'
+import type { MaybeArray, MaybePromise, Nullish, TypeError } from '../utils/types'
 import {
   handleHttpRequest,
   type HTTPLinkBaseOptions,
   type HTTPLinkOptions,
   resolveHttpOperationParams,
-} from '../http-link'
-import type { EdenLink, Operation, OperationLink } from '../types'
-import { type BatchLoader, dataLoader } from './data-loader'
+} from './http-link'
+import type { EdenLink, Operation, OperationLink } from './types'
 
 export type BatchingNotDetectedError =
   TypeError<'Batch plugin not detected on Elysia.js server application'>
