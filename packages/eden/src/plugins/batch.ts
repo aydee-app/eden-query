@@ -41,7 +41,12 @@ export async function resolveBatchAsStream(resolvedBatchParams: EdenRequestParam
 
   const stream = jsonlStreamProducer({ data })
 
-  const response = new Response(stream)
+  const headers = new Headers()
+
+  headers.set('content-type', 'text/event-stream')
+  headers.set('transfer-encoding', 'chunked')
+
+  const response = new Response(stream, { headers })
 
   return response
 }
@@ -114,9 +119,9 @@ export function createBatchResolvers(domain: InternalElysia, config: BatchPlugin
 
     const accept = context.request.headers.get('Accept')
 
-    const resolve = accept?.indexOf('event-stream') ? resolveBatchAsStream : resolveBatchAsJson
+    const resolve = accept?.includes('event-stream') ? resolveBatchAsStream : resolveBatchAsJson
 
-    const response = await resolve(resolvedBatchParams)
+    const response = resolve(resolvedBatchParams)
 
     return response
   }

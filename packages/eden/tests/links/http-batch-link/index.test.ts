@@ -10,6 +10,7 @@ import { EdenClient } from '../../../src/client'
 import type { EdenResponse, EdenResult } from '../../../src/core/dto'
 import type { AnyDataTransformer } from '../../../src/core/transform'
 import { httpBatchLink } from '../../../src/links/http-batch-link'
+import { httpBatchSubscriptionLink } from '../../../src/links/http-batch-subscription-link'
 import { batchPlugin } from '../../../src/plugins/batch'
 import { transformPlugin } from '../../../src/plugins/transform'
 import { sleep } from '../../../src/utils/sleep'
@@ -389,7 +390,39 @@ describe('http-batch-link', () => {
       })
     })
 
-    test.only('stream', async () => {
+    test('batch stream', async () => {
+      let i = 0
+
+      const app = new Elysia()
+        .use(transformPlugin({ transformers: { SuperJSON, devalue } }))
+        .use(batchPlugin())
+        .get('/', async () => {
+          const id = i++
+          await sleep(id * 1_000)
+          return id
+        })
+
+      useApp(app)
+
+      const client = new EdenClient({
+        links: [
+          httpBatchSubscriptionLink({
+            domain: 'http://localhost:3000',
+          }),
+        ],
+      })
+
+      await Promise.all([
+        client.query('/').then((result) => {
+          console.log({ result }, 1)
+        }),
+        client.query('/').then((result) => {
+          console.log({ result }, 2)
+        }),
+      ])
+    })
+
+    test('stream', async () => {
       const results = Array.from({ length: 5 }, (_, index) => index)
 
       const app = new Elysia()

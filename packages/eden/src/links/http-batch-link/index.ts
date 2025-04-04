@@ -7,15 +7,19 @@ import { BATCH_ENDPOINT, type EDEN_STATE_KEY, HTTP_SUBSCRIPTION_ERROR } from '..
 import type { EdenRequestParams } from '../../core/config'
 import type { EdenResult } from '../../core/dto'
 import type { EdenError } from '../../core/error'
+import { processHeaders } from '../../core/headers'
+import type { HTTPHeaders } from '../../core/http'
 import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
 import type { InternalElysia, TypeConfig } from '../../core/types'
 import { Observable } from '../../observable'
 import { toArray } from '../../utils/array'
+import type { CallbackOrValue } from '../../utils/callback-or-value'
 import { linkAbortSignals, raceAbortSignals } from '../../utils/signal'
-import type { TypeError } from '../../utils/types'
+import type { MaybeArray, MaybePromise, Nullish, TypeError } from '../../utils/types'
 import {
   handleHttpRequest,
   type HTTPLinkBaseOptions,
+  type HTTPLinkOptions,
   resolveHttpOperationParams,
 } from '../http-link'
 import type { EdenLink, Operation, OperationLink } from '../types'
@@ -58,6 +62,33 @@ export type HTTPBatchLinkOptions<
    * @default "POST"
    */
   method?: BatchMethod
+
+  /**
+   * Headers to be set on outgoing requests or a callback that of said headers
+   * Basically like {@link EdenResolverConfig.headers} but callbacks are provided with the entire operation.
+   *
+   * @see http://trpc.io/docs/client/headers
+   */
+  headers?: MaybeArray<CallbackOrValue<MaybePromise<HTTPHeaders | Nullish>, [Operation[]]>>
+
+  /**
+   * Shorthand for declaring that the batch plugin should accept the event-stream response type.
+   *
+   * e.g.
+   *
+   * ```ts
+   * {
+   *   // with headers
+   *   headers: {
+   *     'accept': 'text/event-stream',
+   *   },
+   *
+   *   // with shortcut
+   *   stream: true,
+   * }
+   * ```
+   */
+  stream?: boolean
 }
 
 const batchSerializers = {
@@ -80,12 +111,12 @@ export type HTTPBatchLinkResult<
 
 /**
  */
-async function resolveBatchJson(result: EdenResult, ops: EdenRequestParams[]) {
+export async function resolveBatchJson(result: EdenResult, ops: EdenRequestParams[]) {
   if (!Array.isArray(result.data)) return []
 
   const batchedData: EdenResult[] = result.data
 
-  const resultOperations = batchedData.map(async (batchedResult, index) => {
+  const results = batchedData.map(async (batchedResult, index) => {
     let result = batchedResult
 
     const op = ops[index]
@@ -102,14 +133,12 @@ async function resolveBatchJson(result: EdenResult, ops: EdenRequestParams[]) {
     return result
   })
 
-  const results = await Promise.all(resultOperations)
-
   return results
 }
 
 /**
  */
-async function resolveBatchStream(result: EdenResult, ops: EdenRequestParams[]) {
+export async function resolveBatchStream(result: EdenResult, ops: EdenRequestParams[]) {
   if (result.type !== 'data' || !result.response.body) return []
 
   const abortController = new AbortController()
@@ -136,9 +165,7 @@ async function resolveBatchStream(result: EdenResult, ops: EdenRequestParams[]) 
     return result
   })
 
-  const results = await Promise.all(resultOperations)
-
-  return results
+  return resultOperations
 }
 
 /**
@@ -158,7 +185,18 @@ export function httpBatchLink<
 
   const endpoint = options.endpoint ?? BATCH_ENDPOINT
 
-  const edenParamsResolver = (op: Operation) => resolveHttpOperationParams(options, op)
+  // Lazily evaluated, global operation headers.
+  let operationHeaders = {}
+
+  const edenParamsResolver = async (op: Operation) => {
+    const headers = [operationHeaders, ...toArray(op.params.headers)]
+
+    const params = await resolveHttpOperationParams(options, op)
+
+    const resolvedParams = { ...params, headers }
+
+    return resolvedParams
+  }
 
   const batchLoader: BatchLoader<Operation, EdenResult<any, EdenError>> = {
     async validate(batchOps) {
@@ -182,12 +220,27 @@ export function httpBatchLink<
       if (batchOps.length === 1) {
         const [firstOperation] = batchOps
 
-        if (firstOperation != null) {
-          const result = await handleHttpRequest(options, firstOperation)
-          return [result]
+        // Error case: only one operation, but it is somehow null.
+        if (firstOperation == null) return []
+
+        // Resolve the custom headers here since HTTP handling has a different shape for input headers.
+        const headers = await processHeaders(options.headers, batchOps)
+
+        if (options.stream) {
+          headers['accept'] = 'text/event-stream'
         }
+
+        const httpLinkOptions: HTTPLinkOptions<TElysia, TConfig['types']> = {
+          ...options,
+          headers,
+        }
+
+        const result = await handleHttpRequest(httpLinkOptions, firstOperation)
+
+        return [result]
       }
 
+      operationHeaders = await processHeaders(options.headers, batchOps)
       const postRequest = batchOps.find((op) => op.params?.method?.toUpperCase() === 'POST')
 
       const method = (postRequest && 'POST') || options.method || 'POST'
@@ -197,6 +250,10 @@ export function httpBatchLink<
       const serializer = batchSerializers[method]
 
       const resolvedBatchParams = await serializer(resolvedBatchOps)
+
+      if (options.stream) {
+        resolvedBatchParams.headers.set('accept', 'text/event-stream')
+      }
 
       const resolvedParams = {
         ...options,

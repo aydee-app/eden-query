@@ -69,7 +69,7 @@ export type HTTPLinkOptions<
 export async function resolveHttpOperationParams<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
->(options: HTTPLinkOptions<TElysia, TConfig>, op: Operation) {
+>(options: HTTPLinkBaseOptions<TElysia, TConfig>, op: Operation) {
   const { path, params } = op
 
   const fetch = { ...options.fetch, ...params?.fetch }
@@ -80,10 +80,6 @@ export async function resolveHttpOperationParams<
 
   const onResult = [...toArray(options.onResult), ...toArray(params.onResult)]
 
-  const operationHeaders = await processHeaders(options.headers, op)
-
-  const headers = [operationHeaders, ...toArray(params.headers)]
-
   const resolvedParams = {
     path,
     ...options,
@@ -92,7 +88,6 @@ export async function resolveHttpOperationParams<
     onRequest,
     onResponse,
     onResult,
-    headers,
   } as EdenRequestParams
 
   return resolvedParams
@@ -102,8 +97,16 @@ export async function handleHttpRequest<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
 >(options: HTTPLinkOptions<TElysia, TConfig>, op: Operation) {
-  const resolvedParams = await resolveHttpOperationParams(options, op)
+  const operationHeaders = await processHeaders(options.headers, op)
+
+  const headers = [operationHeaders, ...toArray(op.params.headers)]
+
+  const params = await resolveHttpOperationParams(options, op)
+
+  const resolvedParams = { ...params, headers }
+
   const result = await resolveEdenRequest(resolvedParams)
+
   return result
 }
 
