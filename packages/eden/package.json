@@ -5,7 +5,7 @@
   "description": "Fully type-safe Elysia.js client",
   "license": "MIT",
   "scripts": {
-    "test": "ATTEST_skipTypes=1 vitest",
+    "test": "ATTEST_skipTypes=1 vitest http-subscription-link",
     "test:types": "vitest test-d"
   },
   "repository": {
@@ -18,7 +18,11 @@
     "@ark/attest": "^0.45.6",
     "@trpc/client": "^11.0.1",
     "@trpc/server": "^11.0.1",
+    "@types/event-source-polyfill": "^1.0.5",
+    "@types/jsdom": "^21.1.7",
     "devalue": "^5.1.1",
+    "event-source-polyfill": "^1.0.31",
+    "jsdom": "^26.0.0",
     "superjson": "^2.2.2",
     "typescript": "^5.8.2"
   },

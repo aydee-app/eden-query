@@ -52,14 +52,14 @@ export function sseStreamConsumer<TConfig extends ConsumerConfig>(
 
   let _es: InstanceType<TConfig['EventSource']> | null = null
 
-  const createStream = () =>
-    new ReadableStream<ConsumerStreamResult<TConfig>>({
+  const createStream = () => {
+    const stream = new ReadableStream<ConsumerStreamResult<TConfig>>({
       async start(controller) {
         const [url, init] = await Promise.all([opts.url(), opts.init()])
 
-        type EventSource = InstanceType<TConfig['EventSource']>
+        type TEventSource = InstanceType<TConfig['EventSource']>
 
-        const eventSource = (_es = new opts.EventSource(url, init) as EventSource)
+        const eventSource = (_es = new opts.EventSource(url, init) as TEventSource)
 
         controller.enqueue({
           type: 'connecting',
@@ -73,6 +73,7 @@ export function sseStreamConsumer<TConfig extends ConsumerConfig>(
           const options: SSEClientOptions = JSON.parse(msg.data)
 
           clientOptions = options
+
           controller.enqueue({
             type: 'connected',
             options,
@@ -104,7 +105,7 @@ export function sseStreamConsumer<TConfig extends ConsumerConfig>(
         })
 
         eventSource.addEventListener('error', (event) => {
-          if (eventSource.readyState === EventSource.CLOSED) {
+          if (eventSource.readyState === _es?.CLOSED) {
             controller.error(event)
           } else {
             controller.enqueue({
@@ -153,6 +154,9 @@ export function sseStreamConsumer<TConfig extends ConsumerConfig>(
       },
     })
 
+    return stream
+  }
+
   const getStreamResource = () => {
     let stream = createStream()
     let reader = stream.getReader()
@@ -178,10 +182,10 @@ export function sseStreamConsumer<TConfig extends ConsumerConfig>(
     )
   }
 
-  return hello(getStreamResource, _es, clientOptions)
+  return runStreamReader(getStreamResource, _es, clientOptions)
 }
 
-async function* hello(
+async function* runStreamReader(
   getStreamResource: () => ResourceStreamGetter,
   _es: EventSourceLike.AnyConstructor | null,
   clientOptions: SSEClientOptions,

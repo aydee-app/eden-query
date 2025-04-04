@@ -1,11 +1,13 @@
 import type { EdenResult, EdenWsStateResult } from '../core/dto'
 import { EdenClientError, type EdenError } from '../core/error'
+import { resolveEdenFetchPath } from '../core/resolve'
 import { resolveTransformer } from '../core/transform'
 import type { InternalElysia, TypeConfig } from '../core/types'
 import { behaviorSubject, Observable } from '../observable'
 import { sseStreamConsumer } from '../stream/sse'
 import type { EventSourceLike } from '../stream/types'
 import { type CallbackOrValue, resolveCallbackOrValue } from '../utils/callback-or-value'
+import { buildQueryString } from '../utils/query'
 import { raceAbortSignals } from '../utils/signal'
 import type { MaybePromise } from '../utils/types'
 import type { WebSocketUrlOptions } from '../ws/url'
@@ -90,20 +92,26 @@ type HTTPSubscriptionLinkOptions<
 export function httpSubscriptionLink<
   TElysia extends InternalElysia,
   TEventSource extends EventSourceLike.AnyConstructor,
->(opts: HTTPSubscriptionLinkOptions<TElysia, TEventSource>): EdenLink<TElysia> {
-  const transformer = resolveTransformer(opts.transformer)
+>(options: HTTPSubscriptionLinkOptions<TElysia, TEventSource>): EdenLink<TElysia> {
+  const transformer = resolveTransformer(options.transformer)
 
   const link = (() => {
     const operationLink = (({ op }) => {
       return new Observable((observer) => {
-        const { type } = op
+        const { type, path, params } = op
 
-        /* istanbul ignore if -- @preserve */
         if (type !== 'subscription') {
           throw new Error('httpSubscriptionLink only supports subscriptions')
         }
 
-        let lastEventId: string | undefined = undefined
+        const resolvedParams = {
+          path,
+          ...params,
+        }
+
+        const resolvedPath = resolveEdenFetchPath(resolvedParams)
+
+        let lastEventId: string
 
         const abortController = new AbortController()
 
@@ -120,22 +128,24 @@ export function httpSubscriptionLink<
 
         const eventSourceStream = sseStreamConsumer<TConsumerConfig>({
           url: async () => {
-            return lastEventId?.toString() || ''
-            // getUrl({
-            //   transformer,
-            //   url: await urlWithConnectionParams(opts),
-            //   input: inputWithTrackedEventId(input, lastEventId),
-            //   path,
-            //   type,
-            //   signal: null,
-            // })
+            const queryObject = { ...params.query }
+
+            if (lastEventId) {
+              queryObject['lastEventId'] = lastEventId
+            }
+
+            const query = buildQueryString(queryObject)
+
+            const pathWithQuery = `${resolvedPath}${query ? '?' : ''}${query}`
+
+            return options.url + pathWithQuery
           },
           init: () => {
-            return resolveCallbackOrValue(opts.eventSourceOptions, op)
+            return resolveCallbackOrValue(options.eventSourceOptions, op)
           },
           signal,
           deserialize: transformer?.output.deserialize,
-          EventSource: opts.EventSource ?? (globalThis.EventSource as never as TEventSource),
+          EventSource: options.EventSource ?? (globalThis.EventSource as any),
         })
 
         const connectionState = behaviorSubject<EdenWsStateResult<EdenError>>({
@@ -152,7 +162,7 @@ export function httpSubscriptionLink<
           },
         })
 
-        ;(async () => {
+        const run = async () => {
           for await (const chunk of eventSourceStream) {
             switch (chunk.type) {
               case 'ping':
@@ -167,6 +177,7 @@ export function httpSubscriptionLink<
                 if (chunkData.id) {
                   // if the `tracked()`-helper is used, we always have an `id` field
                   lastEventId = chunkData.id
+
                   result = {
                     id: chunkData.id,
                     data: chunkData,
@@ -204,6 +215,7 @@ export function httpSubscriptionLink<
                   state: 'pending',
                   error: undefined,
                 })
+
                 break
               }
 
@@ -249,9 +261,7 @@ export function httpSubscriptionLink<
                   type: 'state',
                   state: 'connecting',
                   error: new EdenClientError(123, ''),
-                  // new TRPCClientError(
-                  //    `Timeout of ${chunk.ms}ms reached while waiting for a response`,
-                  //  ),
+                  // new TRPCClientError(`Timeout of ${chunk.ms}ms reached while waiting for a response`),
                 })
               }
             }
@@ -266,7 +276,9 @@ export function httpSubscriptionLink<
           })
 
           observer.complete()
-        })().catch((error: any) => {
+        }
+
+        run().catch((error: any) => {
           observer.error(error)
           // observer.error(TRPCClientError.from(error))
         })
