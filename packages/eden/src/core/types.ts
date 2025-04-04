@@ -85,6 +85,25 @@ export type DefinedTypeConfig = InternalTypeConfig | true
 export type TypeConfig = DefinedTypeConfig | undefined | unknown
 
 /**
+ * First, resolve an unknown type configuration, then check if it contains a key
+ * that is a {@link PropertyKey}. If it is not, then disable type checking,
+ * otherwise perform the appropriate checks.
+ *
+ * @example
+ *
+ * ```ts
+ * type Disabled = undefined
+ *
+ * type Resolved = ResolveTypeConfig<Disabled>
+ *
+ * type ExampleElysia = { store: Record<string, unknown> }
+ *
+ * type CheckElysia = Resolved['key'] extends PropertyKey
+ *   ? ExampleElysia['store'][Resolved['key']] extends { batch: any }
+ *     ? 'OK: Batching enabled'
+ *     : 'ERROR: Batching disabled'
+ *   : 'OK: Not checking if batching enabled'
+ * ```
  */
 export type ResolveTypeConfig<T> = T extends InternalTypeConfig
   ? T
