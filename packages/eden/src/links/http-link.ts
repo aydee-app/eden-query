@@ -3,7 +3,7 @@ import type { EdenRequestParams, EdenResolverConfig, EdenResolverTypeConfig } fr
 import { processHeaders } from '../core/headers'
 import type { HTTPHeaders } from '../core/http'
 import { resolveEdenRequest } from '../core/resolve'
-import type { DefinedTypeConfig, InternalElysia, TypeConfig } from '../core/types'
+import type { InternalElysia, TypeConfig } from '../core/types'
 import { Observable } from '../observable'
 import { toArray } from '../utils/array'
 import type { CallbackOrValue } from '../utils/callback-or-value'
@@ -22,9 +22,7 @@ import type { EdenLink, Operation, OperationLink } from './types'
 export type HTTPLinkBaseOptions<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
-> = Omit<EdenResolverTypeConfig<TElysia, TConfig>, 'types' | 'headers'> & {
-  types?: DefinedTypeConfig
-} & Omit<EdenResolverConfig<TElysia, TConfig>, 'headers'>
+> = EdenResolverTypeConfig<TElysia, TConfig> & Omit<EdenResolverConfig<TElysia, TConfig>, 'headers'>
 
 /**
  * An extremely flexible resolver for HTTP Headers.
@@ -113,10 +111,9 @@ export async function handleHttpRequest<
 /**
  * @see https://trpc.io/docs/client/links/httpLink
  */
-export function httpLink<
-  TElysia extends InternalElysia,
-  const TConfig extends HTTPLinkOptions<TElysia, TConfig['types']>,
->(options: TConfig = {} as any) {
+export function httpLink<TElysia extends InternalElysia, const TConfig>(
+  options: HTTPLinkOptions<TElysia, TConfig> = {} as any,
+) {
   const link = (() => {
     const operationLink = (({ op }) => {
       if (op.type === 'subscription') throw new Error(HTTP_SUBSCRIPTION_ERROR)

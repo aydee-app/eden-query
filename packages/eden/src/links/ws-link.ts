@@ -1,6 +1,10 @@
-import type { EDEN_STATE_KEY } from '../constants'
 import { type AnyDataTransformer, resolveTransformer } from '../core/transform'
-import type { InternalElysia, TypeConfig } from '../core/types'
+import type {
+  InternalElysia,
+  InternalTypeConfig,
+  ResolveTypeConfig,
+  TypeConfig,
+} from '../core/types'
 import { Observable } from '../observable'
 import type { TypeError } from '../utils/types'
 import type { WebSocketClient } from '../ws/client'
@@ -21,21 +25,17 @@ export type ConfigWithWs = { ws: any }
 
 export type WsLinkResult<
   TElysia extends InternalElysia,
-  TConfig extends WsLinkOptions<any, any>,
-> = TConfig['types'] extends PropertyKey
-  ? ConfigWithWs extends TElysia['store'][Extract<TConfig['types'], keyof TElysia['store']>]
+  TConfig extends TypeConfig,
+  TResolvedConfig extends InternalTypeConfig = ResolveTypeConfig<TConfig>,
+> = TResolvedConfig['key'] extends PropertyKey
+  ? TElysia['store'][TResolvedConfig['key']] extends ConfigWithWs
     ? EdenLink<TElysia>
     : WsNotDetectedError
-  : TConfig['types'] extends true
-    ? TElysia['store'][typeof EDEN_STATE_KEY] extends ConfigWithWs
-      ? EdenLink<TElysia>
-      : WsNotDetectedError
-    : EdenLink<TElysia>
+  : EdenLink<TElysia>
 
-export function wsLink<
-  TElysia extends InternalElysia,
-  const TConfig extends WsLinkOptions<TElysia, TConfig['types']>,
->(options: TConfig): WsLinkResult<TElysia, TConfig> {
+export function wsLink<TElysia extends InternalElysia, const TConfig>(
+  options: WsLinkOptions<TElysia, TConfig>,
+): WsLinkResult<TElysia, TConfig> {
   const { client } = options
 
   const transformer = resolveTransformer(options.transformer)

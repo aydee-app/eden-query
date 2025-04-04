@@ -12,9 +12,8 @@ import {
  * when inside of object errors. e.g. If {@link TConfig} itself contained an array,
  * then introspection would fail...
  */
-export function httpBatchSubscriptionLink<
-  TElysia extends InternalElysia,
-  const TConfig extends HTTPBatchLinkOptions<TElysia, TConfig['types']>,
->(options: TConfig = {} as any): HTTPBatchLinkResult<TElysia, TConfig> {
+export function httpBatchSubscriptionLink<TElysia extends InternalElysia, const TConfig>(
+  options: HTTPBatchLinkOptions<TElysia, TConfig> = {} as any,
+): HTTPBatchLinkResult<TElysia, TConfig> {
   return httpBatchLink({ ...options, stream: true } as any) as any
 }

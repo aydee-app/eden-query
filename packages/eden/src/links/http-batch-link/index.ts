@@ -3,14 +3,19 @@ import { jsonlStreamConsumer } from '@trpc/server/unstable-core-do-not-import'
 import { serializeBatchGetParams } from '../../batch/serializers/get'
 import { serializeBatchPostParams } from '../../batch/serializers/post'
 import type { BatchMethod } from '../../batch/shared'
-import { BATCH_ENDPOINT, type EDEN_STATE_KEY, HTTP_SUBSCRIPTION_ERROR } from '../../constants'
+import { BATCH_ENDPOINT, HTTP_SUBSCRIPTION_ERROR } from '../../constants'
 import type { EdenRequestParams } from '../../core/config'
 import type { EdenResult } from '../../core/dto'
 import type { EdenError } from '../../core/error'
 import { processHeaders } from '../../core/headers'
 import type { HTTPHeaders } from '../../core/http'
 import { defaultOnResult, resolveEdenRequest } from '../../core/resolve'
-import type { InternalElysia, TypeConfig } from '../../core/types'
+import type {
+  InternalElysia,
+  InternalTypeConfig,
+  ResolveTypeConfig,
+  TypeConfig,
+} from '../../core/types'
 import { Observable } from '../../observable'
 import { toArray } from '../../utils/array'
 import type { CallbackOrValue } from '../../utils/callback-or-value'
@@ -98,16 +103,13 @@ const batchSerializers = {
 
 export type HTTPBatchLinkResult<
   TElysia extends InternalElysia,
-  TConfig extends HTTPBatchLinkOptions<any, any>,
-> = TConfig['types'] extends PropertyKey
-  ? ConfigWithBatching extends TElysia['store'][Extract<TConfig['types'], keyof TElysia['store']>]
+  TConfig extends TypeConfig,
+  TResolvedConfig extends InternalTypeConfig = ResolveTypeConfig<TConfig>,
+> = TResolvedConfig['key'] extends PropertyKey
+  ? TElysia['store'][TResolvedConfig['key']] extends ConfigWithBatching
     ? EdenLink<TElysia>
     : BatchingNotDetectedError
-  : TConfig['types'] extends true
-    ? TElysia['store'][typeof EDEN_STATE_KEY] extends ConfigWithBatching
-      ? EdenLink<TElysia>
-      : BatchingNotDetectedError
-    : EdenLink<TElysia>
+  : EdenLink<TElysia>
 
 /**
  */
@@ -175,10 +177,9 @@ export async function resolveBatchStream(result: EdenResult, ops: EdenRequestPar
  * when inside of object errors. e.g. If {@link TConfig} itself contained an array,
  * then introspection would fail...
  */
-export function httpBatchLink<
-  TElysia extends InternalElysia,
-  const TConfig extends HTTPBatchLinkOptions<TElysia, TConfig['types']>,
->(options: TConfig = {} as any): HTTPBatchLinkResult<TElysia, TConfig> {
+export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
+  options: HTTPBatchLinkOptions<TElysia, TConfig> = {} as any,
+): HTTPBatchLinkResult<TElysia, TConfig> {
   const maxURLLength = options.maxURLLength ?? Infinity
 
   const maxItems = options.maxItems ?? Infinity
@@ -230,10 +231,7 @@ export function httpBatchLink<
           headers['accept'] = 'text/event-stream'
         }
 
-        const httpLinkOptions: HTTPLinkOptions<TElysia, TConfig['types']> = {
-          ...options,
-          headers,
-        }
+        const httpLinkOptions: HTTPLinkOptions<TElysia, TConfig> = { ...options, headers }
 
         const result = await handleHttpRequest(httpLinkOptions, firstOperation)
 

@@ -90,4 +90,6 @@ export type ResolveTypeConfig<T> = T extends InternalTypeConfig
   ? T
   : T extends true
     ? DefaultTypeConfig
-    : never
+    : {
+        key?: undefined
+      }

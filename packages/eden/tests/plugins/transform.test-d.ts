@@ -100,6 +100,7 @@ describe('transformPlugin', () => {
         attest(() => {
           new EdenClient<typeof app>({
             links: [
+              // @ts-expect-error Batching not enabled.
               httpBatchLink({
                 types: true,
                 // @ts-expect-error Transformer should be SuperJSON.
@@ -108,44 +109,6 @@ describe('transformPlugin', () => {
             ],
           })
         }).type.errors("Type 'boolean' is not assignable to type 'typeof SuperJSON'.")
-      })
-
-      describe('weird - only either transformer or batch plugin error can occur at the same time', () => {
-        test('transformer', () => {
-          const app = new Elysia().use(transformPlugin({ types: true, transformer: SuperJSON }))
-
-          attest(() => {
-            new EdenClient<typeof app>({
-              links: [
-                // This app does not have the batch plugin, so httpBatchLink should not even
-                // have a valid return, but it looksl like the error is swallowed.
-                httpBatchLink({
-                  types: true,
-                  // @ts-expect-error Transformer should be SuperJSON.
-                  transformer: true,
-                }),
-              ],
-            })
-          }).type.errors("Type 'boolean' is not assignable to type 'typeof SuperJSON'.")
-        })
-
-        test('batch', () => {
-          const app = new Elysia().use(transformPlugin({ types: true, transformer: SuperJSON }))
-
-          attest(() => {
-            new EdenClient<typeof app>({
-              links: [
-                // @ts-expect-error Batch plugin not present.
-                httpBatchLink({
-                  types: true,
-                  // If the transformer is asserted as any, then the input no longer has an error
-                  // and the batch error will appear.
-                  transformer: true as any,
-                }),
-              ],
-            })
-          }).type.errors("Type 'BatchingNotDetectedError' is not assignable to type 'EdenLink")
-        })
       })
 
       describe('transformers array', () => {
