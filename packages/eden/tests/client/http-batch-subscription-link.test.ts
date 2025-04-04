@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 import SuperJSON from 'superjson'
-import { describe, expect,test } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import { EdenClient } from '../../src/client'
 import { httpBatchSubscriptionLink } from '../../src/links/http-batch-subscription-link'
@@ -42,7 +42,9 @@ describe('httpBatchSubscriptionLink', () => {
 
       let i = 0
 
-      const app = new Elysia().use(batchPlugin({ types: true })).get('/', () => values[i++])
+      const app = new Elysia()
+        .use(batchPlugin({ types: true, method: 'GET' }))
+        .get('/', () => values[i++])
 
       useApp(app)
 

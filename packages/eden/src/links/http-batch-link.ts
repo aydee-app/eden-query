@@ -10,12 +10,7 @@ import type { EdenError } from '../core/error'
 import { processHeaders } from '../core/headers'
 import type { HTTPHeaders } from '../core/http'
 import { defaultOnResult, resolveEdenRequest } from '../core/resolve'
-import type {
-  InternalElysia,
-  InternalTypeConfig,
-  ResolveTypeConfig,
-  TypeConfig,
-} from '../core/types'
+import type { InternalElysia, InternalTypeConfig, ResolveTypeConfig } from '../core/types'
 import { Observable } from '../observable'
 import { toArray } from '../utils/array'
 import type { CallbackOrValue } from '../utils/callback-or-value'
@@ -50,7 +45,7 @@ export type HTTPBatchLinkHeaders = CallbackOrValue<
 
 export type HTTPBatchLinkOptions<
   TElysia extends InternalElysia = InternalElysia,
-  TConfig extends TypeConfig = undefined,
+  TConfig = undefined,
 > = HTTPLinkBaseOptions<TElysia, TConfig> & {
   /**
    * Path for the batch endpoint.
@@ -113,7 +108,7 @@ const batchSerializers = {
 
 export type HTTPBatchLinkResult<
   TElysia extends InternalElysia,
-  TConfig extends TypeConfig,
+  TConfig,
   TResolvedConfig extends InternalTypeConfig = ResolveTypeConfig<TConfig>,
 > = TResolvedConfig['key'] extends PropertyKey
   ? TResolvedConfig['key'] extends keyof TElysia['store']

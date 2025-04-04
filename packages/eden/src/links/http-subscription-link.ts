@@ -2,7 +2,7 @@ import type { EdenResult, EdenWsStateResult } from '../core/dto'
 import { EdenClientError, type EdenError } from '../core/error'
 import { resolveEdenFetchPath } from '../core/resolve'
 import { resolveTransformer } from '../core/transform'
-import type { InternalElysia, TypeConfig } from '../core/types'
+import type { InternalElysia } from '../core/types'
 import { behaviorSubject, Observable } from '../observable'
 import { sseStreamConsumer } from '../stream/sse'
 import type { EventSourceLike } from '../stream/types'
@@ -70,7 +70,7 @@ const codes5xx: TRPC_ERROR_CODE_NUMBER[] = [
 type HTTPSubscriptionLinkOptions<
   TElysia extends InternalElysia,
   TEventSource extends EventSourceLike.AnyConstructor = typeof EventSource,
-  TConfig extends TypeConfig = undefined,
+  TConfig = undefined,
 > = HTTPLinkBaseOptions<TElysia, TConfig> & {
   /**
    * EventSource ponyfill.

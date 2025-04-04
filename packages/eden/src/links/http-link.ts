@@ -3,7 +3,7 @@ import type { EdenRequestParams, EdenResolverConfig, EdenResolverTypeConfig } fr
 import { processHeaders } from '../core/headers'
 import type { HTTPHeaders } from '../core/http'
 import { resolveEdenRequest } from '../core/resolve'
-import type { InternalElysia, TypeConfig } from '../core/types'
+import type { InternalElysia } from '../core/types'
 import { Observable } from '../observable'
 import { toArray } from '../utils/array'
 import type { CallbackOrValue } from '../utils/callback-or-value'
@@ -21,7 +21,7 @@ import type { EdenLink, Operation, OperationLink } from './types'
  */
 export type HTTPLinkBaseOptions<
   TElysia extends InternalElysia = InternalElysia,
-  TConfig extends TypeConfig = undefined,
+  TConfig = undefined,
 > = EdenResolverTypeConfig<TElysia, TConfig> & Omit<EdenResolverConfig<TElysia, TConfig>, 'headers'>
 
 /**
@@ -47,7 +47,7 @@ export type HTTPLinkHeaders = CallbackOrValue<MaybePromise<HTTPHeaders | Nullish
  */
 export type HTTPLinkOptions<
   TElysia extends InternalElysia = InternalElysia,
-  TConfig extends TypeConfig = undefined,
+  TConfig = undefined,
 > = HTTPLinkBaseOptions<TElysia, TConfig> & {
   /**
    * Headers to be set on outgoing requests or a callback that of said headers
@@ -66,7 +66,7 @@ export type HTTPLinkOptions<
  */
 export async function resolveHttpOperationParams<
   TElysia extends InternalElysia = InternalElysia,
-  TConfig extends TypeConfig = undefined,
+  TConfig = undefined,
 >(options: HTTPLinkBaseOptions<TElysia, TConfig>, op: Operation) {
   const { path, params } = op
 
@@ -93,7 +93,7 @@ export async function resolveHttpOperationParams<
 
 export async function handleHttpRequest<
   TElysia extends InternalElysia = InternalElysia,
-  TConfig extends TypeConfig = undefined,
+  TConfig = undefined,
 >(options: HTTPLinkOptions<TElysia, TConfig>, op: Operation) {
   const operationHeaders = await processHeaders(options.headers, op)
 

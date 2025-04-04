@@ -1,10 +1,5 @@
 import { type AnyDataTransformer, resolveTransformer } from '../core/transform'
-import type {
-  InternalElysia,
-  InternalTypeConfig,
-  ResolveTypeConfig,
-  TypeConfig,
-} from '../core/types'
+import type { InternalElysia, InternalTypeConfig, ResolveTypeConfig } from '../core/types'
 import { Observable, type Unsubscribable } from '../observable'
 import type { TypeError } from '../utils/types'
 import type { WebSocketClient } from '../ws/client'
@@ -15,7 +10,7 @@ export type WsNotDetectedError = TypeError<'WS plugin not detected on Elysia.js 
 
 export type WsLinkOptions<
   TElysia extends InternalElysia = InternalElysia,
-  TConfig extends TypeConfig = undefined,
+  TConfig = undefined,
 > = HTTPLinkBaseOptions<TElysia, TConfig> & {
   client: WebSocketClient
   transformer?: AnyDataTransformer
@@ -25,7 +20,7 @@ export type ConfigWithWs = { ws: any }
 
 export type WsLinkResult<
   TElysia extends InternalElysia,
-  TConfig extends TypeConfig,
+  TConfig,
   TResolvedConfig extends InternalTypeConfig = ResolveTypeConfig<TConfig>,
 > = TResolvedConfig['key'] extends PropertyKey
   ? TElysia['store'][Extract<TResolvedConfig['key'], keyof TElysia['store']>] extends ConfigWithWs
