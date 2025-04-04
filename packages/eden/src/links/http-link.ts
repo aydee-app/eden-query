@@ -1,5 +1,5 @@
 import { HTTP_SUBSCRIPTION_ERROR } from '../constants'
-import type { EdenRequestParams, EdenResolverConfig } from '../core/config'
+import type { EdenRequestParams, EdenResolverConfig, EdenResolverTypeConfig } from '../core/config'
 import { processHeaders } from '../core/headers'
 import type { HTTPHeaders } from '../core/http'
 import { resolveEdenRequest } from '../core/resolve'
@@ -22,9 +22,9 @@ import type { EdenLink, Operation, OperationLink } from './types'
 export type HTTPLinkBaseOptions<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
-> = Omit<EdenResolverConfig<TElysia, TConfig>, 'types' | 'headers'> & {
+> = Omit<EdenResolverTypeConfig<TElysia, TConfig>, 'types' | 'headers'> & {
   types?: DefinedTypeConfig
-}
+} & Omit<EdenResolverConfig<TElysia, TConfig>, 'headers'>
 
 /**
  * An extremely flexible resolver for HTTP Headers.
@@ -53,7 +53,7 @@ export type HTTPLinkOptions<
 > = HTTPLinkBaseOptions<TElysia, TConfig> & {
   /**
    * Headers to be set on outgoing requests or a callback that of said headers
-   * Basically like {@link EdenResolverConfig.headers} but callbacks are provided with the entire operation.
+   * Basically like {@link EdenResolverTypeConfig.headers} but callbacks are provided with the entire operation.
    *
    * @see http://trpc.io/docs/client/headers
    */

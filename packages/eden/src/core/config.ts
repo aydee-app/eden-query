@@ -52,101 +52,108 @@ export type EdenResultTransformer<
 /**
  * Configure the global behavior of the request resolver.
  */
-export type EdenResolverConfig<
+export type EdenResolverTypeConfig<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
-> = EdenTypeConfig<TConfig> &
-  TransformerConfig<TElysia, TConfig> & {
-    /**
-     * Global query parameters for requests.
-     */
-    query?: Record<string, any>
+> = EdenTypeConfig<TConfig> & TransformerConfig<TElysia, TConfig>
 
-    /**
-     * Global fetch options.
-     */
-    fetch?: Omit<RequestInit, keyof EdenResolverConfig>
+/**
+ * Configure the global behavior of the request resolver.
+ */
+export interface EdenResolverConfig<
+  TElysia extends InternalElysia = InternalElysia,
+  TConfig extends TypeConfig = undefined,
+> {
+  /**
+   * Global query parameters for requests.
+   */
+  query?: Record<string, any>
 
-    /**
-     * Ponyfill for fetch.
-     *
-     * Feature is available in both tRPC and eden (official).
-     *
-     * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L29
-     * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/index.ts#L164
-     */
-    fetcher?: FetchEsque
+  /**
+   * Global fetch options.
+   */
+  fetch?: Omit<RequestInit, keyof EdenResolverTypeConfig>
 
-    /**
-     * Global headers, provide a function to compute headers based on the request.
-     */
-    headers?: EdenRequestHeaders<TElysia, TConfig>
+  /**
+   * Ponyfill for fetch.
+   *
+   * Feature is available in both tRPC and eden (official).
+   *
+   * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L29
+   * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/index.ts#L164
+   */
+  fetcher?: FetchEsque
 
-    /**
-     * Function(s) that can transform the request before it gets resolved.
-     *
-     * @default Eden provides a default that will apply transformers serializers with JSON or FormData bodies.
-     */
-    onRequest?: MaybeArray<EdenRequestTransformer<TElysia, TConfig>>
+  /**
+   * Global headers, provide a function to compute headers based on the request.
+   */
+  headers?: EdenRequestHeaders<TElysia, TConfig>
 
-    /**
-     * Function(s) that can transform the response before processing the result.
-     * Each function will be called in sequence, stopping at the first one that returns data or an error.
-     * The returned data or error will be used as the result.
-     *
-     * @default Eden provides a default that will attempt to parse the data from the {@link Response}.
-     */
-    onResponse?: MaybeArray<EdenResponseTransformer<TElysia, TConfig>>
+  /**
+   * Function(s) that can transform the request before it gets resolved.
+   *
+   * @default Eden provides a default that will apply transformers serializers with JSON or FormData bodies.
+   */
+  onRequest?: MaybeArray<EdenRequestTransformer<TElysia, TConfig>>
 
-    /**
-     * Function(s) that can transform the result before the resolver resolves.
-     *
-     * @default Eden provides a default that will apply transformer deserializations to the response data.
-     */
-    onResult?: MaybeArray<EdenResultTransformer<TElysia, TConfig>>
+  /**
+   * Function(s) that can transform the response before processing the result.
+   * Each function will be called in sequence, stopping at the first one that returns data or an error.
+   * The returned data or error will be used as the result.
+   *
+   * @default Eden provides a default that will attempt to parse the data from the {@link Response}.
+   */
+  onResponse?: MaybeArray<EdenResponseTransformer<TElysia, TConfig>>
 
-    /**
-     * Whether to dynamically resolve the domain.
-     *
-     * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/index.ts#L477
-     */
-    keepDomain?: boolean
+  /**
+   * Function(s) that can transform the result before the resolver resolves.
+   *
+   * @default Eden provides a default that will apply transformer deserializations to the response data.
+   */
+  onResult?: MaybeArray<EdenResultTransformer<TElysia, TConfig>>
 
-    /**
-     * Either an origin or the Elysia.js application.
-     */
-    domain?: TElysia | string
+  /**
+   * Whether to dynamically resolve the domain.
+   *
+   * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/index.ts#L477
+   */
+  keepDomain?: boolean
 
-    /**
-     * Passed as second argument to new URL if applicable.
-     *
-     * Basically {@link EdenRequestInit.domain} but always a string representing the "origin" of the request.
-     *
-     * @example
-     *
-     * ```ts
-     * const base = 'http://e.ly'
-     * const path = '/posts/123'
-     *
-     * const url = new URL(path, base)
-     * ```
-     */
-    base?: string
+  /**
+   * Either an origin or the Elysia.js application.
+   */
+  domain?: TElysia | string
 
-    /**
-     * Default HTTP method for the request.
-     *
-     * Based on `methodOverride` from tRPC.
-     *
-     * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L35
-     */
-    method?: string
-  }
+  /**
+   * Passed as second argument to new URL if applicable.
+   *
+   * Basically {@link EdenRequestInput.domain} but always a string representing the "origin" of the request.
+   *
+   * @example
+   *
+   * ```ts
+   * const base = 'http://e.ly'
+   * const path = '/posts/123'
+   *
+   * const url = new URL(path, base)
+   * ```
+   */
+  base?: string
+
+  /**
+   * Default HTTP method for the request.
+   *
+   * Based on `methodOverride` from tRPC.
+   *
+   * @see https://github.com/trpc/trpc/blob/662da0bb0a2766125e3f7eced3576f05a850a069/packages/client/src/links/internals/httpUtils.ts#L35
+   */
+  method?: string
+}
 
 /**
  * Resolver input for a specific request.
  */
-export interface EdenRequestInit {
+export interface EdenRequestInput {
   /**
    * Fetch options for a "query" method, i.e. "GET", "HEAD", "OPTIONS".
    */
@@ -169,12 +176,14 @@ export interface EdenRequestInit {
 /**
  * Parameters that control how an Eden request is resolved.
  *
- * Some information is duplicated in the {@link EdenResolverConfig} properties.
- * For example, {@link EdenRequestParams.options.headers} and {@link EdenResolverConfig.headers}.
+ * Some information is duplicated in the {@link EdenResolverTypeConfig} properties.
+ * For example, {@link EdenRequestParams.options.headers} and {@link EdenResolverTypeConfig.headers}.
  * Values in the request-specific options will have greater precedence
  * than the global resolver configuration options.
  */
 export type EdenRequestParams<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
-> = EdenResolverConfig<TElysia, TConfig> & EdenRequestInit
+> = EdenResolverTypeConfig<TElysia, TConfig> &
+  EdenRequestInput &
+  EdenResolverConfig<TElysia, TConfig>
