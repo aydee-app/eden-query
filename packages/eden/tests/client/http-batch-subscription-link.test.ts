@@ -3,6 +3,7 @@ import SuperJSON from 'superjson'
 import { describe, expect, test, vi } from 'vitest'
 
 import { EdenClient } from '../../src/client'
+import type { EdenResult } from '../../src/core/dto'
 import { EdenFetchError } from '../../src/core/error'
 import { httpBatchSubscriptionLink } from '../../src/links/http-batch-subscription-link'
 import { httpLink } from '../../src/links/http-link'
@@ -151,7 +152,7 @@ describe('httpBatchSubscriptionLink', () => {
       await expect(async () => await Promise.all(promises)).rejects.toThrow(BatchInputTooLargeError)
     })
 
-    test.only('resolves with all errors', async () => {
+    test('resolves with all errors', async () => {
       const app = new Elysia().use(batchPlugin({ types: true, method: true }))
 
       useApp(app)
@@ -183,6 +184,61 @@ describe('httpBatchSubscriptionLink', () => {
 
       promises.forEach((_, index) => {
         expect(listener).toHaveBeenNthCalledWith(index + 1, notFoundError)
+      })
+    })
+
+    test.only('individually resolves errors', async () => {
+      const values = Array.from({ length: 5 }, (_, index) => Boolean(index % 2))
+      const data = 'Hello, Elysia'
+
+      const app = new Elysia().use(batchPlugin({ types: true, method: true })).get('/', () => data)
+
+      useApp(app)
+
+      const client = new EdenClient<typeof app>({
+        links: [
+          httpBatchSubscriptionLink({
+            types: true,
+            domain: 'http://localhost:3000',
+            method: 'GET',
+          }),
+        ],
+      })
+
+      const listener = vi.fn()
+
+      const validRequester = client.query.bind(client, '/')
+
+      const invalidRequester = client.query.bind(client, '/invalid')
+
+      const promises = values.map((value) => {
+        const requester = value ? invalidRequester : validRequester
+        return requester().then(listener).catch(listener)
+      })
+
+      await Promise.all(promises)
+
+      const validResult: EdenResult = {
+        type: 'data',
+        error: null,
+        data,
+        response: {} as any,
+      }
+
+      const notFoundError = {
+        value: 'NOT_FOUND',
+        status: 404,
+        name: 'Error',
+        message: 'NOT_FOUND',
+      } satisfies EdenFetchError
+
+      expect(listener).toHaveBeenCalledTimes(promises.length)
+
+      console.log(listener.mock.calls)
+
+      promises.forEach((_, index) => {
+        const result = index % 2 ? notFoundError : validResult
+        expect(listener).toHaveBeenNthCalledWith(index + 1, result)
       })
     })
   })
