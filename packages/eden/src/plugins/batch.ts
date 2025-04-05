@@ -6,7 +6,7 @@ import { deserializeBatchGetParams } from '../batch/deserializers/get'
 import { deserializeBatchPostParams } from '../batch/deserializers/post'
 import type { BatchMethod } from '../batch/shared'
 import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../constants'
-import type { EdenRequestParams } from '../core/config'
+import type { EdenResult } from '../core/dto'
 import { resolveEdenRequest } from '../core/resolve'
 import type {
   DefinedTypeConfig,
@@ -33,12 +33,7 @@ export const batchDeserializers = {
 /**
  * Stream individual batch responses.
  */
-export async function resolveBatchAsStream(resolvedBatchParams: EdenRequestParams[]) {
-  const data = resolvedBatchParams.map(async (params) => {
-    const response = await resolveEdenRequest(params)
-    return response
-  })
-
+export async function resolveBatchAsStream(data: Promise<EdenResult>[]) {
   const stream = jsonlStreamProducer({ data })
 
   const headers = new Headers()
@@ -54,13 +49,8 @@ export async function resolveBatchAsStream(resolvedBatchParams: EdenRequestParam
 /**
  * Resolve batch request as a single JSON response with all the individual responses.
  */
-export async function resolveBatchAsJson(resolvedBatchParams: EdenRequestParams[]) {
-  const batchOperations = resolvedBatchParams.map(async (params) => {
-    const response = await resolveEdenRequest(params)
-    return response
-  })
-
-  const results = await Promise.all(batchOperations)
+export async function resolveBatchAsJson(data: Promise<EdenResult>[]) {
+  const results = await Promise.all(data)
 
   const headers = new Headers()
 
@@ -121,7 +111,22 @@ export function createBatchResolvers(domain: InternalElysia, config: BatchPlugin
 
     const resolve = accept?.includes('event-stream') ? resolveBatchAsStream : resolveBatchAsJson
 
-    const response = resolve(resolvedBatchParams)
+    const data = resolvedBatchParams.map(async (params) => {
+      const response = await resolveEdenRequest(params)
+
+      if (response.error) {
+        response.error = {
+          status: response.error?.status,
+          value: response.error?.value,
+          name: response.error.name,
+          message: response.error.message,
+        }
+      }
+
+      return response
+    })
+
+    const response = resolve(data)
 
     return response
   }
@@ -154,7 +159,7 @@ export function batchPlugin<const T extends BatchPluginConfig>(config: T = {} as
   const plugin = (app: Elysia) => {
     const resolvers = createBatchResolvers(app, config)
 
-    const methods = toArray(config.method)
+    const methods = config.method === true ? ['GET', 'POST'] : toArray(config.method)
 
     if (!methods.length) {
       methods.push('POST')

@@ -3,6 +3,7 @@ import SuperJSON from 'superjson'
 import { describe, expect, test, vi } from 'vitest'
 
 import { EdenClient } from '../../src/client'
+import { EdenFetchError } from '../../src/core/error'
 import { httpBatchSubscriptionLink } from '../../src/links/http-batch-subscription-link'
 import { httpLink } from '../../src/links/http-link'
 import { batchPlugin } from '../../src/plugins/batch'
@@ -124,7 +125,7 @@ describe('httpBatchSubscriptionLink', () => {
       expect(listener).toHaveBeenCalledTimes(groups)
     })
 
-    test('throws error if too large', async () => {
+    test('throws error if a single input is too large', async () => {
       const app = new Elysia().use(
         batchPlugin({
           types: true,
@@ -148,6 +149,41 @@ describe('httpBatchSubscriptionLink', () => {
       const promises = [client.query('/'), client.query('/')]
 
       await expect(async () => await Promise.all(promises)).rejects.toThrow(BatchInputTooLargeError)
+    })
+
+    test.only('resolves with all errors', async () => {
+      const app = new Elysia().use(batchPlugin({ types: true, method: true }))
+
+      useApp(app)
+
+      const client = new EdenClient<typeof app>({
+        links: [
+          httpBatchSubscriptionLink({
+            types: true,
+            domain: 'http://localhost:3000',
+            method: 'GET',
+          }),
+        ],
+      })
+
+      const listener = vi.fn()
+
+      const promises = [client.query('/').catch(listener), client.query('/').catch(listener)]
+
+      await Promise.all(promises)
+
+      const notFoundError = {
+        value: 'NOT_FOUND',
+        status: 404,
+        name: 'Error',
+        message: 'NOT_FOUND',
+      } satisfies EdenFetchError
+
+      expect(listener).toHaveBeenCalledTimes(promises.length)
+
+      promises.forEach((_, index) => {
+        expect(listener).toHaveBeenNthCalledWith(index + 1, notFoundError)
+      })
     })
   })
 })

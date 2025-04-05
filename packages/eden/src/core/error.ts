@@ -102,6 +102,10 @@ export interface EdenWebSocketClosedErrorOptions {
 }
 
 export class EdenWebSocketClosedError extends Error {
+  public status = undefined
+
+  public value = undefined
+
   constructor(options: EdenWebSocketClosedErrorOptions) {
     super(options.message, { cause: options.cause })
 
@@ -111,4 +115,8 @@ export class EdenWebSocketClosedError extends Error {
   }
 }
 
-export class EdenWebSocketError extends Error {}
+export class EdenWebSocketError extends Error {
+  public status = undefined
+
+  public value = undefined
+}
