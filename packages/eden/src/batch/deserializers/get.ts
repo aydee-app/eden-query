@@ -1,6 +1,6 @@
 import type { EdenRequestParams } from '../../core/config'
 import type { InternalContext, InternalElysia, TypeConfig } from '../../core/types'
-import { IGNORED_HEADERS } from '../shared'
+import { BODY_KEYS, IGNORED_HEADERS } from '../shared'
 import type { BatchDeserializerConfig } from './config'
 
 export async function deserializeBatchGetParams<
@@ -43,29 +43,27 @@ export async function deserializeBatchGetParams<
   }
 
   for (const [key, value] of searchParams) {
-    const [index, name] = key.split('.')
+    const [index, name, queryKey] = key.split('.')
 
-    if (!index) continue
-
-    if (!name) {
-      globalQuery[index] = value
-      continue
-    }
+    if (index == null) continue
 
     const paramIndex = Number(index)
 
     if (Number.isNaN(paramIndex)) continue
 
     switch (name) {
-      case 'query': {
+      case BODY_KEYS.query: {
+        if (queryKey == null) continue
+
         result[paramIndex] ??= {}
         result[paramIndex].options ??= {}
         result[paramIndex].options.query ??= {}
-        ;(result[paramIndex].options.query as any)[name] = value
+        ;(result[paramIndex].options.query as any)[queryKey] = value
+
         continue
       }
 
-      case 'path': {
+      case BODY_KEYS.path: {
         result[paramIndex] ??= {}
         result[paramIndex].path = value
         continue

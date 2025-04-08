@@ -1,6 +1,7 @@
 import type { EdenRequestParams } from '../../core/config'
 import { processHeaders } from '../../core/headers'
 import type { InternalElysia, TypeConfig } from '../../core/types'
+import { BODY_KEYS } from '../shared'
 
 /**
  * Get the parameters for a batch GET request.
@@ -36,13 +37,15 @@ export async function serializeBatchGetParams<
       }
     }
 
-    query[`${index}.path`] = path
+    query[`${index}.${BODY_KEYS.path}`] = path
 
-    for (const key in params.options?.query) {
-      const value = params.options.query[key as never]
+    const resolvedQuery = { ...params.query, ...params.options?.query }
+
+    for (const key in resolvedQuery) {
+      const value = resolvedQuery[key]
 
       if (value != null) {
-        query[`${index}.query.${key}`] = value
+        query[`${index}.${BODY_KEYS.query}.${key}`] = value
       }
     }
 
@@ -54,7 +57,7 @@ export async function serializeBatchGetParams<
       const value = currentHeaders[key as keyof typeof currentHeaders]
 
       if (value) {
-        headers.append(`${index}.headers.${key}`, value)
+        headers.append(`${index}.${key}`, value)
       }
     }
   })

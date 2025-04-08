@@ -26,7 +26,7 @@ function throwFatalError() {
   )
 }
 
-export class BatchInputTooLargeErro extends Error {
+export class BatchInputTooLargeError extends Error {
   public override message =
     'Input is too large for a single dispatch, try using a different HTTP method'
 }
@@ -78,7 +78,7 @@ export function dataLoader<TKey, TValue>(batchLoader: BatchLoader<TKey, TValue>)
       }
 
       if (lastGroup.length === 0) {
-        item.reject?.(new BatchInputTooLargeErro())
+        item.reject?.(new BatchInputTooLargeError())
         index++
         continue
       }

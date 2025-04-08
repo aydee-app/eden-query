@@ -21,7 +21,7 @@ export const BODY_TYPES = {
 /**
  * Temporary fix to ignore these headers from the batch request.
  */
-export const IGNORED_HEADERS = ['content-type', 'content-length']
+export const IGNORED_HEADERS = ['content-type', 'content-length', 'accept']
 
 export const BATCH_METHODS = ['GET', 'POST'] as const
 
