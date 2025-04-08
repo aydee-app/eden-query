@@ -56,6 +56,13 @@ export interface WebSocketClientOptions extends WebSocketUrlOptions {
    * @default {@link exponentialBackoff}
    */
   retryDelayMs?: (attemptIndex: number) => number
+
+  /**
+   * Whether multiple messages can be sent as a single message in a JSON array.
+   *
+   * @default true
+   */
+  batch?: boolean
 }
 
 /**
@@ -110,7 +117,7 @@ export class WebSocketClient {
 
   private requestManager = new RequestManager()
 
-  private readonly activeConnection: WebSocketConnection
+  readonly activeConnection: WebSocketConnection
 
   private readonly reconnectRetryDelay: (attemptIndex: number) => number
 
@@ -154,8 +161,7 @@ export class WebSocketClient {
 
     this.activeConnection.wsObservable.subscribe({
       next: (ws) => {
-        if (!ws) return
-        this.setupWebSocketListeners(ws)
+        if (ws) this.setupWebSocketListeners(ws)
       },
     })
 
@@ -190,10 +196,7 @@ export class WebSocketClient {
     }
 
     const result = await this.activeConnection.open().catch((cause) => {
-      const error = new EdenWebSocketClosedError({
-        message: 'Initialization error',
-        cause: cause,
-      })
+      const error = new EdenWebSocketClosedError({ message: 'Initialization error', cause: cause })
 
       this.reconnect(error)
 
@@ -351,7 +354,7 @@ export class WebSocketClient {
     this.connectionState.next(WEBSOCKET_CONNECTION_STATES.PENDING)
   }
 
-  private setupWebSocketListeners(ws: WebSocket) {
+  setupWebSocketListeners(ws: WebSocket) {
     ws.addEventListener('open', () => {
       this.#onOpen().catch((error) => {
         ws.close(3000)
@@ -369,13 +372,6 @@ export class WebSocketClient {
       const incomingMessages = toArray(incomingMessage)
 
       await Promise.all(incomingMessages.map(this.handleResponseMessage))
-
-      // if ('method' in incomingMessage) {
-      //   // Reconnections are communicated as results now.
-      //   // this.handleIncomingRequest(incomingMessage)
-      // } else {
-      //   this.handleResponseMessage(incomingMessage)
-      // }
     })
 
     ws.addEventListener('close', (event) => {
@@ -384,11 +380,7 @@ export class WebSocketClient {
       this.options.onClose?.(event)
 
       if (!this.lazyMode) {
-        const error = new EdenWebSocketClosedError({
-          message: 'WebSocket closed',
-          cause: event,
-        })
-
+        const error = new EdenWebSocketClosedError({ message: 'WebSocket closed', cause: event })
         this.reconnect(error)
       }
     })
@@ -398,10 +390,7 @@ export class WebSocketClient {
 
       this.options.onError?.(event)
 
-      const error = new EdenWebSocketClosedError({
-        message: 'WebSocket closed',
-        cause: event,
-      })
+      const error = new EdenWebSocketClosedError({ message: 'WebSocket closed', cause: event })
 
       this.reconnect(error)
     })
@@ -439,26 +428,26 @@ export class WebSocketClient {
     }
   }
 
-  // private handleIncomingRequest(message: EdenWsReconnectResult) {
-  //   if (message.type === 'reconnect') {
-  //     const error = new EdenWebSocketClosedError({
-  //       message: 'Server requested reconnect',
-  //     })
-  //     this.reconnect(error)
-  //   }
-  // }
-
   /**
    * Sends a message or batch of messages directly to the server.
    */
-  private send(messageOrMessages: MaybeArray<EdenWsOutgoingMessage>) {
+  send(messageOrMessages: MaybeArray<EdenWsOutgoingMessage>) {
     if (!this.activeConnection.isOpen()) {
       throw new Error('Active connection is not open')
     }
 
-    const messages = messageOrMessages instanceof Array ? messageOrMessages : [messageOrMessages]
+    const messages = Array.isArray(messageOrMessages) ? messageOrMessages : [messageOrMessages]
 
-    this.activeConnection.ws.send(JSON.stringify(messages.length === 1 ? messages[0] : messages))
+    // Replicates eden-treaty
+    // @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty/index.ts#L68
+    if (this.options.batch == false) {
+      for (const message of messages) {
+        const data = typeof message === 'object' ? JSON.stringify(message) : String(message)
+        this.activeConnection.ws?.send(data)
+      }
+    } else {
+      this.activeConnection.ws?.send(JSON.stringify(messages.length === 1 ? messages[0] : messages))
+    }
   }
 
   /**
