@@ -127,7 +127,7 @@ export class EdenClient<T extends InternalElysia> {
       signal: options?.signal,
     })
 
-    const unsubscribable = observable$.subscribe({
+    const subscription = observable$.subscribe({
       next(envelope) {
         switch (envelope.result.type) {
           case 'state': {
@@ -161,6 +161,6 @@ export class EdenClient<T extends InternalElysia> {
       },
     })
 
-    return unsubscribable
+    return subscription
   }
 }

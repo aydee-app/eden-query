@@ -1,5 +1,4 @@
 import { IS_SERVER } from '../constants'
-import { createNewFile } from './file'
 
 export async function jsonToFormData(body: unknown) {
   const formData = new FormData()
@@ -14,14 +13,13 @@ export async function jsonToFormData(body: unknown) {
     }
 
     if (field instanceof File) {
-      formData.append(key, await createNewFile(field))
+      formData.append(key, field)
       continue
     }
 
     if (field instanceof FileList || Array.isArray(field)) {
       for (const value of field) {
-        const formValue = value instanceof File ? await createNewFile(value) : value
-        formData.append(key, formValue)
+        formData.append(key, value)
       }
 
       continue

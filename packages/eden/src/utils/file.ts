@@ -1,5 +1,4 @@
 import { isServer } from '../constants'
-import { notNull } from './null'
 
 export function isFile(value: unknown) {
   if (isServer) return value instanceof Blob
@@ -21,25 +20,6 @@ export function hasFile(object?: unknown) {
   })
 
   return hasFileValue
-}
-
-export function createNewFile(value: File) {
-  if (isServer) return value
-
-  return new Promise<File>((resolve) => {
-    const reader = new FileReader()
-
-    reader.onload = () => {
-      const fileBits = [reader.result].filter(notNull)
-      const file = new File(fileBits, value.name, {
-        lastModified: value.lastModified,
-        type: value.type,
-      })
-      resolve(file)
-    }
-
-    reader.readAsArrayBuffer(value)
-  })
 }
 
 export type ExtractedFile = {
