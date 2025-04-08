@@ -1,11 +1,17 @@
+import {
+  type EventSourceLike,
+  sseStreamConsumer,
+  type TRPC_ERROR_CODE_NUMBER,
+  TRPC_ERROR_CODES_BY_KEY,
+} from '@trpc/server/unstable-core-do-not-import'
+import { EventSourcePolyfill, NativeEventSource } from 'event-source-polyfill'
+
 import type { EdenResult, EdenWsStateResult } from '../core/dto'
 import { EdenClientError, type EdenError } from '../core/error'
 import { resolveEdenFetchPath } from '../core/resolve'
 import { resolveTransformer } from '../core/transform'
 import type { InternalElysia } from '../core/types'
 import { behaviorSubject, Observable } from '../observable'
-import { sseStreamConsumer } from '../stream/sse'
-import type { EventSourceLike } from '../stream/types'
 import { type CallbackOrValue, resolveCallbackOrValue } from '../utils/callback-or-value'
 import { buildQueryString } from '../utils/query'
 import { raceAbortSignals } from '../utils/signal'
@@ -13,48 +19,7 @@ import type { MaybePromise } from '../utils/types'
 import type { WebSocketUrlOptions } from '../ws/url'
 import type { HTTPLinkBaseOptions } from './http-link'
 import type { EdenLink, Operation, OperationLink } from './types'
-
-/**
- * JSON-RPC 2.0 Error codes
- *
- * `-32000` to `-32099` are reserved for implementation-defined server-errors.
- * For tRPC we're copying the last digits of HTTP 4XX errors.
- */
-export const TRPC_ERROR_CODES_BY_KEY = {
-  /**
-   * Invalid JSON was received by the server.
-   * An error occurred on the server while parsing the JSON text.
-   */
-  PARSE_ERROR: -32700,
-  /**
-   * The JSON sent is not a valid Request object.
-   */
-  BAD_REQUEST: -32600, // 400
-
-  // Internal JSON-RPC error
-  INTERNAL_SERVER_ERROR: -32603, // 500
-  NOT_IMPLEMENTED: -32603, // 501
-  BAD_GATEWAY: -32603, // 502
-  SERVICE_UNAVAILABLE: -32603, // 503
-  GATEWAY_TIMEOUT: -32603, // 504
-
-  // Implementation specific errors
-  UNAUTHORIZED: -32001, // 401
-  FORBIDDEN: -32003, // 403
-  NOT_FOUND: -32004, // 404
-  METHOD_NOT_SUPPORTED: -32005, // 405
-  TIMEOUT: -32008, // 408
-  CONFLICT: -32009, // 409
-  PRECONDITION_FAILED: -32012, // 412
-  PAYLOAD_TOO_LARGE: -32013, // 413
-  UNSUPPORTED_MEDIA_TYPE: -32015, // 415
-  UNPROCESSABLE_CONTENT: -32022, // 422
-  TOO_MANY_REQUESTS: -32029, // 429
-  CLIENT_CLOSED_REQUEST: -32099, // 499
-} as const
-
-export type TRPC_ERROR_CODE_NUMBER =
-  (typeof TRPC_ERROR_CODES_BY_KEY)[keyof typeof TRPC_ERROR_CODES_BY_KEY]
+;(global as any).EventSource = NativeEventSource || EventSourcePolyfill
 
 /**
  * tRPC error codes that are considered retryable
