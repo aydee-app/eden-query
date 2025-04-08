@@ -92,8 +92,12 @@ export async function resolveBatchAsJson(data: Promise<EdenResult>[]) {
  * })
  * ```
  */
-export function createBatchResolvers(domain: InternalElysia, config: BatchPluginConfig = {}) {
-  const resolveBatchRequest = async (method: BatchMethod, context: InternalContext) => {
+export function createBatchResolver(domain: InternalElysia, config: BatchPluginConfig = {}) {
+  const resolveBatchRequest = async (context: InternalContext) => {
+    const requestMethod = context.request.method.toUpperCase()
+
+    const method = requestMethod === 'GET' ? 'GET' : 'POST'
+
     const url = new URL(context.request.url)
 
     const base = url.origin
@@ -131,10 +135,7 @@ export function createBatchResolvers(domain: InternalElysia, config: BatchPlugin
     return response
   }
 
-  return {
-    GET: resolveBatchRequest.bind(null, 'GET'),
-    POST: resolveBatchRequest.bind(null, 'POST'),
-  }
+  return resolveBatchRequest
 }
 
 /**
@@ -157,21 +158,28 @@ export function batchPlugin<const T extends BatchPluginConfig>(config: T = {} as
    * the batch methods are not intended to be invoked directly...
    */
   const plugin = (app: Elysia) => {
-    const resolvers = createBatchResolvers(app, config)
+    const resolver = createBatchResolver(app, config)
 
-    const methods = config.method === true ? ['GET', 'POST'] : toArray(config.method)
+    const methods = toArray(config.method)
 
     if (!methods.length) {
-      methods.push('POST')
+      methods.push(true)
     }
 
-    if (methods.includes('GET')) {
-      app.get(endpoint, resolvers.GET)
+    const routeOptions: any = {
+      /**
+       * Disable built-in Elysia.js parser for batch route handler.
+       */
+      parse: () => null,
     }
 
-    if (methods.includes('POST')) {
-      app.post(endpoint, resolvers.POST, { parse: () => null })
-    }
+    methods.forEach((method) => {
+      if (method === true) {
+        app.all(endpoint, resolver, routeOptions)
+      } else {
+        app.route(method, endpoint, resolver, routeOptions)
+      }
+    })
 
     const appWithState = app.state(() => {
       type TResolvedState = Record<TResolvedKey, { batch: T }>

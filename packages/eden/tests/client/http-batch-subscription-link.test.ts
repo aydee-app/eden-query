@@ -52,12 +52,7 @@ describe('httpBatchSubscriptionLink', () => {
           const url = new URL(context.request.url)
           if (url.pathname === '/batch') listener()
         })
-        .use(
-          batchPlugin({
-            types: true,
-            method: 'GET',
-          }),
-        )
+        .use(batchPlugin({ types: true }))
         .get('/', () => values[i++])
 
       useApp(app)

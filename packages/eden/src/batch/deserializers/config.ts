@@ -14,7 +14,7 @@ export interface BatchDeserializerConfig {
    *
    * @default "POST".
    */
-  method?: MaybeArray<BatchMethod> | true
+  method?: MaybeArray<BatchMethod | true>
 }
 
 /**
