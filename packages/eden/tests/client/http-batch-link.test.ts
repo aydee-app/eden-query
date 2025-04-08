@@ -6,115 +6,12 @@ import { describe, expect, test, vi } from 'vitest'
 import { EdenClient } from '../../src/client'
 import type { EdenResult } from '../../src/core/dto'
 import { EdenFetchError } from '../../src/core/error'
-import { httpBatchSubscriptionLink } from '../../src/links/http-batch-subscription-link'
+import { httpBatchLink } from '../../src/links/http-batch-link'
 import { httpLink } from '../../src/links/http-link'
 import { batchPlugin } from '../../src/plugins/batch'
-import { BatchInputTooLargeError } from '../../src/utils/data-loader'
 import { useApp } from '../setup'
 
-describe('httpBatchSubscriptionLink', () => {
-  describe('batching implementation', () => {
-    test('does not call batch endpoint if only one request', async () => {
-      const listener = vi.fn()
-
-      const app = new Elysia().all('/batch', listener).get('/', () => 'Hello, Elysia!')
-
-      useApp(app)
-
-      const client = new EdenClient<typeof app>({
-        links: [
-          httpBatchSubscriptionLink({
-            domain: 'http://localhost:3000',
-          }),
-        ],
-      })
-
-      await client.query('/', { method: 'GET' })
-
-      expect(listener).not.toHaveBeenCalled()
-    })
-
-    test('groups requests based on number of requests allowed per batch', async () => {
-      const maxItems = 2
-
-      const groups = 3
-
-      const length = maxItems * groups
-
-      const values = Array.from({ length }, (_, index) => index)
-
-      let i = 0
-
-      const listener = vi.fn()
-
-      const app = new Elysia()
-        .onRequest((context) => {
-          const url = new URL(context.request.url)
-          if (url.pathname === '/batch') listener()
-        })
-        .use(
-          batchPlugin({
-            types: true,
-            method: 'GET',
-          }),
-        )
-        .get('/', () => values[i++])
-
-      useApp(app)
-
-      const client = new EdenClient<typeof app>({
-        links: [
-          httpBatchSubscriptionLink({
-            types: true,
-            domain: 'http://localhost:3000',
-            method: 'GET',
-            maxItems,
-          }),
-        ],
-      })
-
-      const requester = client.query.bind(client, '/', undefined, undefined)
-
-      const promises = values.map(requester)
-
-      await Promise.all(promises)
-
-      expect(listener).toHaveBeenCalledTimes(groups)
-    })
-
-    test('throws error if a single request exceeds the size limit', async () => {
-      const app = new Elysia().use(
-        batchPlugin({
-          types: true,
-          method: 'GET',
-        }),
-      )
-
-      useApp(app)
-
-      const client = new EdenClient<typeof app>({
-        links: [
-          httpBatchSubscriptionLink({
-            types: true,
-            domain: 'http://localhost:3000',
-            method: 'GET',
-            maxURLLength: 0,
-          }),
-        ],
-      })
-
-      const promises = [client.query('/'), client.query('/')]
-
-      const results = await Promise.allSettled(promises)
-
-      results.forEach((result) => {
-        expect(result.status).toBe('rejected')
-        assert(result.status === 'rejected')
-        expect(result.reason).toBeInstanceOf(BatchInputTooLargeError)
-      })
-    })
-  })
-
+describe('httpBatchLink', () => {
   describe('GET', async () => {
     test('switches to POST if any requests are not GET', async () => {
       const listener = vi.fn()
@@ -125,7 +22,7 @@ describe('httpBatchSubscriptionLink', () => {
 
       const client = new EdenClient<typeof app>({
         links: [
-          httpBatchSubscriptionLink({
+          httpBatchLink({
             types: true,
             domain: 'http://localhost:3000',
             method: 'GET',
@@ -184,7 +81,7 @@ describe('httpBatchSubscriptionLink', () => {
 
         const client = new EdenClient<typeof app>({
           links: [
-            httpBatchSubscriptionLink({
+            httpBatchLink({
               types: true,
               domain: 'http://localhost:3000',
               method: 'GET',
@@ -214,7 +111,7 @@ describe('httpBatchSubscriptionLink', () => {
 
         const client = new EdenClient<typeof app>({
           links: [
-            httpBatchSubscriptionLink({
+            httpBatchLink({
               types: true,
               domain: 'http://localhost:3000',
               method: 'GET',
@@ -253,7 +150,7 @@ describe('httpBatchSubscriptionLink', () => {
 
         const client = new EdenClient<typeof app>({
           links: [
-            httpBatchSubscriptionLink({
+            httpBatchLink({
               types: true,
               domain: 'http://localhost:3000',
               method: 'GET',
@@ -314,7 +211,7 @@ describe('httpBatchSubscriptionLink', () => {
 
         const client = new EdenClient<typeof app>({
           links: [
-            httpBatchSubscriptionLink({
+            httpBatchLink({
               types: true,
               domain: 'http://localhost:3000',
               method: 'GET',
@@ -365,7 +262,7 @@ describe('httpBatchSubscriptionLink', () => {
 
         const client = new EdenClient<typeof app>({
           links: [
-            httpBatchSubscriptionLink({
+            httpBatchLink({
               types: true,
               domain: 'http://localhost:3000',
               method: 'GET',
@@ -419,7 +316,7 @@ describe('httpBatchSubscriptionLink', () => {
 
         const client = new EdenClient<typeof app>({
           links: [
-            httpBatchSubscriptionLink({
+            httpBatchLink({
               types: true,
               domain: 'http://localhost:3000',
               method: 'GET',

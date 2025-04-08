@@ -214,12 +214,7 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
       return url.length <= maxURLLength
     },
     async fetch(batchOps) {
-      if (batchOps.length === 1) {
-        const [firstOperation] = batchOps
-
-        // Error case: only one operation, but it is somehow null.
-        if (firstOperation == null) return []
-
+      if (batchOps.length === 1 && batchOps[0]) {
         // Resolve the custom headers here since HTTP handling has a different shape for input headers.
         const headers = await processHeaders(options.headers, batchOps)
 
@@ -229,7 +224,7 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
 
         const httpLinkOptions: HTTPLinkOptions<TElysia, TConfig> = { ...options, headers }
 
-        const result = await handleHttpRequest(httpLinkOptions, firstOperation)
+        const result = await handleHttpRequest(httpLinkOptions, batchOps[0])
 
         return [result]
       }

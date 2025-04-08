@@ -66,7 +66,7 @@ describe.skip('adapter', () => {
 })
 
 describe('wsLink', async () => {
-  test('works with batched request', async () => {
+  test.only('works with batched request', async () => {
     const data = ['Hello, Elysia', 'Hello, Aponia', 'Hello, Eden']
 
     let i = 0

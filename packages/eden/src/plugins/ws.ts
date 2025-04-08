@@ -55,7 +55,10 @@ export function wsPlugin<const T extends WsPluginConfig>(config: T = {} as any) 
     const wsMessageHandler = handleWsMessage.bind(null, app)
 
     appWithState.ws(endpoint, {
-      message: async (ws, messageOrMessages: MaybeArray<EdenWsOutgoingMessage>) => {
+      message: async (ws, raw) => {
+        const messageOrMessages: MaybeArray<EdenWsOutgoingMessage> =
+          typeof raw === 'string' ? JSON.parse(raw) : raw
+
         // For simplicity, if a single message was sent, respond in-kind with a single response.
         if (!Array.isArray(messageOrMessages)) {
           const incomingMessage = await wsMessageHandler(messageOrMessages)
