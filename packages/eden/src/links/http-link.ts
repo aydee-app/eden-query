@@ -1,4 +1,3 @@
-import { HTTP_SUBSCRIPTION_ERROR } from '../constants'
 import type { EdenRequestParams, EdenResolverConfig, EdenResolverTypeConfig } from '../core/config'
 import { processHeaders } from '../core/headers'
 import type { HTTPHeaders } from '../core/http'
@@ -8,6 +7,7 @@ import { Observable } from '../observable'
 import { toArray } from '../utils/array'
 import type { CallbackOrValue } from '../utils/callback-or-value'
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
+import { WebSocketClient } from '../ws/client'
 import type { EdenLink, Operation, OperationLink } from './types'
 
 /**
@@ -116,7 +116,26 @@ export function httpLink<TElysia extends InternalElysia, const TConfig>(
 ) {
   const link = (() => {
     const operationLink = (({ op }) => {
-      if (op.type === 'subscription') throw new Error(HTTP_SUBSCRIPTION_ERROR)
+      if (op.type === 'subscription') {
+        const client = new WebSocketClient({
+          url: `${options.domain}${op.path}`,
+        })
+
+        return new Observable((observer) => {
+          const connectionStateSubscription = client.connectionState.subscribe({
+            next(result: any) {
+              observer.next({
+                result,
+                context: op.context,
+              })
+            },
+          })
+
+          return () => {
+            connectionStateSubscription.unsubscribe()
+          }
+        })
+      }
 
       return new Observable((observer) => {
         const request = handleHttpRequest(options, op)
