@@ -140,7 +140,7 @@ export type ResolveTransformer<T> = T extends ConfigWithTransformer
     ? T['transformers'] extends Array<infer TItem extends AnyDataTransformer>
       ? { transformer: TItem }
       : T['transformers'] extends Record<string, AnyDataTransformer>
-        ? { transformer: T['transformers'][keyof T['transformers']] }
+        ? { transformer?: T['transformers'][keyof T['transformers']] }
         : Partial<ConfigWithTransformer>
     : Partial<ConfigWithTransformer>
 

@@ -191,6 +191,10 @@ export interface EdenFetchErrorResult<T> extends EdenFetchBaseResult {
 
 export type EdenErrorResult<T> = EdenFetchErrorResult<T>
 
+export type EdenFetchResult<TData = any, TError = any> =
+  | EdenFetchSuccessResult<TData>
+  | EdenFetchErrorResult<TError>
+
 /**
  * Primarily intended for usage by the WebSocket client.
  * A union of all possible results, i.e. unwrapped in a JSON-RPC-esque object.

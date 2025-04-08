@@ -1,5 +1,5 @@
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
-import type { EdenResult } from './dto'
+import type { EdenFetchResult } from './dto'
 import type { EdenError } from './error'
 import type { FetchEsque, HeadersEsque } from './http'
 import type { EdenRouteBody, EdenRouteOptions } from './infer'
@@ -41,13 +41,13 @@ export type EdenResponseTransformer<
 
 /**
  */
-export type EdenResultTransformer<
+export type EdenFetchResultTransformer<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
 > = (
-  result: EdenResult<any, EdenError>,
+  result: EdenFetchResult<any, EdenError>,
   params: EdenRequestParams<TElysia, TConfig>,
-) => MaybePromise<EdenResult<any, EdenError> | Nullish>
+) => MaybePromise<EdenFetchResult<any, EdenError> | Nullish>
 
 /**
  * Configure the global behavior of the request resolver.
@@ -110,7 +110,7 @@ export interface EdenResolverConfig<
    *
    * @default Eden provides a default that will apply transformer deserializations to the response data.
    */
-  onResult?: MaybeArray<EdenResultTransformer<TElysia, TConfig>>
+  onResult?: MaybeArray<EdenFetchResultTransformer<TElysia, TConfig>>
 
   /**
    * Whether to dynamically resolve the domain.

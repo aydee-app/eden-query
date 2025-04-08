@@ -110,7 +110,7 @@ async function handleWsFetchRequest(
   if (result.error) {
     const incomingMessage: EdenWsIncomingMessage = {
       id: message.id,
-      error: result.error,
+      error: { error: result.error, response: result.response },
       result: undefined,
     }
 
@@ -119,11 +119,11 @@ async function handleWsFetchRequest(
 
   const incomingMessage: EdenWsIncomingMessage = {
     id: message.id,
-    error: undefined,
+    error: result.error || undefined,
     result: {
-      ...result,
       type: 'data',
-      response: {} as any,
+      data: result.data,
+      response: result.response,
     },
   }
 

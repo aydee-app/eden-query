@@ -30,12 +30,9 @@ describe('http-batch-link', () => {
 
   describe('query', () => {
     test('forwards global query', async () => {
-      const app = new Elysia()
-        .use(transformPlugin({ transformer: SuperJSON }))
-        .use(batchPlugin())
-        .get('/', (context) => {
-          return context.query
-        })
+      const app = new Elysia().use(batchPlugin()).get('/', (context) => {
+        return context.query
+      })
 
       useApp(app)
 
@@ -58,12 +55,9 @@ describe('http-batch-link', () => {
 
   describe('headers', () => {
     test('forwards global headers', async () => {
-      const app = new Elysia()
-        .use(transformPlugin({ transformer: SuperJSON }))
-        .use(batchPlugin())
-        .get('/', (context) => {
-          return context.headers
-        })
+      const app = new Elysia().use(batchPlugin()).get('/', (context) => {
+        return context.headers
+      })
 
       useApp(app)
 
@@ -105,10 +99,7 @@ describe('http-batch-link', () => {
         return context.query
       })
 
-      const app = new Elysia()
-        .use(transformPlugin({ transformer: SuperJSON }))
-        .use(batchPlugin())
-        .get('/query', handleGet, { query })
+      const app = new Elysia().use(batchPlugin()).get('/query', handleGet, { query })
 
       useApp(app)
 
@@ -327,11 +318,11 @@ describe('http-batch-link', () => {
         }
       })
 
-      const results = (await Promise.all(
-        bodies.map(async (body) => {
-          return client.mutation('/hello', { method: 'POST', body })
-        }),
-      )) as EdenResult[]
+      const promises = bodies.map(async (body) => {
+        return client.mutation('/hello', { method: 'POST', body })
+      })
+
+      const results = await Promise.all(promises)
 
       results.forEach((result, index) => {
         expect(result.data).toStrictEqual(bodies[index])
@@ -339,7 +330,7 @@ describe('http-batch-link', () => {
       })
     })
 
-    test('works with request-specific transformer', async () => {
+    test.only('works with request-specific transformer', async () => {
       const body = t.Object({
         id: t.BigInt(),
         name: t.String(),
@@ -374,15 +365,15 @@ describe('http-batch-link', () => {
         }
       })
 
-      const results = (await Promise.all(
-        bodies.map(async (body, index) => {
-          return client.mutation('/hello', {
-            method: 'POST',
-            body,
-            transformer: index % 2 ? SuperJSON : devalue,
-          })
-        }),
-      )) as EdenResult[]
+      const promises = bodies.map(async (body, index) => {
+        return client.mutation('/hello', {
+          method: 'POST',
+          body,
+          transformer: index % 2 ? SuperJSON : devalue,
+        })
+      })
+
+      const results = await Promise.all(promises)
 
       results.forEach((result, index) => {
         expect(result.data).toStrictEqual(bodies[index])

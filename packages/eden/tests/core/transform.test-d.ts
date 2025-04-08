@@ -36,12 +36,12 @@ describe('ResolveTransformer', () => {
   describe('prohibits transformer if invalid transformers', () => {
     test('transformers is invalid', () => {
       type Result = ResolveTransformer<{ transformers: {} }>
-      expectTypeOf<Result>().toEqualTypeOf<{ transformer: never }>()
+      expectTypeOf<Result>().toEqualTypeOf<{ transformer?: never }>()
     })
 
     test('transformer and transformers are invalid', () => {
       type Result = ResolveTransformer<{ transformer: {}; transformers: {} }>
-      expectTypeOf<Result>().toEqualTypeOf<{ transformer: never }>()
+      expectTypeOf<Result>().toEqualTypeOf<{ transformer?: never }>()
     })
   })
 
@@ -77,7 +77,7 @@ describe('ResolveTransformer', () => {
 
       test('returns union of record values if object of valid transformers', () => {
         type Result = ResolveTransformer<{ transformers: { SuperJSON: typeof SuperJSON } }>
-        expectTypeOf<Result>().toEqualTypeOf<{ transformer: typeof SuperJSON }>()
+        expectTypeOf<Result>().toEqualTypeOf<{ transformer?: typeof SuperJSON }>()
       })
 
       test('returns union of array values if array of valid transformers', () => {
@@ -104,7 +104,7 @@ describe('ResolveTransformer', () => {
 
         type Result = ResolveTransformer<{ transformers: Transformers }>
 
-        expectTypeOf<Result>().toEqualTypeOf<{ transformer: Transformers[keyof Transformers] }>()
+        expectTypeOf<Result>().toEqualTypeOf<{ transformer?: Transformers[keyof Transformers] }>()
       })
 
       test('returns union of array values if array of multiple valid transformers', () => {

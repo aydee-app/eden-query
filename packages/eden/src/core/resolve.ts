@@ -3,12 +3,12 @@ import { extractFiles } from '../utils/file'
 import { jsonToFormData } from '../utils/form-data'
 import { buildQueryString } from '../utils/query'
 import type {
+  EdenFetchResultTransformer,
   EdenRequestParams,
   EdenRequestTransformer,
   EdenResponseTransformer,
-  EdenResultTransformer,
 } from './config'
-import type { EdenResult } from './dto'
+import type { EdenFetchResult } from './dto'
 import { type EdenError, EdenFetchError } from './error'
 import { getFetch } from './fetch'
 import { processHeaders } from './headers'
@@ -111,7 +111,7 @@ export const defaultOnResult = (async (result, params) => {
   if (result.error && 'value' in result.error) {
     result.error.value = await transformer.output.deserialize(result.error.value)
   }
-}) satisfies EdenResultTransformer
+}) satisfies EdenFetchResultTransformer
 
 export function resolveEdenFetchPath<
   TElysia extends InternalElysia = InternalElysia,
@@ -173,7 +173,7 @@ export async function resolveFetchOptions<
 
   const onResult = [
     ...toArray(params.onResult),
-    defaultOnResult as EdenResultTransformer<TElysia, TConfig>,
+    defaultOnResult as EdenFetchResultTransformer<TElysia, TConfig>,
   ]
 
   return { path, query, fetchInit, onResponse, onResult }
@@ -209,7 +209,7 @@ export async function resolveEdenRequest<
 
   let currentResponse: typeof response | undefined = undefined
 
-  let result: EdenResult<any, EdenError>
+  let result: EdenFetchResult<any, EdenError>
 
   try {
     for (const value of onResponse) {

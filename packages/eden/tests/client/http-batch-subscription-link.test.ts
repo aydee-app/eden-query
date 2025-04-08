@@ -1,17 +1,26 @@
 import assert from 'node:assert'
 
+import { uneval } from 'devalue'
 import { Elysia, type HTTPMethod } from 'elysia'
+import SuperJSON from 'superjson'
 import { describe, expect, test, vi } from 'vitest'
 
 import { EdenClient } from '../../src/client'
 import type { EdenResult } from '../../src/core/dto'
 import { EdenFetchError } from '../../src/core/error'
+import type { AnyDataTransformer } from '../../src/core/transform'
 import type { HTTPBatchLinkHeaders } from '../../src/links/http-batch-link'
 import { httpBatchSubscriptionLink } from '../../src/links/http-batch-subscription-link'
 import { httpLink } from '../../src/links/http-link'
 import { batchPlugin } from '../../src/plugins/batch'
+import { transformPlugin } from '../../src/plugins/transform'
 import { BatchInputTooLargeError } from '../../src/utils/data-loader'
 import { useApp } from '../setup'
+
+const devalue: AnyDataTransformer = {
+  serialize: (object) => uneval(object),
+  deserialize: (object) => eval(`(${object})`),
+}
 
 describe('httpBatchSubscriptionLink', () => {
   describe('batching implementation', () => {
@@ -551,6 +560,82 @@ describe('httpBatchSubscriptionLink', () => {
 
           expect(searchParams).toStrictEqual(expectedQuery)
         })
+      })
+    })
+  })
+
+  describe('transformers (POST)', () => {
+    test('works with multiple transformers', async () => {
+      const values = Array.from({ length: 5 }, (_, index) => {
+        return { value: BigInt(index) }
+      })
+
+      const app = new Elysia()
+        .use(transformPlugin({ types: true, transformers: { SuperJSON, devalue } }))
+        .use(batchPlugin({ types: true }))
+        .post('/', (context) => context.body)
+
+      useApp(app)
+
+      const client = new EdenClient<typeof app>({
+        links: [
+          httpBatchSubscriptionLink({
+            types: true,
+            domain: 'http://localhost:3000',
+            transformers: { SuperJSON, devalue },
+          }),
+        ],
+      })
+
+      const promises = values.map(async (value, index) => {
+        return await client.query('/', {
+          method: 'POST',
+          body: value,
+          transformer: index % 2 ? SuperJSON : devalue,
+        })
+      })
+
+      const results = await Promise.allSettled(promises)
+
+      results.forEach((result, index) => {
+        assert(result.status === 'fulfilled')
+        expect(result.status).toBe('fulfilled')
+        expect(result.value.data).toStrictEqual(values[index])
+      })
+    })
+
+    test('works with one transformer', async () => {
+      const values = Array.from({ length: 5 }, (_, index) => {
+        return { value: BigInt(index) }
+      })
+
+      const app = new Elysia()
+        .use(transformPlugin({ types: true, transformer: SuperJSON }))
+        .use(batchPlugin({ types: true }))
+        .post('/', (context) => context.body)
+
+      useApp(app)
+
+      const client = new EdenClient<typeof app>({
+        links: [
+          httpBatchSubscriptionLink({
+            types: true,
+            domain: 'http://localhost:3000',
+            transformer: SuperJSON,
+          }),
+        ],
+      })
+
+      const promises = values.map(async (value) => {
+        return await client.query('/', { method: 'POST', body: value })
+      })
+
+      const results = await Promise.allSettled(promises)
+
+      results.forEach((result, index) => {
+        assert(result.status === 'fulfilled')
+        expect(result.status).toBe('fulfilled')
+        expect(result.value.data).toStrictEqual(values[index])
       })
     })
   })

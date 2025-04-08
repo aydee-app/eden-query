@@ -5,7 +5,7 @@ import { serializeBatchPostParams } from '../batch/serializers/post'
 import type { BatchMethod } from '../batch/shared'
 import { BATCH_ENDPOINT, HTTP_SUBSCRIPTION_ERROR } from '../constants'
 import type { EdenRequestParams } from '../core/config'
-import type { EdenResult } from '../core/dto'
+import type { EdenFetchResult } from '../core/dto'
 import type { EdenError } from '../core/error'
 import { processHeaders } from '../core/headers'
 import type { HTTPHeaders } from '../core/http'
@@ -118,10 +118,10 @@ export type HTTPBatchLinkResult<
     : BatchingNotDetectedError
   : EdenLink<TElysia>
 
-export async function resolveBatchJson(result: EdenResult, ops: EdenRequestParams[]) {
+export async function resolveBatchJson(result: EdenFetchResult, ops: EdenRequestParams[]) {
   if (!Array.isArray(result.data)) return []
 
-  const batchedData: EdenResult[] = result.data
+  const batchedData: EdenFetchResult[] = result.data
 
   const results = batchedData.map(async (batchedResult, index) => {
     let result = batchedResult
@@ -143,7 +143,7 @@ export async function resolveBatchJson(result: EdenResult, ops: EdenRequestParam
   return results
 }
 
-export async function resolveBatchStream(result: EdenResult, ops: EdenRequestParams[]) {
+export async function resolveBatchStream(result: EdenFetchResult, ops: EdenRequestParams[]) {
   if (result.type !== 'data' || !result.response.body) return []
 
   const abortController = new AbortController()
@@ -195,7 +195,7 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
     return resolvedParams
   }
 
-  const batchLoader: BatchLoader<Operation, EdenResult<any, EdenError>> = {
+  const batchLoader: BatchLoader<Operation, EdenFetchResult<any, EdenError>> = {
     async validate(batchOps) {
       // If not a GET request, then we don't care about size limits.
       if (options.method !== 'GET') return true
@@ -231,9 +231,15 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
 
       operationHeaders = await processHeaders(options.headers, batchOps)
 
-      const nonGetRequest = batchOps.find(
-        (op) => op.params?.method && op.params.method.toUpperCase() !== 'GET',
-      )
+      const nonGetRequest = batchOps.some((op) => {
+        // Has body, assume that the HTTP method is not GET.
+        if (op.params.body) return true
+
+        // Explicitly not GET.
+        if (op.params?.method && op.params.method.toUpperCase() !== 'GET') return true
+
+        return false
+      })
 
       const method = (nonGetRequest && 'POST') || options.method || 'POST'
 

@@ -40,7 +40,7 @@ function createIntervalIterable(interval = 1_000, limit = Infinity) {
 }
 
 describe('httpSubscriptionLink', () => {
-  test.only('works', async () => {
+  test('connects to sse-compatible endpoint', async () => {
     const length = 5
     const interval = 500
     const timeout = length * interval * 2
