@@ -12,7 +12,7 @@ import { useApp } from '../setup'
  */
 const origin = 'http://localhost'
 
-describe.skip('adapter', () => {
+describe('adapter', () => {
   test('should work', async () => {
     const app = createWsApp(origin).ws('/ws', {
       message(ws, message) {
@@ -66,7 +66,7 @@ describe.skip('adapter', () => {
 })
 
 describe('wsLink', async () => {
-  test.only('works with batched request', async () => {
+  test('works with batched request', async () => {
     const data = ['Hello, Elysia', 'Hello, Aponia', 'Hello, Eden']
 
     let i = 0

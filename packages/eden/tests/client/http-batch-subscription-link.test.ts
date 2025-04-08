@@ -6,6 +6,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { EdenClient } from '../../src/client'
 import type { EdenResult } from '../../src/core/dto'
 import { EdenFetchError } from '../../src/core/error'
+import type { HTTPBatchLinkHeaders } from '../../src/links/http-batch-link'
 import { httpBatchSubscriptionLink } from '../../src/links/http-batch-subscription-link'
 import { httpLink } from '../../src/links/http-link'
 import { batchPlugin } from '../../src/plugins/batch'
@@ -339,8 +340,6 @@ describe('httpBatchSubscriptionLink', () => {
 
           const expectedHeaders = requestHeaders[index]
 
-          assert(expectedHeaders != null)
-
           expect(headers).toStrictEqual(expectedHeaders)
         })
       })
@@ -390,8 +389,6 @@ describe('httpBatchSubscriptionLink', () => {
 
           const url = new URL(request.url)
 
-          assert(query != null)
-
           const searchParams = Object.fromEntries(url.searchParams.entries())
 
           expect(searchParams).toStrictEqual(query)
@@ -431,6 +428,128 @@ describe('httpBatchSubscriptionLink', () => {
 
         listeners.forEach((listener) => {
           expect(listener).toHaveBeenCalledOnce()
+        })
+      })
+    })
+
+    describe('merges global request params with individual request params', () => {
+      test('headers', async () => {
+        const values = Array.from({ length: 5 }, (_, index) => index)
+
+        const app = new Elysia().use(batchPlugin({ types: true, method: 'GET' }))
+
+        const listeners = values.map((value) => {
+          const listener = vi.fn()
+          app.get('/' + value, listener)
+          return listener
+        })
+
+        useApp(app)
+
+        const globalHeaders: HTTPBatchLinkHeaders = {
+          elysia: 'elf',
+          pardofelis: 'cat',
+          mobius: 'snake',
+        }
+
+        const client = new EdenClient<typeof app>({
+          links: [
+            httpBatchSubscriptionLink({
+              types: true,
+              domain: 'http://localhost:3000',
+              method: 'GET',
+              headers: globalHeaders,
+            }),
+          ],
+        })
+
+        const requestHeaders = values.map((value) => {
+          return {
+            authorization: `Bearer ${value}`,
+            age: value + '',
+            host: value + '',
+          }
+        })
+
+        const promises = requestHeaders.map(async (headers, index) => {
+          const result = await client.query('/' + index, { headers })
+          return result
+        })
+
+        await Promise.allSettled(promises)
+
+        listeners.forEach((listener, index) => {
+          const request: Request = listener.mock.calls[0]?.[0]?.request
+
+          const headers = Object.fromEntries(request.headers.entries())
+
+          const expectedHeaders = {
+            ...globalHeaders,
+            ...requestHeaders[index],
+          }
+
+          expect(headers).toStrictEqual(expectedHeaders)
+        })
+      })
+
+      test('query parameters', async () => {
+        const values = Array.from({ length: 5 }, (_, index) => index)
+
+        const app = new Elysia().use(batchPlugin({ types: true, method: 'GET' }))
+
+        const listeners = values.map((value) => {
+          const listener = vi.fn()
+          app.get('/' + value, listener)
+          return listener
+        })
+
+        useApp(app)
+
+        const globalQuery: Record<string, any> = {
+          elysia: 'elf',
+          pardofelis: 'cat',
+          mobius: 'snake',
+        }
+
+        const client = new EdenClient<typeof app>({
+          links: [
+            httpBatchSubscriptionLink({
+              types: true,
+              domain: 'http://localhost:3000',
+              method: 'GET',
+              query: globalQuery,
+            }),
+          ],
+        })
+
+        const requestQueries = values.map((value) => {
+          return {
+            name: value + '',
+            id: value + '',
+            description: value + '',
+          }
+        })
+
+        const promises = requestQueries.map(async (query, index) => {
+          const result = await client.query('/' + index, { query })
+          return result
+        })
+
+        await Promise.allSettled(promises)
+
+        listeners.forEach((listener, index) => {
+          const request: Request = listener.mock.calls[0]?.[0]?.request
+
+          const url = new URL(request.url)
+
+          const searchParams = Object.fromEntries(url.searchParams.entries())
+
+          const expectedQuery = {
+            ...globalQuery,
+            ...requestQueries[index],
+          }
+
+          expect(searchParams).toStrictEqual(expectedQuery)
         })
       })
     })

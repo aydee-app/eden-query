@@ -9,7 +9,7 @@ import type {
   EdenResultTransformer,
 } from './config'
 import type { EdenResult } from './dto'
-import { type EdenError,EdenFetchError } from './error'
+import { type EdenError, EdenFetchError } from './error'
 import { getFetch } from './fetch'
 import { processHeaders } from './headers'
 import { getResponseData } from './response'

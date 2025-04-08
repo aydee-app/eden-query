@@ -45,11 +45,12 @@ export async function deserializeBatchGetParams<
   for (const [key, value] of searchParams) {
     const [index, name, queryKey] = key.split('.')
 
-    if (index == null) continue
-
     const paramIndex = Number(index)
 
-    if (Number.isNaN(paramIndex)) continue
+    if (Number.isNaN(paramIndex)) {
+      globalQuery[key] = value
+      continue
+    }
 
     switch (name) {
       case BODY_KEYS.query: {

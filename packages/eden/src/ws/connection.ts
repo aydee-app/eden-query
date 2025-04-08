@@ -241,9 +241,7 @@ export function backwardCompatibility(connection: WebSocketConnection) {
     } as const
   }
 
-  if (!connection.ws) {
-    return null
-  }
+  if (!connection.ws) return null
 
   return {
     id: connection.id,

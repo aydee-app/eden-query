@@ -1,12 +1,16 @@
 // @vitest-environment happy-dom
 
 import { Elysia } from 'elysia'
-import { EventSourcePolyfill } from 'event-source-polyfill'
+import { EventSourcePolyfill, NativeEventSource } from 'event-source-polyfill'
 import { describe, expect, test, vi } from 'vitest'
 
 import { EdenClient } from '../../src/client'
 import { httpSubscriptionLink } from '../../src/links/http-subscription-link'
 import { useApp } from '../setup'
+
+const EventSource: any = NativeEventSource || EventSourcePolyfill
+
+global.EventSource = EventSource
 
 function createIntervalIterable(interval = 1_000, limit = Infinity) {
   let counter = 0

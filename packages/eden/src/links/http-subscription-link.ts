@@ -4,7 +4,6 @@ import {
   type TRPC_ERROR_CODE_NUMBER,
   TRPC_ERROR_CODES_BY_KEY,
 } from '@trpc/server/unstable-core-do-not-import'
-import { EventSourcePolyfill, NativeEventSource } from 'event-source-polyfill'
 
 import type { EdenResult, EdenWsStateResult } from '../core/dto'
 import { EdenClientError, type EdenError } from '../core/error'
@@ -19,7 +18,6 @@ import type { MaybePromise } from '../utils/types'
 import type { WebSocketUrlOptions } from '../ws/url'
 import type { HTTPLinkBaseOptions } from './http-link'
 import type { EdenLink, Operation, OperationLink } from './types'
-;(global as any).EventSource = NativeEventSource || EventSourcePolyfill
 
 /**
  * tRPC error codes that are considered retryable
