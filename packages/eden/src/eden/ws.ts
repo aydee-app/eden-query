@@ -55,9 +55,9 @@ export class EdenWs<T extends Record<string, any> = {}> extends WebSocketClient 
       return this
     }
 
-    this.activeConnection.ws?.send(
-      typeof data === 'object' ? JSON.stringify(data) : data.toString(),
-    )
+    const message = typeof data === 'object' ? JSON.stringify(data) : data.toString()
+
+    this.activeConnection.ws?.send(message)
 
     return this
   }

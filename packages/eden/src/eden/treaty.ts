@@ -126,7 +126,7 @@ export type EdenTreatyRoute<
 > = TPaths extends [...infer TPathSegments, infer TMethod]
   ? Uppercase<TMethod & string> extends 'GET'
     ? EdenTreatyQueryRoute<TElysia, TRoute, TConfig, TPathSegments>
-    : Uppercase<TMethod & string> extends 'SUBSCRIPTION'
+    : Uppercase<TMethod & string> extends 'SUBSCRIBE'
       ? EdenTreatySubscriptionRoute<TElysia, TRoute, TConfig, TPathSegments>
       : EdenTreatyMutationRoute<TElysia, TRoute, TConfig, TPathSegments>
   : never
@@ -182,12 +182,16 @@ export type EdenTreatyMutationRoute<
 /**
  */
 export type EdenTreatySubscriptionRoute<
-  _TElysia extends InternalElysia,
+  TElysia extends InternalElysia,
   TRoute extends InternalRouteSchema,
-  _TConfig extends InternalEdenTypesConfig = {},
+  TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
-  TOptions = WebSocketClientOptions,
-> = (options?: TOptions) => EdenWs<TRoute>
+  TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
+  TFinalOptions = TConfig['separator'] extends string ? TOptions : Omit<TOptions, 'params'>,
+> = (
+  options: {} extends TFinalOptions ? void | TFinalOptions : TFinalOptions,
+  clientOptions?: Partial<WebSocketClientOptions>,
+) => EdenWs<TRoute>
 
 /**
  * Core Eden-Treaty implementation.
@@ -285,7 +289,7 @@ export function createEdenTreatyProxy<
 
       params = { path, ...params }
 
-      if (method === 'SUBSCRIPTION') {
+      if (method === 'SUBSCRIBE') {
         return new EdenWebSocket({ url: config?.domain + path, ...argArray[0] })
       }
 
