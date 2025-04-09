@@ -1,6 +1,6 @@
 import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
 import type { EdenFetchResult } from './dto'
-import type { EdenError } from './error'
+import type { EdenFetchError } from './error'
 import type { FetchEsque, HeadersEsque } from './http'
 import type { EdenRouteBody, EdenRouteOptions } from './infer'
 import type { TransformerConfig } from './transform'
@@ -45,9 +45,9 @@ export type EdenFetchResultTransformer<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
 > = (
-  result: EdenFetchResult<any, EdenError>,
+  result: EdenFetchResult<any, EdenFetchError>,
   params: EdenRequestParams<TElysia, TConfig>,
-) => MaybePromise<EdenFetchResult<any, EdenError> | Nullish>
+) => MaybePromise<EdenFetchResult<any, EdenFetchError> | Nullish>
 
 /**
  * Configure the global behavior of the request resolver.

@@ -9,7 +9,7 @@ import type {
   EdenResponseTransformer,
 } from './config'
 import type { EdenFetchResult } from './dto'
-import { type EdenError, EdenFetchError } from './error'
+import { EdenFetchError } from './error'
 import { getFetch } from './fetch'
 import { processHeaders } from './headers'
 import { getResponseData } from './response'
@@ -209,7 +209,7 @@ export async function resolveEdenRequest<
 
   let currentResponse: typeof response | undefined = undefined
 
-  let result: EdenFetchResult<any, EdenError>
+  let result: EdenFetchResult<any, EdenFetchError>
 
   try {
     for (const value of onResponse) {

@@ -1,12 +1,8 @@
-import {
-  type EventSourceLike,
-  sseStreamConsumer,
-  type TRPC_ERROR_CODE_NUMBER,
-  TRPC_ERROR_CODES_BY_KEY,
-} from '@trpc/server/unstable-core-do-not-import'
+import { type EventSourceLike, sseStreamConsumer } from '@trpc/server/unstable-core-do-not-import'
 
 import type { EdenResult, EdenWsStateResult } from '../core/dto'
-import { EdenClientError, type EdenError } from '../core/error'
+import { EdenError } from '../core/error'
+import { EDEN_SERVER_ERROR_CODES } from '../core/error-codes'
 import { resolveEdenFetchPath } from '../core/resolve'
 import { resolveTransformer } from '../core/transform'
 import type { InternalElysia } from '../core/types'
@@ -23,12 +19,7 @@ import type { EdenLink, Operation, OperationLink } from './types'
  * tRPC error codes that are considered retryable
  * With out of the box SSE, the client will reconnect when these errors are encountered
  */
-const codes5xx: TRPC_ERROR_CODE_NUMBER[] = [
-  TRPC_ERROR_CODES_BY_KEY.BAD_GATEWAY,
-  TRPC_ERROR_CODES_BY_KEY.SERVICE_UNAVAILABLE,
-  TRPC_ERROR_CODES_BY_KEY.GATEWAY_TIMEOUT,
-  TRPC_ERROR_CODES_BY_KEY.INTERNAL_SERVER_ERROR,
-]
+const internalServerErrorCodes = Object.values(EDEN_SERVER_ERROR_CODES)
 
 type HTTPSubscriptionLinkOptions<
   TElysia extends InternalElysia,
@@ -85,7 +76,7 @@ export function httpSubscriptionLink<
         type TConsumerConfig = {
           EventSource: TEventSource
           data: Partial<{ id?: string; data: unknown }>
-          error: any // TRPCErrorShape
+          error: EdenError
         }
 
         const eventSourceStream = sseStreamConsumer<TConsumerConfig>({
@@ -181,9 +172,9 @@ export function httpSubscriptionLink<
 
               case 'serialized-error': {
                 // const error = TRPCClientError.from({ error: chunk.error })
-                const error = chunk.error
+                const error: any = chunk.error
 
-                if (codes5xx.includes(chunk.error.code)) {
+                if (internalServerErrorCodes.includes(error.code)) {
                   //
                   connectionState.next({
                     type: 'state',
@@ -217,11 +208,12 @@ export function httpSubscriptionLink<
               }
 
               case 'timeout': {
+                const message = `Timeout of ${chunk.ms}ms reached while waiting for a response`
+
                 connectionState.next({
                   type: 'state',
                   state: 'connecting',
-                  error: new EdenClientError(123, ''),
-                  // new TRPCClientError(`Timeout of ${chunk.ms}ms reached while waiting for a response`),
+                  error: new EdenError(message),
                 })
               }
             }

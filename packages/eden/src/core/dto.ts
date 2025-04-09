@@ -231,7 +231,7 @@ export interface EdenSuccessResponse<T> extends JSONRPC2.SuccessResponse {
  *
  * @see https://www.jsonrpc.org/specification#response_object
  */
-export interface EdenErrorResponse<T> extends JSONRPC2.ErrorResponse {
+export interface EdenErrorResponse<T = any> extends JSONRPC2.ErrorResponse {
   result?: never
   error: EdenErrorResult<T>
 }

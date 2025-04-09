@@ -1,0 +1,52 @@
+import type { InvertKeyValue, ValueOf } from '../utils/types'
+
+export const EDEN_INTERNAL_SERVER_ERROR_CODES = {
+  INTERNAL_SERVER_ERROR: -32603, // 500
+  NOT_IMPLEMENTED: -32603, // 501
+  BAD_GATEWAY: -32603, // 502
+  SERVICE_UNAVAILABLE: -32603, // 503
+  GATEWAY_TIMEOUT: -32603, // 504
+} as const
+
+export const EDEN_SERVER_ERROR_CODES = {
+  ...EDEN_INTERNAL_SERVER_ERROR_CODES,
+} as const
+
+export const EDEN_CLIENT_FETCH_ERROR_CODES = {} as const
+
+export const EDEN_CLIENT_WEB_SOCKET_ERROR_CODES = {
+  WEBSOCKET_CLOSED: -32500,
+  WEBSOCKET_TIMEOUT: -32501,
+} as const
+
+export const EDEN_CLIENT_ERROR_CODES = {
+  ...EDEN_CLIENT_FETCH_ERROR_CODES,
+  ...EDEN_CLIENT_WEB_SOCKET_ERROR_CODES,
+} as const
+
+/**
+ */
+export const EDEN_ERROR_CODES = {
+  ...EDEN_SERVER_ERROR_CODES,
+  ...EDEN_CLIENT_ERROR_CODES,
+} as const
+
+/**
+ */
+export const EDEN_ERROR_CODES_BY_NUMBER: InvertKeyValue<typeof EDEN_ERROR_CODES> = {
+  [-32603]: 'INTERNAL_SERVER_ERROR',
+  [-32500]: 'WEBSOCKET_CLOSED',
+  [-32501]: 'WEBSOCKET_TIMEOUT',
+}
+
+export type EDEN_ERROR_CODE_NUMBER = ValueOf<typeof EDEN_ERROR_CODES>
+
+export type EDEN_ERROR_CODE = keyof typeof EDEN_ERROR_CODES
+
+export type EDEN_CLIENT_ERROR_CODE_NUMBER = ValueOf<typeof EDEN_CLIENT_ERROR_CODES>
+
+export type EDEN_CLIENT_ERROR_CODE = keyof typeof EDEN_CLIENT_ERROR_CODES
+
+export type EDEN_SERVER_ERROR_CODE_NUMBER = ValueOf<typeof EDEN_SERVER_ERROR_CODES>
+
+export type EDEN_SERVER_ERROR_CODE = keyof typeof EDEN_SERVER_ERROR_CODES

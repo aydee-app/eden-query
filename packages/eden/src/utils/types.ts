@@ -98,3 +98,13 @@ export type StringReplace<
 > = T extends `${infer THead}${TTarget}${infer TTail}` ? `${THead}${TValue}${TTail}` : T
 
 export type ExtractString<T, U extends string> = T extends `${U}${infer Inner}` ? Inner : T & string
+
+export type ValueOf<T> = T[keyof T]
+
+export type KeyFromValue<TValue, TType extends Record<PropertyKey, PropertyKey>> = {
+  [K in keyof TType]: TValue extends TType[K] ? K : never
+}[keyof TType]
+
+export type InvertKeyValue<T extends Record<PropertyKey, PropertyKey>> = {
+  [TValue in T[keyof T]]: KeyFromValue<TValue, T>
+}
