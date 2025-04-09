@@ -49,9 +49,9 @@ export type EdenFetchRequester<
 > = <
   TPath extends keyof TEndpoints,
   TEndpoint extends TEndpoints[TPath],
-  TMethod extends Uppercase<keyof TEndpoint & string>,
+  TMethod extends keyof TEndpoint,
   TRoute extends InternalRouteSchema = Extract<
-    TEndpoint[Extract<Lowercase<TMethod extends string ? TMethod : 'GET'>, keyof TEndpoint>],
+    TEndpoint[Extract<TMethod extends string ? TMethod : 'get', keyof TEndpoint>],
     InternalRouteSchema
   >,
 >(
@@ -87,14 +87,14 @@ export type EdenFetchDistinctEndpoints<
       >
 }[keyof TRoutes]
 
-export type EdenFetchOptions<TMethod, TRoute extends InternalRouteSchema> = (TMethod extends 'GET'
+export type EdenFetchOptions<TMethod, TRoute extends InternalRouteSchema> = (TMethod extends 'get'
   ? {
-      method?: TMethod
+      method?: Uppercase<TMethod & string>
     }
   : {
-      method: TMethod
+      method: Uppercase<TMethod & string>
     }) &
-  (TMethod extends 'GET' | 'SUBSCRIBE'
+  (TMethod extends 'get' | 'subscribe'
     ? EdenFetchQueryOptions<TRoute>
     : EdenFetchMutationOptions<TRoute>)
 
@@ -105,14 +105,14 @@ export type EdenFetchMutationOptions<
   TBody = EdenRouteBody<TRoute>,
 > = EdenRouteOptions<TRoute> & (undefined extends TBody ? { body?: TBody } : { body: TBody })
 
-export type EdenFetchSubscriptionParameters<TMethod> = TMethod extends 'SUBSCRIBE'
+export type EdenFetchSubscriptionParameters<TMethod> = TMethod extends 'subscribe'
   ? [clientOptions?: Partial<WebSocketClientOptions>]
   : []
 
 export type EdenFetchResponse<
   TMethod,
   TRoute extends InternalRouteSchema,
-> = TMethod extends 'SUBSCRIBE'
+> = TMethod extends 'subscribe'
   ? EdenWs<TRoute>
   : Promise<EdenFetchResult<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>>>
 

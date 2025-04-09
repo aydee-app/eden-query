@@ -108,7 +108,7 @@ describe('transformPlugin', () => {
               }),
             ],
           })
-        }).type.errors("Type 'boolean' is not assignable to type 'typeof SuperJSON'.")
+        }).type.errors("Type 'BatchingNotDetectedError' is not assignable to type")
       })
 
       describe('transformers array', () => {
@@ -231,7 +231,7 @@ describe('transformPlugin', () => {
             .use(batchPlugin({ types: true }))
 
           const error =
-            "Type 'boolean' is not assignable to type 'typeof SuperJSON | { serialize: (object: any) => string; deserialize: (object: any) => any; }'."
+            "Type 'true' is not assignable to type 'typeof SuperJSON | { serialize: (object: any) => string; deserialize: (object: any) => any; } | undefined'."
 
           attest(() => {
             new EdenClient<typeof app>({
@@ -409,7 +409,7 @@ describe('transformPlugin', () => {
           )
 
           const error =
-            "Type 'boolean' is not assignable to type 'typeof SuperJSON | { serialize: (object: any) => string; deserialize: (object: any) => any; }'."
+            "Type 'true' is not assignable to type 'typeof SuperJSON | { serialize: (object: any) => string; deserialize: (object: any) => any; } | undefined'."
 
           attest(() => {
             new EdenClient<typeof app>({
