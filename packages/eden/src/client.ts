@@ -46,10 +46,10 @@ export interface EdenRequestOptions {
   signal?: AbortSignal
 }
 
-export class EdenClient<T extends InternalElysia> {
+export class EdenClient<T extends InternalElysia = InternalElysia> {
   private readonly links: OperationLink<T>[]
 
-  public readonly runtime: EdenClientRuntime
+  public readonly runtime: EdenClientRuntime<T>
 
   private requestId: number
 

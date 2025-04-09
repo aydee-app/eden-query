@@ -1,8 +1,11 @@
+import type { EdenClient } from '../client'
 import type { EdenResolverConfig } from '../core/config'
 import type { EdenRouteOptions } from '../core/infer'
 import type { InternalElysia, InternalRouteSchema, InternalTypeConfig } from '../core/types'
 import type { EdenLink } from '../links/types'
+import type { WebSocketClientOptions } from '../ws/client'
 import type { ParamSeparator } from './path-param'
+import type { EdenWs } from './ws'
 
 export type ResolveEdenTypeConfig<T> = T extends InternalEdenTypesConfig ? T : never
 
@@ -34,9 +37,21 @@ export type EdenConfig<
 }
 
 export type ExtendedEdenRouteOptions<
-  TElysia extends InternalElysia,
-  TRoute extends InternalRouteSchema,
-  TConfig extends InternalEdenTypesConfig,
+  TElysia extends InternalElysia = InternalElysia,
+  TRoute extends InternalRouteSchema = InternalRouteSchema,
+  TConfig extends InternalEdenTypesConfig = InternalEdenTypesConfig,
 > = EdenRouteOptions<TRoute> & {
   eden?: EdenResolverConfig<TElysia, TConfig>
+}
+
+/**
+ * Similar to tRPC, all of the possible operations are calculated and cached
+ * outside of the proxy implementation. These operations are called "root hooks".
+ *
+ * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/react-query/src/shared/hooks/createHooksInternal.tsx#L81
+ */
+export interface EdenHooks {
+  query: EdenClient['query']
+  mutation: EdenClient['mutation']
+  subscription: (options: WebSocketClientOptions) => EdenWs
 }

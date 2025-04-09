@@ -8,6 +8,7 @@ import type { InternalElysia, InternalRouteSchema } from '../core/types'
 import type { WebSocketClientOptions } from '../ws/client'
 import type {
   EdenConfig,
+  EdenHooks,
   ExtendedEdenRouteOptions,
   InternalEdenTypesConfig,
   ResolveEdenTypeConfig,
@@ -18,7 +19,7 @@ import {
   type ParameterFunctionArgs,
   replacePathParams,
 } from './path-param'
-import { EdenWs as EdenWebSocket, EdenWs } from './ws'
+import { EdenWs } from './ws'
 
 /**
  * Properties available at the Eden-treaty proxy root.
@@ -31,20 +32,6 @@ export type EdenTreatyRoot<T extends InternalElysia = {}> = {
    * Utility function to update the types configuration.
    */
   types<U extends InternalEdenTypesConfig>(types?: U): EdenTreatyProxy<T, T['_routes'], U>
-
-  /**
-   * Eden resolves requests in two possible modes.
-   * 1. Links mode.
-   * 2. Basic HTTP networking mode.
-   *
-   * Based on Apollo GraphQL.
-   * @see https://www.apollographql.com/docs/react/api/link/introduction
-   *
-   * By default, HTTP networking mode will call {@link resolveEdenRequest}.
-   * If links are provided, then an {@link EdenClient} will be initialized and requests will
-   * be resolved through this client.
-   */
-  client?: EdenClient<T>
 }
 
 /**
@@ -202,7 +189,7 @@ export function createEdenTreatyProxy<
   TElysia extends InternalElysia = any,
   TConfig extends InternalEdenTypesConfig = any,
 >(
-  root: EdenTreatyRoot,
+  hooks: EdenHooks,
   config?: EdenConfig<TElysia, TConfig>,
   paths: string[] = [],
   pathParams: Record<string, any>[] = [],
@@ -213,7 +200,7 @@ export function createEdenTreatyProxy<
 
       if (p !== 'index') newPaths.push(p)
 
-      return createEdenTreatyProxy(root, config, newPaths, pathParams)
+      return createEdenTreatyProxy(hooks, config, newPaths, pathParams)
     },
     apply(_target, _thisArg, argArray) {
       /**
@@ -224,12 +211,12 @@ export function createEdenTreatyProxy<
       /**
        * @example 'get', 'post', 'patch'
        */
-      const method = pathsCopy.pop()?.toUpperCase() ?? ''
+      const method = pathsCopy.pop()?.toUpperCase()
 
       /**
        * {@link HTTP_METHODS} is an array of **lowercase** HTTP method names.
        */
-      const lowercaseMethod: any = method.toLowerCase()
+      const lowercaseMethod: any = method?.toLowerCase()
 
       /**
        * Determine whether a path parameter can be found from the provided args.
@@ -263,7 +250,7 @@ export function createEdenTreatyProxy<
          */
         const pathsWithParams = [...paths, `:${pathParam.key}`]
 
-        return createEdenTreatyProxy(root, config, pathsWithParams, allPathParams)
+        return createEdenTreatyProxy(hooks, config, pathsWithParams, allPathParams)
       }
 
       let params: EdenRequestParams = { method, ...(config as any) }
@@ -290,12 +277,12 @@ export function createEdenTreatyProxy<
       params = { path, ...params }
 
       if (method === 'SUBSCRIBE') {
-        return new EdenWebSocket({ url: config?.domain + path, ...argArray[0] })
+        return hooks.subscription({ url: config?.domain + path, ...argArray[0] })
       }
 
       const type = method && method !== 'GET' ? 'mutation' : 'query'
 
-      const result = root.client?.[type](path, params) ?? resolveEdenRequest(params)
+      const result = hooks[type](path, params)
 
       return result
     },
@@ -333,11 +320,29 @@ export function edenTreaty<
     },
   }
 
-  if (config?.links) {
-    root.client = new EdenClient({ links: config.links, domain })
+  const client = config.links ? new EdenClient({ links: config.links, domain }) : undefined
+
+  /**
+   * There is not much of a difference between inlining these function calls inside the proxy
+   * versus definining them here.
+   *
+   * `query` and `mutation` are essentially the same thing.
+   */
+  const hooks: EdenHooks = {
+    query(...args) {
+      const result = client?.query(...args) ?? resolveEdenRequest({ path: args[0], ...args[1] })
+      return result as any
+    },
+    mutation(...args) {
+      const result = client?.mutation(...args) ?? resolveEdenRequest({ path: args[0], ...args[1] })
+      return result as any
+    },
+    subscription(options) {
+      return new EdenWs(options)
+    },
   }
 
-  const innerProxy = createEdenTreatyProxy(root, { domain, ...config } as any)
+  const innerProxy = createEdenTreatyProxy(hooks, { domain, ...config } as any)
 
   const proxy: any = new Proxy(() => {}, {
     get(_target, p, _receiver) {

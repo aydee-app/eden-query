@@ -108,3 +108,21 @@ export type KeyFromValue<TValue, TType extends Record<PropertyKey, PropertyKey>>
 export type InvertKeyValue<T extends Record<PropertyKey, PropertyKey>> = {
   [TValue in T[keyof T]]: KeyFromValue<TValue, T>
 }
+
+export type UnionToIntersection<U> = (U extends any ? (arg: U) => any : never) extends (
+  arg: infer I,
+) => void
+  ? I
+  : never
+
+export type Stringable = string | number | bigint | null | undefined
+
+export type Join<
+  T extends any[],
+  TSeparator extends Stringable = '/',
+  TResult extends string = '',
+> = T extends [infer THead extends Stringable, ...infer TTail extends Stringable[]]
+  ? Join<TTail, TSeparator, `${TResult}${TSeparator}${THead}`>
+  : TResult
+
+export type IsAny<T> = 0 extends 1 & T ? true : false
