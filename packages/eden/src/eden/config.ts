@@ -1,5 +1,6 @@
 import type { EdenResolverConfig } from '../core/config'
-import type { InternalElysia, InternalTypeConfig } from '../core/types'
+import type { EdenRouteOptions } from '../core/infer'
+import type { InternalElysia, InternalRouteSchema, InternalTypeConfig } from '../core/types'
 import type { EdenLink } from '../links/types'
 import type { ParamSeparator } from './path-param'
 
@@ -30,4 +31,12 @@ export type EdenConfig<
 > = EdenResolverConfig<TElysia, TConfig> & {
   types?: TConfig
   links?: EdenLink<TElysia>[]
+}
+
+export type ExtendedEdenRouteOptions<
+  TElysia extends InternalElysia,
+  TRoute extends InternalRouteSchema,
+  TConfig extends InternalEdenTypesConfig,
+> = EdenRouteOptions<TRoute> & {
+  eden?: EdenResolverConfig<TElysia, TConfig>
 }

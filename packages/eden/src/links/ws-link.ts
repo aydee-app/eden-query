@@ -35,7 +35,9 @@ export function wsLink<TElysia extends InternalElysia, const TConfig>(
 
   const transformer = resolveTransformer(options.transformer)
 
-  const link = (() => {
+  const link = ((runtimeOptions) => {
+    options = { ...runtimeOptions, ...options }
+
     const operationLink = (({ op }) => {
       return new Observable((observer) => {
         const subscriptions: Unsubscribable[] = []

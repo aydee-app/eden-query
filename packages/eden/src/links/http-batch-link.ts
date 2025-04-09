@@ -297,7 +297,9 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
 
   const loader = dataLoader(batchLoader)
 
-  const link = (() => {
+  const link = ((runtimeOptions) => {
+    options = { ...runtimeOptions, ...options }
+
     const operationLink: OperationLink<TElysia> = ({ op }) => {
       return new Observable((observer) => {
         if (op.type === 'subscription') throw new Error(HTTP_SUBSCRIPTION_ERROR)

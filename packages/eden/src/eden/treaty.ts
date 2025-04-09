@@ -1,17 +1,17 @@
 import { EdenClient } from '../client'
 import { GET_OR_HEAD_HTTP_METHODS, HTTP_METHODS } from '../constants'
-import type { EdenRequestParams, EdenResolverConfig } from '../core/config'
+import type { EdenRequestParams } from '../core/config'
 import type { EdenFetchResult } from '../core/dto'
-import type {
-  EdenRouteBody,
-  EdenRouteError,
-  EdenRouteOptions,
-  EdenRouteSuccess,
-} from '../core/infer'
+import type { EdenRouteBody, EdenRouteError, EdenRouteSuccess } from '../core/infer'
 import { resolveEdenRequest } from '../core/resolve'
 import type { InternalElysia, InternalRouteSchema } from '../core/types'
 import type { WebSocketClientOptions } from '../ws/client'
-import type { EdenConfig, InternalEdenTypesConfig, ResolveEdenTypeConfig } from './config'
+import type {
+  EdenConfig,
+  ExtendedEdenRouteOptions,
+  InternalEdenTypesConfig,
+  ResolveEdenTypeConfig,
+} from './config'
 import {
   type FormatParam,
   getPathParam,
@@ -30,7 +30,7 @@ export type EdenTreatyRoot<T extends InternalElysia = {}> = {
   /**
    * Utility function to update the types configuration.
    */
-  types<U extends InternalEdenTypesConfig>(types: U): EdenTreatyProxy<T['_routes'], U>
+  types<U extends InternalEdenTypesConfig>(types?: U): EdenTreatyProxy<T, T['_routes'], U>
 
   /**
    * Eden resolves requests in two possible modes.
@@ -56,14 +56,17 @@ export type EdenTreatyRoot<T extends InternalElysia = {}> = {
  * @internal
  */
 export type EdenTreatyProxy<
+  TElysia extends InternalElysia,
   TRoutes extends Record<string, unknown>,
   TConfig extends InternalEdenTypesConfig = {},
   TPaths extends any[] = [],
   TParams extends string = Extract<keyof TRoutes, `:${string}`>,
   TNormalRoutes extends Record<string, any> = Omit<TRoutes, TParams>,
   TParamsRoutes extends Record<string, any> = Pick<TRoutes, TParams>,
-> = EdenTreatyNormalPathProxy<TNormalRoutes, TConfig, TPaths> &
-  ({} extends TParamsRoutes ? {} : EdenTreatyParameterPathProxy<TParamsRoutes, TConfig, TPaths>)
+> = EdenTreatyNormalPathProxy<TElysia, TNormalRoutes, TConfig, TPaths> &
+  ({} extends TParamsRoutes
+    ? {}
+    : EdenTreatyParameterPathProxy<TElysia, TParamsRoutes, TConfig, TPaths>)
 
 /**
  * Mapping for a normal path.
@@ -75,13 +78,14 @@ export type EdenTreatyProxy<
  * @internal
  */
 export type EdenTreatyNormalPathProxy<
+  TElysia extends InternalElysia,
   TRoutes extends Record<string, any>,
   TConfig extends InternalEdenTypesConfig = {},
   TPaths extends any[] = [],
 > = {
   [K in keyof TRoutes]: TRoutes[K] extends InternalRouteSchema
-    ? EdenTreatyRoute<TRoutes[K], TConfig, [...TPaths, K]>
-    : EdenTreatyProxy<TRoutes[K], TConfig, [...TPaths, K]>
+    ? EdenTreatyRoute<TElysia, TRoutes[K], TConfig, [...TPaths, K]>
+    : EdenTreatyProxy<TElysia, TRoutes[K], TConfig, [...TPaths, K]>
 }
 
 /**
@@ -93,6 +97,7 @@ export type EdenTreatyNormalPathProxy<
  * @internal
  */
 export type EdenTreatyParameterPathProxy<
+  TElysia extends InternalElysia,
   TRoutes extends Record<string, any>,
   TConfig extends InternalEdenTypesConfig = {},
   TPaths extends any[] = [],
@@ -100,29 +105,30 @@ export type EdenTreatyParameterPathProxy<
 > = TSeparator extends string
   ? {
     // prettier-ignore
-    [K in keyof TRoutes as FormatParam<K, TSeparator>]: EdenTreatyProxy<TRoutes[K], TConfig, [...TPaths, K]>
+    [K in keyof TRoutes as FormatParam<K, TSeparator>]: EdenTreatyProxy<TElysia, TRoutes[K], TConfig, [...TPaths, K]>
   }
   : // prettier-ignore
-    (args: ParameterFunctionArgs<TRoutes>) => EdenTreatyProxy<TRoutes[keyof TRoutes], TConfig, [...TPaths, keyof TRoutes]>
+    (args: ParameterFunctionArgs<TRoutes>) => EdenTreatyProxy<TElysia, TRoutes[keyof TRoutes], TConfig, [...TPaths, keyof TRoutes]>
 
 /**
  * A route typically has three signatures.
- * - query: Up to one argument is allowed, which is {@link EdenRouteOptions}.
- * - mutation: Up to two arguments are allowed, which are {@link EdenRouteBody} and {@link EdenRouteOptions}.
+ * - query: Up to one argument is allowed, which is {@link EdenExtendedRouteOptions}.
+ * - mutation: Up to two arguments are allowed, which are {@link EdenRouteBody} and {@link EdenExtendedRouteOptions}.
  * - subscription: Up to one argument is allowed, which is
  *
  * @internal
  */
 export type EdenTreatyRoute<
+  TElysia extends InternalElysia,
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   TPaths extends any[] = [],
 > = TPaths extends [...infer TPathSegments, infer TMethod]
   ? Uppercase<TMethod & string> extends 'GET'
-    ? EdenTreatyQueryRoute<TRoute, TConfig, TPathSegments>
+    ? EdenTreatyQueryRoute<TElysia, TRoute, TConfig, TPathSegments>
     : Uppercase<TMethod & string> extends 'SUBSCRIPTION'
-      ? EdenTreatySubscriptionRoute<TRoute, TConfig, TPathSegments>
-      : EdenTreatyMutationRoute<TRoute, TConfig, TPathSegments>
+      ? EdenTreatySubscriptionRoute<TElysia, TRoute, TConfig, TPathSegments>
+      : EdenTreatyMutationRoute<TElysia, TRoute, TConfig, TPathSegments>
   : never
 
 /**
@@ -138,10 +144,11 @@ export type EdenTreatyRoute<
  * @internal
  */
 export type EdenTreatyQueryRoute<
+  TElysia extends InternalElysia,
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
-  TOptions = EdenRouteOptions<TRoute> & { eden?: EdenResolverConfig },
+  TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
   TFinalOptions = TConfig['separator'] extends string ? TOptions : Omit<TOptions, 'params'>,
 > = (
   options: {} extends TFinalOptions ? void | TFinalOptions : TFinalOptions,
@@ -160,11 +167,12 @@ export type EdenTreatyQueryRoute<
  * @internal
  */
 export type EdenTreatyMutationRoute<
+  TElysia extends InternalElysia,
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
   TBody = EdenRouteBody<TRoute>,
-  TOptions = EdenRouteOptions<TRoute> & { eden?: EdenResolverConfig },
+  TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
   TFinalOptions = TConfig['separator'] extends string ? TOptions : Omit<TOptions, 'params'>,
 > = (
   body: {} extends TBody ? void | TBody : TBody,
@@ -174,6 +182,7 @@ export type EdenTreatyMutationRoute<
 /**
  */
 export type EdenTreatySubscriptionRoute<
+  _TElysia extends InternalElysia,
   TRoute extends InternalRouteSchema,
   _TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
@@ -214,6 +223,11 @@ export function createEdenTreatyProxy<
       const method = pathsCopy.pop()?.toUpperCase() ?? ''
 
       /**
+       * {@link HTTP_METHODS} is an array of **lowercase** HTTP method names.
+       */
+      const lowercaseMethod: any = method.toLowerCase()
+
+      /**
        * Determine whether a path parameter can be found from the provided args.
        *
        * @example { param: { id: '123' }, key: 'id' }
@@ -227,7 +241,7 @@ export function createEdenTreatyProxy<
        * Determine if the property can be found on the root hooks.
        * @example "createQuery," "createMutation," etc.
        */
-      const isMethod = HTTP_METHODS.includes(method.toLowerCase() as any)
+      const isMethod = HTTP_METHODS.includes(lowercaseMethod)
 
       // This is a valid path parameter call, and it no HTTP method was found.
 
@@ -248,20 +262,31 @@ export function createEdenTreatyProxy<
         return createEdenTreatyProxy(root, config, pathsWithParams, allPathParams)
       }
 
+      let params: EdenRequestParams = { method, ...(config as any) }
+
+      // Path parameters will either be in the recursively created array, or in the
+      // options provided to the request.
+
+      const allPathParams = pathParams
+
+      if (GET_OR_HEAD_HTTP_METHODS.includes(lowercaseMethod)) {
+        params = { ...params, ...argArray[0]?.eden, options: argArray[0] }
+        if (argArray[0]?.params) allPathParams.push(argArray[0]?.params)
+      } else {
+        params = { ...params, ...argArray[1]?.eden, body: argArray[0], options: argArray[1] }
+        if (argArray[1]?.params) allPathParams.push(argArray[1]?.params)
+      }
+
       const rawPath = pathsCopy.join('/')
 
-      const path = replacePathParams(rawPath, pathParams, config?.types?.separator)
+      const pathWithParams = replacePathParams(rawPath, allPathParams, config?.types?.separator)
+
+      const path = '/' + pathWithParams
+
+      params = { path, ...params }
 
       if (method === 'SUBSCRIPTION') {
         return new EdenWebSocket({ url: config?.domain + path, ...argArray[0] })
-      }
-
-      let params: EdenRequestParams = { path, method, ...(config as any) }
-
-      if (GET_OR_HEAD_HTTP_METHODS.includes(method as any)) {
-        params = { ...params, ...argArray[0]?.eden, options: argArray[0] }
-      } else {
-        params = { ...params, ...argArray[1]?.eden, body: argArray[0], options: argArray[1] }
       }
 
       const type = method && method !== 'GET' ? 'mutation' : 'query'
@@ -281,7 +306,7 @@ export function createEdenTreatyProxy<
 export type EdenTreaty<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends InternalEdenTypesConfig = {},
-> = EdenTreatyRoot<TElysia> & EdenTreatyProxy<TElysia['_routes'], TConfig>
+> = EdenTreatyRoot<TElysia> & EdenTreatyProxy<TElysia, TElysia['_routes'], TConfig>
 
 /**
  * @public
@@ -300,12 +325,12 @@ export function edenTreaty<
       // possible alternative: mutate the config and return the same proxy.
       // config.types = types as any
       // return proxy
-      return edenTreaty(domain, { ...config, types } as any)
+      return edenTreaty(domain, { ...config, types } as any) as any
     },
   }
 
   if (config?.links) {
-    root.client = new EdenClient({ links: config.links })
+    root.client = new EdenClient({ links: config.links, domain })
   }
 
   const innerProxy = createEdenTreatyProxy(root, { domain, ...config } as any)

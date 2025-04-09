@@ -80,11 +80,13 @@ export interface Operation<T extends EdenRequestParams = EdenRequestParams>
  * Each link is a function that returns an initialization function that is invoked internally.
  * Since there is no data in the client runtime, it's basically just a thunk.
  */
-export type EdenClientRuntime = {}
+export type EdenClientRuntime<T extends InternalElysia = InternalElysia> = {
+  domain?: string | T
+}
 
 /**
  * @public
  */
 export type EdenLink<T extends InternalElysia = InternalElysia> = (
-  opts: EdenClientRuntime,
+  opts: EdenClientRuntime<T>,
 ) => OperationLink<T>

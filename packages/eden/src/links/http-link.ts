@@ -114,7 +114,9 @@ export async function handleHttpRequest<
 export function httpLink<TElysia extends InternalElysia, const TConfig>(
   options: HTTPLinkOptions<NoInfer<TElysia>, TConfig> = {} as any,
 ) {
-  const link = (() => {
+  const link = ((runtimeOptions) => {
+    options = { ...runtimeOptions, ...options }
+
     const operationLink = (({ op }) => {
       if (op.type === 'subscription') {
         const client = new WebSocketClient({

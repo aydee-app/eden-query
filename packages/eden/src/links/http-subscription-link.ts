@@ -51,7 +51,9 @@ export function httpSubscriptionLink<
 
   const EventSource = options.EventSource ?? (globalThis.EventSource as any)
 
-  const link = (() => {
+  const link = ((runtimeOptions) => {
+    options = { ...runtimeOptions, ...options }
+
     const operationLink = (({ op }) => {
       return new Observable((observer) => {
         const { type, path, params } = op

@@ -29,7 +29,7 @@ export interface EdenSubscriptionObserver<TValue, TError> {
 
 /**
  */
-export interface EdenCreateClientOptions<T extends InternalElysia> {
+export interface EdenCreateClientOptions<T extends InternalElysia> extends EdenClientRuntime<T> {
   links: EdenLink<T>[]
   transformer?: 'The transformer property has moved to httpLink/httpBatchLink/wsLink'
 }
@@ -53,12 +53,12 @@ export class EdenClient<T extends InternalElysia> {
 
   private requestId: number
 
-  constructor(opts: EdenCreateClientOptions<T>) {
+  constructor(options: EdenCreateClientOptions<T>) {
     this.requestId = 0
 
-    this.runtime = {}
+    this.runtime = options
 
-    this.links = opts.links.map((link) => link(this.runtime))
+    this.links = options.links.map((link) => link(this.runtime))
   }
 
   private $request<TInput extends EdenRequestParams = any, TOutput = unknown>(
