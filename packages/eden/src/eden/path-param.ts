@@ -1,5 +1,5 @@
 import { toArray } from '../utils/array'
-import type { MaybeArray } from '../utils/types'
+import type { ExtractString, MaybeArray, StringReplace } from '../utils/types'
 
 export const paramKey = 'param' as const
 
@@ -8,6 +8,31 @@ export const defaultParamKey = `:${paramKey}` as const
 export type ParamKey = typeof paramKey
 
 export type ParamSeparator = `${string}${ParamKey}${string}`
+
+/**
+ * Elysia.js always names route params in the format, ":param".
+ * Faciliate custom string templates by replacing this default format.
+ */
+export type FormatParam<T, U> = StringReplace<U, ParamKey, ExtractString<T, ':'>>
+
+/**
+ * Given a route schema like
+ * type Schema = {
+ *   posts: {
+ *     :id: { ... },
+ *     :postId: { ... }
+ *   }
+ * }
+ *
+ * If currently at "posts", then convert to a union of possible objects.
+ *
+ * e.g. ParameterFunctionArgs<Schema['posts'> = { id: string | number } | { postId: string | number }
+ */
+export type ParameterFunctionArgs<T> = {
+  [K in keyof T]: {
+    [Key in ExtractString<K, ':'>]: string | number
+  }
+}[keyof T]
 
 /**
  *

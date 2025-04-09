@@ -1,11 +1,11 @@
 import { Elysia } from 'elysia'
-import { describe, expect,test } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import { edenTreaty } from '../../src/eden/treaty'
 import { useApp } from '../setup'
 
 describe('treaty', () => {
-  test('works', async () => {
+  test('basic HTTP networking works', async () => {
     const data = 'Hello, Elysia'
 
     const app = new Elysia().get('/', () => data)

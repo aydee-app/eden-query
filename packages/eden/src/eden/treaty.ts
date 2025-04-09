@@ -1,37 +1,59 @@
-import { HTTP_METHODS } from '../constants'
-import type { EdenResolverConfig } from '../core/config'
+import { EdenClient } from '../client'
+import { GET_OR_HEAD_HTTP_METHODS, HTTP_METHODS } from '../constants'
+import type { EdenRequestParams, EdenResolverConfig } from '../core/config'
 import type { EdenFetchResult } from '../core/dto'
 import type {
   EdenRouteBody,
   EdenRouteError,
   EdenRouteOptions,
-  EdenRouteParams,
   EdenRouteSuccess,
 } from '../core/infer'
 import { resolveEdenRequest } from '../core/resolve'
-import type { InternalElysia, InternalRouteSchema, InternalTypeConfig } from '../core/types'
-import type { ExtractString, StringReplace } from '../utils/types'
-import { getPathParam, type ParamKey, type ParamSeparator,replacePathParams } from './path-param'
-
-export type FormatParam<T, U> = StringReplace<U, ParamKey, ExtractString<T, ':'>>
-
-export interface InternalEdenTypesConfig extends InternalTypeConfig {
-  separator?: ParamSeparator
-}
-
-export type EdenTypesConfig = InternalEdenTypesConfig | undefined | unknown
-
-export type ResolveEdenTypeConfig<T> = T extends InternalEdenTypesConfig ? T : never
+import type { InternalElysia, InternalRouteSchema } from '../core/types'
+import type { WebSocketClientOptions } from '../ws/client'
+import type { EdenConfig, InternalEdenTypesConfig, ResolveEdenTypeConfig } from './config'
+import {
+  type FormatParam,
+  getPathParam,
+  type ParameterFunctionArgs,
+  replacePathParams,
+} from './path-param'
+import { EdenWs as EdenWebSocket, EdenWs } from './ws'
 
 /**
- * Additional properties available at the Eden-treaty proxy root.
+ * Properties available at the Eden-treaty proxy root.
+ * Also double as shared hooks and cached configuration for nested proxies.
+ *
+ * @internal
  */
-export type EdenTreatyRoot<TElysia extends InternalElysia = {}> = {
-  types<T extends InternalEdenTypesConfig>(config: T): EdenTreatyProxy<TElysia['_routes'], T>
+export type EdenTreatyRoot<T extends InternalElysia = {}> = {
+  /**
+   * Utility function to update the types configuration.
+   */
+  types<U extends InternalEdenTypesConfig>(types: U): EdenTreatyProxy<T['_routes'], U>
+
+  /**
+   * Eden resolves requests in two possible modes.
+   * 1. Links mode.
+   * 2. Basic HTTP networking mode.
+   *
+   * Based on Apollo GraphQL.
+   * @see https://www.apollographql.com/docs/react/api/link/introduction
+   *
+   * By default, HTTP networking mode will call {@link resolveEdenRequest}.
+   * If links are provided, then an {@link EdenClient} will be initialized and requests will
+   * be resolved through this client.
+   */
+  client?: EdenClient<T>
 }
 
 /**
- * Eden-Treaty proxy.
+ * Core Eden-Treaty type-implementation.
+ *
+ * Iterate over every level in the route schema, separating the normal path segments
+ * from the path parameter segments, and lower them separately.
+ *
+ * @internal
  */
 export type EdenTreatyProxy<
   TRoutes extends Record<string, unknown>,
@@ -45,6 +67,12 @@ export type EdenTreatyProxy<
 
 /**
  * Mapping for a normal path.
+ *
+ * Iterate over every value.
+ * If the value is mapped to a route, then lower it to callable request methods.
+ * Otherwise, recursively lower the value as a nested proxy.
+ *
+ * @internal
  */
 export type EdenTreatyNormalPathProxy<
   TRoutes extends Record<string, any>,
@@ -59,7 +87,10 @@ export type EdenTreatyNormalPathProxy<
 /**
  * Mapping for a path parameter.
  *
- * @example ':id'
+ * If there is a separator, then this will be a regular proxy with a formatted key for the path parameter.
+ * Otherwise, by default it will be a function that returns a lower level of the proxy.
+ *
+ * @internal
  */
 export type EdenTreatyParameterPathProxy<
   TRoutes extends Record<string, any>,
@@ -74,12 +105,14 @@ export type EdenTreatyParameterPathProxy<
   : // prettier-ignore
     (args: ParameterFunctionArgs<TRoutes>) => EdenTreatyProxy<TRoutes[keyof TRoutes], TConfig, [...TPaths, keyof TRoutes]>
 
-type ParameterFunctionArgs<T> = {
-  [K in keyof T]: {
-    [Key in ExtractString<K, ':'>]: string | number
-  }
-}[keyof T]
-
+/**
+ * A route typically has three signatures.
+ * - query: Up to one argument is allowed, which is {@link EdenRouteOptions}.
+ * - mutation: Up to two arguments are allowed, which are {@link EdenRouteBody} and {@link EdenRouteOptions}.
+ * - subscription: Up to one argument is allowed, which is
+ *
+ * @internal
+ */
 export type EdenTreatyRoute<
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
@@ -90,56 +123,73 @@ export type EdenTreatyRoute<
     : Uppercase<TMethod & string> extends 'SUBSCRIPTION'
       ? EdenTreatySubscriptionRoute<TRoute, TConfig, TPathSegments>
       : EdenTreatyMutationRoute<TRoute, TConfig, TPathSegments>
-  : TPaths
+  : never
 
+/**
+ * If a resolved route is a query, then it can be called like the following examples.
+ *
+ * ```ts
+ * const { data, error } = await app.hi.get()
+ * const { data, error } = await app.hi.get({ headers: {}, query: {}, params: {} })
+ * ```
+ *
+ * Specific resolver options can be provided at the `eden` property.
+ *
+ * @internal
+ */
 export type EdenTreatyQueryRoute<
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
-  TOptions = EdenRouteOptions<TRoute>,
+  TOptions = EdenRouteOptions<TRoute> & { eden?: EdenResolverConfig },
   TFinalOptions = TConfig['separator'] extends string ? TOptions : Omit<TOptions, 'params'>,
 > = (
   options: {} extends TFinalOptions ? void | TFinalOptions : TFinalOptions,
 ) => Promise<EdenFetchResult<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>>>
 
+/**
+ * If a resolved route is a mutation, then it can be called like the following examples.
+ *
+ * ```ts
+ * const { data, error } = await app.hi.post(body)
+ * const { data, error } = await app.hi.post(body, { headers: {}, query: {}, params: {} })
+ * ```
+ *
+ * Specific resolver options can be provided at the `eden` property.
+ *
+ * @internal
+ */
 export type EdenTreatyMutationRoute<
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
   TBody = EdenRouteBody<TRoute>,
-  TOptions = EdenRouteOptions<TRoute>,
+  TOptions = EdenRouteOptions<TRoute> & { eden?: EdenResolverConfig },
   TFinalOptions = TConfig['separator'] extends string ? TOptions : Omit<TOptions, 'params'>,
 > = (
   body: {} extends TBody ? void | TBody : TBody,
   options: {} extends TFinalOptions ? void | TFinalOptions : TFinalOptions,
 ) => Promise<EdenFetchResult<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>>>
 
+/**
+ */
 export type EdenTreatySubscriptionRoute<
   TRoute extends InternalRouteSchema,
-  TConfig extends InternalEdenTypesConfig = {},
+  _TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
-  TOptions = EdenRouteOptions<TRoute>,
-  TFinalOptions = TConfig['separator'] extends string ? TOptions : TOptions & EdenRouteParams<{}>,
-> = (
-  options: {} extends TFinalOptions ? void | TFinalOptions : TFinalOptions,
-) => Promise<EdenFetchResult<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>>>
+  TOptions = WebSocketClientOptions,
+> = (options?: TOptions) => EdenWs<TRoute>
 
-export type EdenTreaty<
-  TElysia extends InternalElysia = InternalElysia,
-  TConfig extends InternalEdenTypesConfig = {},
-> = EdenTreatyRoot<TElysia> & EdenTreatyProxy<TElysia['_routes'], TConfig>
-
-export type EdenConfig<
-  TElysia extends InternalElysia = InternalElysia,
-  TConfig extends InternalEdenTypesConfig = {},
-> = EdenResolverConfig<TElysia, TConfig> & {
-  types: TConfig
-}
-
+/**
+ * Core Eden-Treaty implementation.
+ *
+ * @internal
+ */
 export function createEdenTreatyProxy<
   TElysia extends InternalElysia = any,
   TConfig extends InternalEdenTypesConfig = any,
 >(
+  root: EdenTreatyRoot,
   config?: EdenConfig<TElysia, TConfig>,
   paths: string[] = [],
   pathParams: Record<string, any>[] = [],
@@ -150,7 +200,7 @@ export function createEdenTreatyProxy<
 
       if (p !== 'index') newPaths.push(p)
 
-      return createEdenTreatyProxy(config, newPaths, pathParams)
+      return createEdenTreatyProxy(root, config, newPaths, pathParams)
     },
     apply(_target, _thisArg, argArray) {
       /**
@@ -195,14 +245,28 @@ export function createEdenTreatyProxy<
          */
         const pathsWithParams = [...paths, `:${pathParam.key}`]
 
-        return createEdenTreatyProxy(config, pathsWithParams, allPathParams)
+        return createEdenTreatyProxy(root, config, pathsWithParams, allPathParams)
       }
 
       const rawPath = pathsCopy.join('/')
 
       const path = replacePathParams(rawPath, pathParams, config?.types?.separator)
 
-      const result = resolveEdenRequest({ path, method, ...(config as any) })
+      if (method === 'SUBSCRIPTION') {
+        return new EdenWebSocket({ url: config?.domain + path, ...argArray[0] })
+      }
+
+      let params: EdenRequestParams = { path, method, ...(config as any) }
+
+      if (GET_OR_HEAD_HTTP_METHODS.includes(method as any)) {
+        params = { ...params, ...argArray[0]?.eden, options: argArray[0] }
+      } else {
+        params = { ...params, ...argArray[1]?.eden, body: argArray[0], options: argArray[1] }
+      }
+
+      const type = method && method !== 'GET' ? 'mutation' : 'query'
+
+      const result = root.client?.[type](path, params) ?? resolveEdenRequest(params)
 
       return result
     },
@@ -211,24 +275,44 @@ export function createEdenTreatyProxy<
   return proxy
 }
 
+/**
+ * @public
+ */
+export type EdenTreaty<
+  TElysia extends InternalElysia = InternalElysia,
+  TConfig extends InternalEdenTypesConfig = {},
+> = EdenTreatyRoot<TElysia> & EdenTreatyProxy<TElysia['_routes'], TConfig>
+
+/**
+ * @public
+ *
+ * @see https://elysiajs.com/eden/treaty/overview.html
+ */
 export function edenTreaty<
   TElysia extends InternalElysia,
   const TConfig extends InternalEdenTypesConfig = {},
 >(
   domain?: string,
-  config?: EdenConfig<TElysia, TConfig>,
+  config: EdenConfig<TElysia, TConfig> = {},
 ): EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>> {
-  const rootHooks: EdenTreatyRoot<TElysia> = {
+  const root: EdenTreatyRoot<TElysia> = {
     types: (types) => {
+      // possible alternative: mutate the config and return the same proxy.
+      // config.types = types as any
+      // return proxy
       return edenTreaty(domain, { ...config, types } as any)
     },
   }
 
-  const innerProxy = createEdenTreatyProxy({ domain, ...config } as any)
+  if (config?.links) {
+    root.client = new EdenClient({ links: config.links })
+  }
+
+  const innerProxy = createEdenTreatyProxy(root, { domain, ...config } as any)
 
   const proxy: any = new Proxy(() => {}, {
     get(_target, p, _receiver) {
-      return rootHooks[p as never] ?? innerProxy[p]
+      return root[p as never] ?? innerProxy[p]
     },
   })
 
