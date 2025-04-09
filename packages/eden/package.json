@@ -5,7 +5,7 @@
   "description": "Fully type-safe Elysia.js client",
   "license": "MIT",
   "scripts": {
-    "test": "ATTEST_skipTypes=1 vitest",
+    "test": "ATTEST_skipTypes=1 vitest eden",
     "test:types": "vitest test-d"
   },
   "repository": {
