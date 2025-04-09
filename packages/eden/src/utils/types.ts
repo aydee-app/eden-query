@@ -90,3 +90,11 @@ const _errorSymbol = Symbol()
 export type TypeError<TMessage extends string> = TMessage & {
   _: typeof _errorSymbol
 }
+
+export type StringReplace<
+  T,
+  TTarget extends string,
+  TValue extends string,
+> = T extends `${infer THead}${TTarget}${infer TTail}` ? `${THead}${TValue}${TTail}` : T
+
+export type ExtractString<T, U extends string> = T extends `${U}${infer Inner}` ? Inner : T & string
