@@ -330,7 +330,7 @@ describe('http-batch-link', () => {
       })
     })
 
-    test.only('works with request-specific transformer', async () => {
+    test('works with request-specific transformer', async () => {
       const body = t.Object({
         id: t.BigInt(),
         name: t.String(),
