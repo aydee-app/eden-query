@@ -18,7 +18,7 @@ import type {
   InternalEdenTypesConfig,
   ResolveEdenTypeConfig,
 } from './config'
-import { type FormatParam,replacePathParams } from './path-param'
+import { type FormatParam, replacePathParams } from './path-param'
 import { EdenWs } from './ws'
 
 /**
@@ -57,14 +57,8 @@ export type EdenFetchRequester<
 >(
   path: TPath,
   ...args: {} extends EdenFetchOptions<TMethod, TRoute>
-    ? [
-        options?: EdenFetchOptions<TMethod, TRoute>,
-        ...(TMethod extends 'SUBSCRIBE' ? [clientOptions?: Partial<WebSocketClientOptions>] : []),
-      ]
-    : [
-        options: EdenFetchOptions<TMethod, TRoute>,
-        ...(TMethod extends 'SUBSCRIBE' ? [clientOptions?: Partial<WebSocketClientOptions>] : []),
-      ]
+    ? [options?: EdenFetchOptions<TMethod, TRoute>, ...EdenFetchSubscriptionParameters<TMethod>]
+    : [options: EdenFetchOptions<TMethod, TRoute>, ...EdenFetchSubscriptionParameters<TMethod>]
 ) => EdenFetchResponse<TMethod, TRoute>
 
 export type EdenFetchEndpoints<
@@ -111,8 +105,9 @@ export type EdenFetchMutationOptions<
   TBody = EdenRouteBody<TRoute>,
 > = EdenRouteOptions<TRoute> & (undefined extends TBody ? { body?: TBody } : { body: TBody })
 
-export type EdenFetchSubscriptionOptions<_TRoute extends InternalRouteSchema> =
-  Partial<WebSocketClientOptions>
+export type EdenFetchSubscriptionParameters<TMethod> = TMethod extends 'SUBSCRIBE'
+  ? [clientOptions?: Partial<WebSocketClientOptions>]
+  : []
 
 export type EdenFetchResponse<
   TMethod,
