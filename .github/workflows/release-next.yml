@@ -31,7 +31,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: 🔨 Build
-        run: bun run build --filter !@elysiajs/documentation
+        run: bun run build
 
       - name: ✏️ Generate commit message
         id: devmoji
