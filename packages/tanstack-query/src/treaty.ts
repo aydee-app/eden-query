@@ -67,20 +67,24 @@ export type EdenQueryOptions<
   TData = TQueryFnData,
   TQueryKey extends QueryKey = QueryKey,
   TPageParam = never,
-> = {
-  queryFn: QueryFunction<TQueryFnData, TQueryKey, TPageParam>
-  queryKey: TQueryKey
-} & Pick<QueryOptions<TQueryFnData, TError, TData, TQueryKey, TPageParam>, 'retry'> // At least one property with TError needs to be selected.
+> =
+  // prettier-ignore At least one property with TError needs to be selected.
+  {
+    queryFn: QueryFunction<TQueryFnData, TQueryKey, TPageParam>
+    queryKey: TQueryKey
+  } & Pick<QueryOptions<TQueryFnData, TError, TData, TQueryKey, TPageParam>, 'retry'>
 
 export type EdenMutationOptions<
   TData = unknown,
   TError = Error,
   TVariables = void,
   TContext = unknown,
-> = {
-  mutationFn: MutationFunction<TData, TVariables>
-  mutationKey: MutationKey
-} & Pick<MutationOptions<TData, TError, TVariables, TContext>, 'onSettled'>
+> =
+  // prettier-ignore At least one property with TError needs to be selected.
+  {
+    mutationFn: MutationFunction<TData, TVariables>
+    mutationKey: MutationKey
+  } & Pick<MutationOptions<TData, TError, TVariables, TContext>, 'retry'>
 
 /**
  * Properties available at the Eden-treaty proxy root.
