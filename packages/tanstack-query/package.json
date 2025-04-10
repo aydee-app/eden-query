@@ -3,12 +3,25 @@
   "private": true,
   "type": "module",
   "main": "./src/treaty.ts",
+  "scripts": {
+    "test": "ATTEST_skipTypes=1 vitest",
+    "test:types": "vitest test-d"
+  },
   "dependencies": {
-    "@ap0nia/eden": "workspace:^",
-    "@tanstack/query-core": "^5.72.2",
-    "elysia": "^1.2.25"
+    "@ap0nia/eden": "workspace:^"
   },
   "devDependencies": {
-    "@tanstack/react-query": "^5.72.2"
+    "@ark/attest": "^0.45.6",
+    "@tanstack/query-core": "^5.72.2",
+    "@tanstack/react-query": "^5.72.2",
+    "@tanstack/solid-query": "^5.72.2",
+    "@tanstack/svelte-query": "^5.72.2",
+    "@tanstack/vue-query": "^5.73.0",
+    "@types/event-source-polyfill": "^1.0.5",
+    "devalue": "^5.1.1",
+    "elysia": "^1.2.25",
+    "event-source-polyfill": "^1.0.31",
+    "jsdom": "^26.0.0",
+    "typescript": "^5.8.2"
   }
 }

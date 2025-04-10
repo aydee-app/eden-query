@@ -1,15 +1,15 @@
 import type { EdenWs, InternalEdenTypesConfig, InternalElysia } from '@ap0nia/eden'
-import type { EdenTreatyTanstackQuery } from '@ap0nia/eden-tanstack-query'
 import type {
-  MutateOptions,
-  MutationOptions,
-  Override,
-  QueryOptions,
-  WithRequired,
-} from '@tanstack/query-core'
-import type { CreateBaseMutationResult, CreateQueryResult } from '@tanstack/svelte-query'
-import Elysia from 'elysia'
-import type { Readable } from 'svelte/store'
+  EdenMutationOptions,
+  EdenQueryOptions,
+  EdenTreatyTanstackQuery,
+} from '@ap0nia/eden-tanstack-query'
+import type {
+  CreateMutationOptions,
+  CreateMutationResult,
+  CreateQueryOptions,
+  CreateQueryResult,
+} from '@tanstack/svelte-query'
 
 /**
  * Core Eden-Treaty type-implementation.
@@ -25,80 +25,47 @@ export type EdenTreatySvelteQuery<
   TConfig extends InternalEdenTypesConfig = {},
   TTanstack = EdenTreatyTanstackQuery<TElysia, TRoutes, TConfig>,
 > = {
-  [K in keyof TTanstack]: TTanstack[K] extends (
-    ...args: infer Args
-  ) => WithRequired<
-    QueryOptions<
-      infer _TQueryFnData,
-      infer TError,
-      infer TData,
-      infer _TQueryKey,
-      infer _TPageParam
-    >,
-    'queryFn' | 'queryKey'
-  >
-    ? {
-        createQuery: (...args: Args) => CreateQueryResult<TData, TError>
-      }
-    : TTanstack[K] extends (
-          ...args: infer Args
-        ) => WithRequired<
-          MutationOptions<
-            infer TData,
-            infer TError,
-            infer TVariables extends any[],
-            infer _TContext
-          >,
-          'mutationFn' | 'mutationKey'
-        >
-      ? {
-          createMutation: <TContext = unknown>(
-            ...args: Args
-          ) => Readable<
-            Override<
-              CreateBaseMutationResult<TData, TError, TVariables, TContext>,
-              {
-                mutate: (
-                  ...args: [
-                    ...TVariables,
-                    mutateOptions?: MutateOptions<TData, TError, TVariables, TContext>,
-                  ]
-                ) => void
-
-                mutateAsync: (
-                  ...args: [
-                    ...TVariables,
-                    mutateOptions?: MutateOptions<TData, TError, TVariables, TContext>,
-                  ]
-                ) => Promise<TData>
-              }
-            >
-          >
-        }
-      : TTanstack[K] extends (...args: infer _Args) => EdenWs<infer _TRoute>
-        ? TTanstack[K]
-        : TTanstack[K] extends (...args: infer Args) => infer TNext
-          ? (...args: Args) => EdenTreatySvelteQuery<TElysia, TRoutes, TConfig, TNext>
-          : EdenTreatySvelteQuery<TElysia, TRoutes, TConfig, TTanstack[K]>
+  [K in keyof TTanstack]: EdenTreatySvelteQueryRoute<TElysia, TRoutes, TConfig, TTanstack[K]>
 }
 
-const app = new Elysia()
-  .get('/hello/world', () => false)
-  .get('/posts/:id', () => 123)
-  .patch('/posts/:id', () => true)
-  .ws('/ws', {})
+type EdenTreatySvelteQueryRoute<
+  TElysia extends InternalElysia,
+  TRoutes extends Record<string, unknown>,
+  TConfig extends InternalEdenTypesConfig = {},
+  TTanstackRoute = EdenTreatyTanstackQuery<TElysia, TRoutes, TConfig>,
+> =
+  // prettier-ignore
+  // Function that returns strongly-typed query options.
+  TTanstackRoute extends (
+    ...args: infer Args
+  ) => EdenQueryOptions<infer TQueryFnData, infer TError, infer TData, infer TQueryKey, infer _TPageParam>
+  ? {
+    createQuery: (
+      ...args: [...Args, options?: CreateQueryOptions<TQueryFnData, TError, TData, TQueryKey>]
+    ) => CreateQueryResult<TData, TError>
+  }
 
-type App = typeof app
+  // prettier-ignore
+  // Function that returns strongly-typed mutation options.
+  : TTanstackRoute extends (
+    ...args: infer Args
+  ) => EdenMutationOptions<infer TData, infer TError, infer TVariables, infer _TContext>
+  ? {
+    createMutation: <TContext = unknown>(
+      ...args: [...Args, options?: CreateMutationOptions<TData, TError, TVariables, TContext>]
+    ) => CreateMutationResult<TData, TError, TVariables, TContext>
+  }
 
-export const tt: EdenTreatyTanstackQuery<App, App['_routes']> = {} as any
+  // prettier-ignore
+  // Function that returns WebSocket client.
+  : TTanstackRoute extends (...args: infer _Args) => EdenWs<infer _TRoute>
+  ? TTanstackRoute
 
-export const hello = tt.posts({ id: '' }).patch()
+  // prettier-ignore
+  // Path parameter function call that returns nested instance of proxy.
+  : TTanstackRoute extends (...args: infer Args) => infer TNext
+  ? (...args: Args) => EdenTreatySvelteQuery<TElysia, TRoutes, TConfig, TNext>
 
-export const treaty: EdenTreatySvelteQuery<App, App['_routes']> = {} as any
-
-export const hm = treaty
-  .posts({ id: '' })
-  .patch.createMutation()
-  .subscribe((p) => p.mutateAsync({}, {}, {}))
-
-export type huhhh = typeof hm
+  // prettier-ignore
+  // Regular path, lower without doing anything else.
+  : EdenTreatySvelteQuery<TElysia, TRoutes, TConfig, TTanstackRoute>

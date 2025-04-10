@@ -56,9 +56,12 @@ export type EdenFetchRequester<
   >,
 >(
   path: TPath,
-  ...args: {} extends EdenFetchOptions<TMethod, TRoute>
-    ? [options?: EdenFetchOptions<TMethod, TRoute>, ...EdenFetchSubscriptionParameters<TMethod>]
-    : [options: EdenFetchOptions<TMethod, TRoute>, ...EdenFetchSubscriptionParameters<TMethod>]
+  ...args: [
+    ...({} extends EdenFetchOptions<TMethod, TRoute>
+      ? [options?: EdenFetchOptions<TMethod, TRoute>]
+      : [options: EdenFetchOptions<TMethod, TRoute>]),
+    ...(TMethod extends 'subscribe' ? [clientOptions?: Partial<WebSocketClientOptions>] : []),
+  ]
 ) => EdenFetchResponse<TMethod, TRoute>
 
 export type EdenFetchEndpoints<
@@ -104,10 +107,6 @@ export type EdenFetchMutationOptions<
   TRoute extends InternalRouteSchema,
   TBody = EdenRouteBody<TRoute>,
 > = EdenRouteOptions<TRoute> & (undefined extends TBody ? { body?: TBody } : { body: TBody })
-
-export type EdenFetchSubscriptionParameters<TMethod> = TMethod extends 'subscribe'
-  ? [clientOptions?: Partial<WebSocketClientOptions>]
-  : []
 
 export type EdenFetchResponse<
   TMethod,

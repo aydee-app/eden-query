@@ -1,0 +1,12 @@
+// @ts-check
+
+import { defineConfig } from 'vitest/config'
+
+const config = defineConfig({
+  test: {
+    setupFiles: ['./tests/setup.ts'],
+    include: ['**/*.test-d.ts', '**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+  },
+})
+
+export default config

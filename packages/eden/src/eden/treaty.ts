@@ -8,7 +8,6 @@ import type { InternalElysia, InternalRouteSchema } from '../core/types'
 import type { WebSocketClientOptions } from '../ws/client'
 import type {
   EdenConfig,
-  EdenHooks,
   ExtendedEdenRouteOptions,
   InternalEdenTypesConfig,
   ResolveEdenTypeConfig,
@@ -32,6 +31,8 @@ export type EdenTreatyRoot<T extends InternalElysia = {}> = {
    * Utility function to update the types configuration.
    */
   types<U extends InternalEdenTypesConfig>(types?: U): EdenTreatyProxy<T, T['_routes'], U>
+
+  client?: EdenClient<T>
 }
 
 /**
@@ -132,7 +133,9 @@ export type EdenTreatyQueryRoute<
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
   TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
-  TFinalOptions = TConfig['separator'] extends string ? TOptions : Omit<TOptions, 'params'>,
+  TFinalOptions = TConfig['separator'] extends string
+    ? TOptions
+    : Omit<TOptions, 'params'> & { params?: Record<string, any> },
 > = (
   options: {} extends TFinalOptions ? void | TFinalOptions : TFinalOptions,
 ) => Promise<EdenFetchResult<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>>>
@@ -156,7 +159,9 @@ export type EdenTreatyMutationRoute<
   _TPaths extends any[] = [],
   TBody = EdenRouteBody<TRoute>,
   TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
-  TFinalOptions = TConfig['separator'] extends string ? TOptions : Omit<TOptions, 'params'>,
+  TFinalOptions = TConfig['separator'] extends string
+    ? TOptions
+    : Omit<TOptions, 'params'> & { params?: Record<string, any> },
 > = (
   ...args: [
     ...({} extends TBody ? [body?: TBody] : [body: TBody]),
@@ -172,7 +177,9 @@ export type EdenTreatySubscriptionRoute<
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
   TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
-  TFinalOptions = TConfig['separator'] extends string ? TOptions : Omit<TOptions, 'params'>,
+  TFinalOptions = TConfig['separator'] extends string
+    ? TOptions
+    : Omit<TOptions, 'params'> & { params?: Record<string, any> },
 > = (
   ...args: [
     ...({} extends TFinalOptions ? [options?: TFinalOptions] : [options: TFinalOptions]),
@@ -185,11 +192,11 @@ export type EdenTreatySubscriptionRoute<
  *
  * @internal
  */
-export function createEdenTreatyProxy<
+export function edenTreatyProxy<
   TElysia extends InternalElysia = any,
   TConfig extends InternalEdenTypesConfig = any,
 >(
-  hooks: EdenHooks,
+  root: EdenTreatyRoot<TElysia>,
   config?: EdenConfig<TElysia, TConfig>,
   paths: string[] = [],
   pathParams: Record<string, any>[] = [],
@@ -200,7 +207,7 @@ export function createEdenTreatyProxy<
 
       if (p !== 'index') newPaths.push(p)
 
-      return createEdenTreatyProxy(hooks, config, newPaths, pathParams)
+      return edenTreatyProxy(root, config, newPaths, pathParams)
     },
     apply(_target, _thisArg, argArray) {
       const pathsCopy = [...paths]
@@ -218,7 +225,7 @@ export function createEdenTreatyProxy<
 
         const pathsWithParams = [...paths, `:${pathParam.key}`]
 
-        return createEdenTreatyProxy(hooks, config, pathsWithParams, allPathParams)
+        return edenTreatyProxy(root, config, pathsWithParams, allPathParams)
       }
 
       let params: EdenRequestParams = { method, ...(config as any) }
@@ -242,12 +249,12 @@ export function createEdenTreatyProxy<
       params = { path, ...params }
 
       if (method === 'SUBSCRIBE') {
-        return hooks.subscription({ url: config?.domain + path, ...argArray[0] })
+        return new EdenWs({ url: config?.domain + path, ...argArray[0] })
       }
 
       const type = method && method !== 'GET' ? 'mutation' : 'query'
 
-      const result = hooks[type](path, params)
+      const result = root?.client?.[type](path, params) ?? resolveEdenRequest({ path, ...params })
 
       return result
     },
@@ -278,25 +285,10 @@ export function edenTreaty<
 ): EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>> {
   const root: EdenTreatyRoot<TElysia> = {
     types: (types) => edenTreaty(domain, { ...config, types } as any) as any,
+    client: config.links ? new EdenClient({ links: config.links, domain }) : undefined,
   }
 
-  const client = config.links ? new EdenClient({ links: config.links, domain }) : undefined
-
-  const hooks: EdenHooks = {
-    query(...args) {
-      const result = client?.query(...args) ?? resolveEdenRequest({ path: args[0], ...args[1] })
-      return result as any
-    },
-    mutation(...args) {
-      const result = client?.mutation(...args) ?? resolveEdenRequest({ path: args[0], ...args[1] })
-      return result as any
-    },
-    subscription(options) {
-      return new EdenWs(options)
-    },
-  }
-
-  const innerProxy = createEdenTreatyProxy(hooks, { domain, ...config } as any)
+  const innerProxy = edenTreatyProxy(root, { domain, ...config } as any)
 
   const proxy: any = new Proxy(() => {}, {
     get(_target, p, _receiver) {
