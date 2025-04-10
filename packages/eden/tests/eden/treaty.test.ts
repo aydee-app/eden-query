@@ -1,11 +1,14 @@
 import { Elysia } from 'elysia'
 import type { ElysiaWS } from 'elysia/ws'
+import SuperJSON from 'superjson'
 import { describe, expect, test, vi } from 'vitest'
 
 import { edenTreaty } from '../../src/eden/treaty'
 import { httpBatchLink } from '../../src/links/http-batch-link'
 import { httpLink } from '../../src/links/http-link'
 import { batchPlugin } from '../../src/plugins/batch'
+import { transformPlugin } from '../../src/plugins/transform'
+import { sleep } from '../../src/utils/sleep'
 import { createWsApp } from '../create-ws-app'
 import { useApp } from '../setup'
 
@@ -78,6 +81,118 @@ describe('treaty', () => {
         expect(result.data).toBe(datas[index])
       })
     })
+
+    describe('with tranformers', () => {
+      test('http link single request', async () => {
+        const data = 123n
+
+        const app = new Elysia()
+          .use(transformPlugin({ types: true, transformer: SuperJSON }))
+          .get('/', () => data)
+
+        useApp(app)
+
+        const treaty = edenTreaty<typeof app>(domain, {
+          links: [
+            httpLink({
+              types: true,
+              transformer: SuperJSON,
+            }),
+          ],
+        })
+
+        const result = await treaty.index.get()
+
+        expect(result.data).toBe(data)
+      })
+
+      test('http batch link multiple requests', async () => {
+        const datas = Array.from({ length: 5 }, (_, index) => {
+          return { value: BigInt(index) }
+        })
+
+        let i = 0
+
+        const app = new Elysia()
+          .use(transformPlugin({ types: true, transformer: SuperJSON }))
+          .use(batchPlugin({ types: true }))
+          .get('/', () => datas[i++])
+
+        useApp(app)
+
+        const treaty = edenTreaty<typeof app>(domain, {
+          links: [httpBatchLink({ types: true, transformer: SuperJSON })],
+        })
+
+        const promises = datas.map(() => treaty.index.get())
+
+        const results = await Promise.all(promises)
+
+        expect(results).toHaveLength(datas.length)
+
+        results.forEach((result, index) => {
+          expect(result.data).toStrictEqual(datas[index])
+        })
+      })
+
+      test('http batch stream link multiple requests', async () => {
+        vi.useFakeTimers()
+
+        const values = Array.from({ length: 5 }, (_, index) => index)
+
+        const interval = 1_000
+
+        let i = 1
+
+        const app = new Elysia()
+          .use(transformPlugin({ types: true, transformer: SuperJSON }))
+          .use(batchPlugin({ types: true }))
+          .get('/', async () => {
+            const id = i++
+
+            await sleep(id * interval)
+
+            return id
+          })
+
+        useApp(app)
+
+        const treaty = edenTreaty<typeof app>(domain, {
+          links: [httpBatchLink({ types: true, transformer: SuperJSON, stream: true })],
+        })
+
+        const listener = vi.fn()
+
+        const promises = values.map(() => treaty.index.get().then(listener))
+
+        for (const value of values) {
+          await vi.advanceTimersByTimeAsync(interval)
+
+          expect(listener).toHaveBeenCalledTimes(value + 1)
+
+          expect(listener).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              data: value + 1,
+            }),
+          )
+        }
+
+        const results = await Promise.all(promises)
+
+        expect(results).toHaveLength(values.length)
+
+        values.forEach((value) => {
+          expect(listener).toHaveBeenNthCalledWith(
+            value + 1,
+            expect.objectContaining({
+              data: value + 1,
+            }),
+          )
+        })
+
+        vi.useRealTimers()
+      })
+    })
   })
 
   describe('websockets', () => {
@@ -118,6 +233,35 @@ describe('treaty', () => {
         expect(clientListener).toHaveBeenCalledExactlyOnceWith(
           expect.objectContaining({ data: serverMessage }),
         ),
+      )
+    })
+  })
+
+  describe('merges options correctly', () => {
+    test('request init', async () => {
+      const data = 'Hello, Elysia'
+
+      const app = new Elysia().get('/', () => data)
+
+      useApp(app)
+
+      const fetcher = vi.fn()
+
+      const fetch: RequestInit = {
+        credentials: 'include',
+        mode: 'no-cors',
+        keepalive: true,
+      }
+
+      const treaty = edenTreaty<typeof app>(domain, {
+        links: [httpLink({ types: true, fetch, fetcher })],
+      })
+
+      await treaty.index.get().catch(() => {})
+
+      expect(fetcher).toHaveBeenCalledExactlyOnceWith(
+        expect.anything(),
+        expect.objectContaining(fetch),
       )
     })
   })

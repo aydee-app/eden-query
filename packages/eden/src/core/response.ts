@@ -37,8 +37,8 @@ export async function* streamResponse(response: ResponseEsque) {
 
 /**
  */
-export async function getResponseData(response: Response) {
-  switch (response.headers.get('Content-Type')?.split(';')[0]) {
+export async function getResponseData(response?: Response) {
+  switch (response?.headers.get('Content-Type')?.split(';')[0]) {
     case 'text/event-stream': {
       return streamResponse(response)
     }
@@ -57,7 +57,7 @@ export async function getResponseData(response: Response) {
     }
 
     default: {
-      return await response.text().then(parseStringifiedValue)
+      return await response?.text().then(parseStringifiedValue)
     }
   }
 }
