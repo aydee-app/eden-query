@@ -14,6 +14,7 @@
     "directory": "packages/eden2"
   },
   "type": "module",
+  "main": "./src/index.ts",
   "devDependencies": {
     "@ark/attest": "^0.45.6",
     "@trpc/client": "^11.0.1",

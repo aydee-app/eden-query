@@ -158,8 +158,10 @@ export type EdenTreatyMutationRoute<
   TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
   TFinalOptions = TConfig['separator'] extends string ? TOptions : Omit<TOptions, 'params'>,
 > = (
-  body: {} extends TBody ? void | TBody : TBody,
-  options: {} extends TFinalOptions ? void | TFinalOptions : TFinalOptions,
+  ...args: [
+    ...({} extends TBody ? [body?: TBody] : [body: TBody]),
+    ...({} extends TFinalOptions ? [options?: TFinalOptions] : [options: TFinalOptions]),
+  ]
 ) => Promise<EdenFetchResult<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>>>
 
 /**
@@ -172,8 +174,10 @@ export type EdenTreatySubscriptionRoute<
   TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
   TFinalOptions = TConfig['separator'] extends string ? TOptions : Omit<TOptions, 'params'>,
 > = (
-  options: {} extends TFinalOptions ? void | TFinalOptions : TFinalOptions,
-  clientOptions?: Partial<WebSocketClientOptions>,
+  ...args: [
+    ...({} extends TFinalOptions ? [options?: TFinalOptions] : [options: TFinalOptions]),
+    clientOptions?: Partial<WebSocketClientOptions>,
+  ]
 ) => EdenWs<TRoute>
 
 /**

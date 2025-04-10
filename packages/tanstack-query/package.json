@@ -1,0 +1,14 @@
+{
+  "name": "@ap0nia/eden-tanstack-query",
+  "private": true,
+  "type": "module",
+  "main": "./src/treaty.ts",
+  "dependencies": {
+    "@ap0nia/eden": "workspace:^",
+    "@tanstack/query-core": "^5.72.2",
+    "elysia": "^1.2.25"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.72.2"
+  }
+}

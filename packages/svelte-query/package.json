@@ -1,0 +1,15 @@
+{
+  "name": "@ap0nia/eden-svelte-query",
+  "private": true,
+  "dependencies": {
+    "@ap0nia/eden": "workspace:^",
+    "@ap0nia/eden-tanstack-query": "workspace:^",
+    "@tanstack/query-core": "^5.72.2",
+    "elysia": "^1.2.25",
+    "svelte": "^5.25.10"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.72.2",
+    "@tanstack/svelte-query": "^5.72.2"
+  }
+}
