@@ -1,6 +1,7 @@
 {
   "name": "@ap0nia/eden-tanstack-query",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "main": "./src/treaty.ts",
   "scripts": {
