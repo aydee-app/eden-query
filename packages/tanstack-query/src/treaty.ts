@@ -13,6 +13,7 @@ import {
   type InternalEdenTypesConfig,
   type InternalElysia,
   type InternalRouteSchema,
+  linkAbortSignals,
   type ParameterFunctionArgs,
   type ResolveEdenTypeConfig,
   type WebSocketClientOptions,
@@ -27,7 +28,7 @@ import type {
   QueryOptions,
 } from '@tanstack/query-core'
 
-interface EdenTreatyTanstackQueryHooks<
+export interface EdenTreatyTanstackQueryHooks<
   TElysia extends InternalElysia = {},
   TConfig extends InternalEdenTypesConfig = {},
 > {
@@ -48,6 +49,16 @@ interface EdenTreatyTanstackQueryHooks<
     paths: string[],
     argArray: any[],
   ) => EdenWs
+}
+
+export interface EdenTanstackQueryConfig<
+  TElysia extends InternalElysia,
+  TConfig extends InternalEdenTypesConfig = {},
+> extends EdenConfig<TElysia, TConfig> {
+  /**
+   * Whether to forward the signal from tanstack-query to the fetch request options.
+   */
+  forwardSignal?: boolean
 }
 
 export type EdenQueryOptions<
@@ -263,7 +274,7 @@ export function edenTreatyTanstackQuery<
   const TConfig extends InternalEdenTypesConfig = {},
 >(
   domain?: string,
-  config: EdenConfig<TElysia, TConfig> = {},
+  config: EdenTanstackQueryConfig<TElysia, TConfig> = {},
 ): EdenTreatyTanstackQuery<TElysia, ResolveEdenTypeConfig<TConfig>> {
   const hooks: EdenTreatyTanstackQueryHooks<TElysia, TConfig> = {
     queryOptions: (treaty, paths, argArray) => {
@@ -271,7 +282,14 @@ export function edenTreatyTanstackQuery<
 
       const queryOptions: EdenQueryOptions = {
         queryKey,
-        queryFn: async (_context) => {
+        queryFn: async (context) => {
+          if (config.forwardSignal) {
+            const options: ExtendedEdenRouteOptions = argArray[0]
+            options.eden ??= {}
+            options.eden.fetch ??= {}
+            linkAbortSignals(context.signal, options.eden.fetch.signal)
+            options.eden.fetch.signal = context.signal
+          }
           const result: EdenResult = await (treaty as any)(...argArray)
           return result.data
         },

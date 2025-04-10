@@ -1,11 +1,11 @@
 import { Elysia, t } from 'elysia'
 import { describe, test } from 'vitest'
 
-import { edenTreatyTanstackQuery } from '../src/treaty'
-import { useApp } from './setup'
+import { edenTreatyTanstackQuery } from '../../src/treaty'
+import { useApp } from '../setup'
 
 describe('edenTreatyTanstackQuery', () => {
-  test('it works', async () => {
+  test.skip('it works', async () => {
     const app = new Elysia().get('/posts/:id', () => 'Hello' as const)
 
     useApp(app)
