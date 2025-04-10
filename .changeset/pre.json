@@ -4,5 +4,5 @@
   "initialVersions": {
     "@ap0nia/eden": "0.0.0"
   },
-  "changesets": ["early-actors-film", "loud-pandas-behave", "spicy-chicken-mate"]
+  "changesets": []
 }
