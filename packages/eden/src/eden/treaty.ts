@@ -56,8 +56,6 @@ export type EdenTreatyProxy<
     : EdenTreatyParameterPathProxy<TElysia, TParamsRoutes, TConfig, TPaths>)
 
 /**
- * Mapping for a normal path.
- *
  * Iterate over every value.
  * If the value is mapped to a route, then lower it to callable request methods.
  * Otherwise, recursively lower the value as a nested proxy.
@@ -76,8 +74,6 @@ export type EdenTreatyNormalPathProxy<
 }
 
 /**
- * Mapping for a path parameter.
- *
  * If there is a separator, then this will be a regular proxy with a formatted key for the path parameter.
  * Otherwise, by default it will be a function that returns a lower level of the proxy.
  *
@@ -203,60 +199,25 @@ export function createEdenTreatyProxy<
       return createEdenTreatyProxy(hooks, config, newPaths, pathParams)
     },
     apply(_target, _thisArg, argArray) {
-      /**
-       * @example ['nendoroid', 'get']
-       */
       const pathsCopy = [...paths]
 
-      /**
-       * @example 'get', 'post', 'patch'
-       */
       const method = pathsCopy.pop()?.toUpperCase()
 
-      /**
-       * {@link HTTP_METHODS} is an array of **lowercase** HTTP method names.
-       */
       const lowercaseMethod: any = method?.toLowerCase()
 
-      /**
-       * Determine whether a path parameter can be found from the provided args.
-       *
-       * @example { param: { id: '123' }, key: 'id' }
-       *
-       * The `param` property is the actual argument that was passed,
-       * while the key is the string representing the placeholder.
-       */
       const pathParam = getPathParam(argArray)
 
-      /**
-       * Determine if the property can be found on the root hooks.
-       * @example "createQuery," "createMutation," etc.
-       */
       const isMethod = HTTP_METHODS.includes(lowercaseMethod)
 
-      // This is a valid path parameter call, and it no HTTP method was found.
-
       if (pathParam?.key != null && !isMethod) {
-        /**
-         * An array of objects representing path parameter replacements.
-         * @example [ writable({ id: 123 }) ]
-         */
         const allPathParams = [...pathParams, pathParam.param]
 
-        /**
-         * Path parameter strings including the current path parameter as a placeholder.
-         *
-         * @example [ 'nendoroid', ':id' ]
-         */
         const pathsWithParams = [...paths, `:${pathParam.key}`]
 
         return createEdenTreatyProxy(hooks, config, pathsWithParams, allPathParams)
       }
 
       let params: EdenRequestParams = { method, ...(config as any) }
-
-      // Path parameters will either be in the recursively created array, or in the
-      // options provided to the request.
 
       const allPathParams = pathParams
 
@@ -312,22 +273,11 @@ export function edenTreaty<
   config: EdenConfig<TElysia, TConfig> = {},
 ): EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>> {
   const root: EdenTreatyRoot<TElysia> = {
-    types: (types) => {
-      // possible alternative: mutate the config and return the same proxy.
-      // config.types = types as any
-      // return proxy
-      return edenTreaty(domain, { ...config, types } as any) as any
-    },
+    types: (types) => edenTreaty(domain, { ...config, types } as any) as any,
   }
 
   const client = config.links ? new EdenClient({ links: config.links, domain }) : undefined
 
-  /**
-   * There is not much of a difference between inlining these function calls inside the proxy
-   * versus definining them here.
-   *
-   * `query` and `mutation` are essentially the same thing.
-   */
   const hooks: EdenHooks = {
     query(...args) {
       const result = client?.query(...args) ?? resolveEdenRequest({ path: args[0], ...args[1] })

@@ -131,12 +131,7 @@ export function edenFetch<
   config.domain ??= domain
 
   const root: EdenFetchRoot<TElysia> = {
-    types: (types) => {
-      // possible alternative: mutate the config and return the same proxy.
-      // config.types = types as any
-      // return proxy
-      return edenFetch(domain, { ...config, types } as any) as any
-    },
+    types: (types) => edenFetch(domain, { ...config, types } as any) as any,
   }
 
   const client = config.links ? new EdenClient({ links: config.links, ...config }) : undefined
