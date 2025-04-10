@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom'
+
 import { JSDOM } from 'jsdom'
 
 const dom = new JSDOM(undefined, {
