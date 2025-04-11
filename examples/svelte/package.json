@@ -1,0 +1,26 @@
+{
+  "name": "@examples/svelte",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "svelte-kit sync",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@ap0nia/eden": "workspace:^",
+    "@ap0nia/eden-tanstack-query": "workspace:^",
+    "@tanstack/svelte-query": "^5.72.2",
+    "elysia": "^1.2.25",
+    "superjson": "^2.2.2"
+  },
+  "devDependencies": {
+    "@sveltejs/kit": "^2.20.5",
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "svelte": "^5.26.1",
+    "svelte-check": "^4.1.5",
+    "typescript": "^5.8.3",
+    "typescript-svelte-plugin": "^0.3.46",
+    "vite": "^6.2.6"
+  }
+}

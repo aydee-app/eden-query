@@ -26,13 +26,20 @@ import { EdenWs } from './ws'
  *
  * @internal
  */
-export type EdenTreatyRoot<T extends InternalElysia = {}> = {
+export type EdenTreatyRoot<
+  TElysia extends InternalElysia = {},
+  TConfig extends InternalEdenTypesConfig = {},
+> = {
   /**
    * Utility function to update the types configuration.
    */
-  types<U extends InternalEdenTypesConfig>(types?: U): EdenTreatyProxy<T, T['_routes'], U>
+  types<U extends InternalEdenTypesConfig>(
+    types?: U,
+  ): EdenTreatyProxy<TElysia, TElysia['_routes'], U>
 
-  client?: EdenClient<T>
+  config(config?: EdenConfig<TElysia, TConfig>): EdenTreaty<TElysia, TConfig>
+
+  client?: EdenClient<TElysia>
 }
 
 /**
@@ -195,6 +202,28 @@ export type EdenTreatySubscriptionRoute<
     : [options: TFinalOptions, clientOptions?: Partial<WebSocketClientOptions>]
 ) => EdenWs<TRoute>
 
+export type EdenTreatyInferInput<
+  TElysia extends InternalElysia = InternalElysia,
+  TConfig extends InternalEdenTypesConfig = {},
+  TRoutes = TElysia['_routes'],
+> = {
+  [K in keyof TRoutes]: TRoutes[K] extends InternalRouteSchema
+    ? Uppercase<K & string> extends 'GET'
+      ? EdenRouteOptions<TRoutes[K]>
+      : { body: EdenRouteBody<TRoutes[K]> } & EdenRouteOptions<TRoutes[K]>
+    : EdenTreatyInferInput<TElysia, TConfig, TRoutes[K]>
+}
+
+export type EdenTreatyInferOutput<
+  TElysia extends InternalElysia = InternalElysia,
+  TConfig extends InternalEdenTypesConfig = {},
+  TRoutes = TElysia['_routes'],
+> = {
+  [K in keyof TRoutes]: TRoutes[K] extends InternalRouteSchema
+    ? EdenRouteSuccess<TRoutes[K]>
+    : EdenTreatyInferOutput<TElysia, TConfig, TRoutes[K]>
+}
+
 /**
  * Core Eden-Treaty implementation.
  *
@@ -204,7 +233,7 @@ export function edenTreatyProxy<
   TElysia extends InternalElysia = any,
   TConfig extends InternalEdenTypesConfig = any,
 >(
-  root: EdenTreatyRoot<TElysia>,
+  root: EdenTreatyRoot<TElysia, TConfig>,
   config?: EdenConfig<TElysia, TConfig>,
   paths: string[] = [],
   pathParams: Record<string, any>[] = [],
@@ -291,8 +320,9 @@ export function edenTreaty<
   domain?: string,
   config: EdenConfig<TElysia, TConfig> = {},
 ): EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>> {
-  const root: EdenTreatyRoot<TElysia> = {
+  const root: EdenTreatyRoot<TElysia, TConfig> = {
     types: (types) => edenTreaty(domain, { ...config, types } as any) as any,
+    config: (config) => edenTreaty(domain, config) as any,
     client: config.links ? new EdenClient({ links: config.links, domain }) : undefined,
   }
 
@@ -300,7 +330,14 @@ export function edenTreaty<
 
   const proxy: any = new Proxy(() => {}, {
     get(_target, p, _receiver) {
-      return root[p as never] ?? innerProxy[p]
+      if (Object.prototype.hasOwnProperty.call(root, p)) return root[p as never]
+      return innerProxy[p]
+    },
+    set(_target, p, newValue, _receiver) {
+      if (Object.prototype.hasOwnProperty.call(root, p)) {
+        root[p as keyof typeof root] = newValue
+      }
+      return true
     },
   })
 

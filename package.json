@@ -24,6 +24,7 @@
     "tanstack-query"
   ],
   "workspaces": [
+    "examples/**/*",
     "packages/*"
   ],
   "type": "module",

@@ -64,6 +64,10 @@ export type EdenTreatyTanstackQueryRoot<
 
   treaty: EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>>
 
+  config(
+    config?: EdenTanstackQueryConfig<TElysia, TConfig>,
+  ): EdenTreatyTanstackQuery<TElysia, TConfig>
+
   hooks: EdenTreatyTanstackQueryHooks<TElysia, TConfig>
 }
 
@@ -136,6 +140,21 @@ export type EdenTreatyTanstackQueryQueryRoute<
   ) => EdenQueryOptions<
     EdenRouteSuccess<TRoute>,
     EdenRouteError<TRoute>,
+    EdenRouteSuccess<TRoute>,
+    [TPaths, { options: EdenRouteOptions; type: 'query' }],
+    TOptions extends { query?: { cursor?: any } } ? NonNullable<TOptions['query']>['cursor'] : never
+  >
+
+  // createQueries and useQueries may not be able to strongly type TError.
+  queriesOptions: (
+    ...args: [
+      ...({} extends TFinalOptions
+        ? [options?: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]
+        : [options: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]),
+    ]
+  ) => EdenQueryOptions<
+    EdenRouteSuccess<TRoute>,
+    Error,
     EdenRouteSuccess<TRoute>,
     [TPaths, { options: EdenRouteOptions; type: 'query' }],
     TOptions extends { query?: { cursor?: any } } ? NonNullable<TOptions['query']>['cursor'] : never
@@ -289,6 +308,7 @@ export function edenTreatyTanstackQuery<
 
   const root: EdenTreatyTanstackQueryRoot<TElysia, TConfig> = {
     types: (types) => edenTreatyTanstackQuery(domain, { ...config, types } as any) as any,
+    config: (newConfig) => edenTreatyTanstackQuery(domain, { ...config, ...newConfig }) as any,
     treaty: edenTreaty(domain, config),
     hooks,
   }
