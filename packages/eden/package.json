@@ -5,6 +5,7 @@
   "description": "Fully type-safe Elysia.js client",
   "license": "MIT",
   "scripts": {
+    "build": "rslib build",
     "test": "ATTEST_skipTypes=1 vitest eden/treaty",
     "test:types": "vitest test-d"
   },
@@ -17,22 +18,23 @@
   "main": "./src/index.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts",
-      "node": "./src/index.ts",
-      "require": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "node": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
     },
     "./plugins": {
-      "types": "./src/plugins/index.ts",
-      "import": "./src/plugins/index.ts",
-      "node": "./src/plugins/index.ts",
-      "require": "./src/plugins/index.ts",
-      "default": "./src/plugins/index.ts"
+      "types": "./dist/plugins.d.ts",
+      "import": "./dist/plugins.js",
+      "node": "./dist/plugins.js",
+      "require": "./dist/plugins.cjs",
+      "default": "./dist/plugins.js"
     }
   },
   "devDependencies": {
     "@ark/attest": "^0.45.6",
+    "@rslib/core": "^0.6.2",
     "@trpc/client": "^11.0.1",
     "@trpc/server": "^11.0.1",
     "@types/event-source-polyfill": "^1.0.5",
@@ -41,6 +43,7 @@
     "event-source-polyfill": "^1.0.31",
     "jsdom": "^26.0.0",
     "query-string": "^9.1.1",
+    "rslib": "^0.0.10",
     "superjson": "^2.2.2",
     "typescript": "^5.8.2"
   },

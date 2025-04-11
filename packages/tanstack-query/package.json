@@ -5,6 +5,7 @@
   "type": "module",
   "main": "./src/treaty.ts",
   "scripts": {
+    "build": "rslib build",
     "test": "ATTEST_skipTypes=1 vitest",
     "test:types": "vitest test-d"
   },
@@ -13,6 +14,7 @@
   },
   "devDependencies": {
     "@ark/attest": "^0.45.6",
+    "@rslib/core": "^0.6.2",
     "@solidjs/testing-library": "^0.8.10",
     "@sveltejs/kit": "^2.20.5",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
@@ -35,6 +37,7 @@
     "elysia": "^1.2.25",
     "event-source-polyfill": "^1.0.31",
     "jsdom": "^26.0.0",
+    "rslib": "^0.0.10",
     "superjson": "^2.2.2",
     "svelte": "^5.25.11",
     "typescript": "^5.8.2",
