@@ -1,13 +1,14 @@
 import {
   type EdenConfig,
+  type EdenResolverConfig,
   type EdenResult,
   type EdenRouteBody,
   type EdenRouteError,
+  type EdenRouteOptions,
   type EdenRouteSuccess,
   type EdenTreaty,
   edenTreaty,
   type EdenWs,
-  type ExtendedEdenRouteOptions,
   type FormatParam,
   getPathParam,
   type InternalEdenTypesConfig,
@@ -18,15 +19,8 @@ import {
   type ResolveEdenTypeConfig,
   type WebSocketClientOptions,
 } from '@ap0nia/eden'
-import type {
-  DefaultError,
-  MutationFunction,
-  MutationKey,
-  MutationOptions,
-  QueryFunction,
-  QueryKey,
-  QueryOptions,
-} from '@tanstack/query-core'
+
+import type { EdenMutationOptions, EdenQueryOptions, EdenTanstackQueryConfig } from './shared'
 
 export interface EdenTreatyTanstackQueryHooks<
   TElysia extends InternalElysia = {},
@@ -50,41 +44,6 @@ export interface EdenTreatyTanstackQueryHooks<
     argArray: any[],
   ) => EdenWs
 }
-
-export interface EdenTanstackQueryConfig<
-  TElysia extends InternalElysia,
-  TConfig extends InternalEdenTypesConfig = {},
-> extends EdenConfig<TElysia, TConfig> {
-  /**
-   * Whether to forward the signal from tanstack-query to the fetch request options.
-   */
-  forwardSignal?: boolean
-}
-
-export type EdenQueryOptions<
-  TQueryFnData = unknown,
-  TError = DefaultError,
-  TData = TQueryFnData,
-  TQueryKey extends QueryKey = QueryKey,
-  TPageParam = never,
-> =
-  // prettier-ignore At least one property with TError needs to be selected.
-  {
-    queryFn: QueryFunction<TQueryFnData, TQueryKey, TPageParam>
-    queryKey: TQueryKey
-  } & Pick<QueryOptions<TQueryFnData, TError, TData, TQueryKey, TPageParam>, 'retry'>
-
-export type EdenMutationOptions<
-  TData = unknown,
-  TError = Error,
-  TVariables = void,
-  TContext = unknown,
-> =
-  // prettier-ignore At least one property with TError needs to be selected.
-  {
-    mutationFn: MutationFunction<TData, TVariables>
-    mutationKey: MutationKey
-  } & Pick<MutationOptions<TData, TError, TVariables, TContext>, 'retry'>
 
 /**
  * Properties available at the Eden-treaty proxy root.
@@ -163,19 +122,23 @@ export type EdenTreatyTanstackQueryQueryRoute<
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   TPaths extends any[] = [],
-  TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
+  TOptions = EdenRouteOptions<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
 > = {
   queryOptions: (
-    options: {} extends TFinalOptions ? void | TFinalOptions : TFinalOptions,
+    ...args: [
+      ...({} extends TFinalOptions
+        ? [options?: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]
+        : [options: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]),
+    ]
   ) => EdenQueryOptions<
     EdenRouteSuccess<TRoute>,
     EdenRouteError<TRoute>,
     EdenRouteSuccess<TRoute>,
-    [TPaths, { options: ExtendedEdenRouteOptions; type: 'query' }],
-    TOptions extends { query: { cursor?: any } } ? TOptions['query']['cursor'] : never
+    [TPaths, { options: EdenRouteOptions; type: 'query' }],
+    TOptions extends { query?: { cursor?: any } } ? NonNullable<TOptions['query']>['cursor'] : never
   >
 }
 
@@ -185,22 +148,26 @@ export type EdenTreatyTanstackQueryMutationRoute<
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
   TBody = EdenRouteBody<TRoute>,
-  TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
+  TOptions = EdenRouteOptions<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
 > = {
   mutationOptions: <TContext = unknown>(
-    options: {} extends TFinalOptions ? void | TFinalOptions : TFinalOptions,
+    ...args: [
+      ...({} extends TFinalOptions
+        ? [options?: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]
+        : [options: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]),
+    ]
   ) => EdenMutationOptions<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>, TBody, TContext>
 }
 
 export type EdenTreatySubscriptionRoute<
-  TElysia extends InternalElysia,
+  _TElysia extends InternalElysia,
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
-  TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
+  TOptions = EdenRouteOptions<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
@@ -287,14 +254,16 @@ export function edenTreatyTanstackQuery<
       const queryOptions: EdenQueryOptions = {
         queryKey,
         queryFn: async (context) => {
-          if (config.forwardSignal) {
-            const options: ExtendedEdenRouteOptions = argArray[0]
-            options.eden ??= {}
-            options.eden.fetch ??= {}
-            linkAbortSignals(context.signal, options.eden.fetch.signal)
-            options.eden.fetch.signal = context.signal
+          if (config.abortOnUnmount) {
+            argArray[1] = { ...argArray[1], fetch: { ...argArray[1]?.fetch } }
+
+            linkAbortSignals(context.signal, argArray[1]?.fetch.signal)
+
+            argArray[1].fetch.signal = context.signal
           }
+
           const result: EdenResult = await (treaty as any)(...argArray)
+
           return result.data
         },
       }

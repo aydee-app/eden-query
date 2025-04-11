@@ -46,9 +46,13 @@ export type EdenRouteParams<T extends InternalRouteSchema> =
     ? {
         params?: Record<string, string>
       }
-    : {
-        params: T['params']
-      }
+    : {} extends T['params']
+      ? {
+          params: T['params']
+        }
+      : {
+          params: T['params']
+        }
 
 /**
  * An object with the `query` property representing strongly-typed {@link InternalRouteSchema.query}.
@@ -67,9 +71,13 @@ export type EdenRouteQuery<
     ? {
         query?: Record<string, string>
       }
-    : {
-        query: Omit<TRoute['query'], TOmitInput>
-      }
+    : {} extends Omit<TRoute['query'], TOmitInput>
+      ? {
+          query?: Omit<TRoute['query'], TOmitInput>
+        }
+      : {
+          query: Omit<TRoute['query'], TOmitInput>
+        }
 
 /**
  * An object with the `headers` property representing strongly-typed {@link RouteSchema.headers}.
@@ -82,9 +90,13 @@ export type EdenRouteHeaders<T extends InternalRouteSchema> = undefined extends 
   ? {
       headers?: Record<string, string>
     }
-  : {
-      headers: T['headers']
-    }
+  : {} extends T['headers']
+    ? {
+        headers?: T['headers']
+      }
+    : {
+        headers: T['headers']
+      }
 
 /**
  * @template TRoute The Elysia.js {@link InternalRouteSchema}.

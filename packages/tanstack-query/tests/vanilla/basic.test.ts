@@ -65,7 +65,7 @@ describe('edenTreatyTanstackQuery', () => {
 
     const queryOptions = eden.posts({ id: 123 }).get.queryOptions({ params: { hello: 123 } })
     const mutationOptions = eden.posts({ id: 456 }).patch.mutationOptions()
-    const infiniteQueryOptions = eden.users.get.queryOptions({ query: {} })
+    const infiniteQueryOptions = eden.users.get.queryOptions()
 
     const reactQuery = useReactQuery(queryOptions)
     const reactMutation = useReactMutation(mutationOptions)

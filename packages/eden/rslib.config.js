@@ -10,6 +10,9 @@ const config = defineConfig({
     },
     sourceMap: true,
   },
+  source: {
+    tsconfigPath: './tsconfig.build.json',
+  },
   lib: [
     {
       bundle: true,

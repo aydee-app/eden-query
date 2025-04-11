@@ -19,7 +19,7 @@ import {
 } from '@ap0nia/eden'
 import type { MutationOptions } from '@tanstack/query-core'
 
-import type { EdenMutationOptions, EdenQueryOptions, EdenTanstackQueryConfig } from './treaty'
+import type { EdenMutationOptions, EdenQueryOptions, EdenTanstackQueryConfig } from './shared'
 
 export type EdenFetchTanstackQueryHooks<
   TElysia extends InternalElysia = {},
@@ -174,11 +174,11 @@ export type EdenFetchDistinctEndpoints<
 
 export function edenFetchTanstackQuery<
   TElysia extends InternalElysia,
-  const TConfig extends InternalEdenTypesConfig = {},
+  const TConfig extends InternalEdenTypesConfig = { separator: ':param' },
 >(
   domain?: string,
   config: EdenTanstackQueryConfig<TElysia, TConfig> = {},
-): EdenFetchTanstackQueryHooks<TElysia, TConfig> {
+): EdenFetchTanstackQuery<TElysia, TConfig> {
   const fetch = edenFetch(domain, config)
 
   const hooks: EdenFetchTanstackQueryHooks<TElysia, TConfig> = {
@@ -197,7 +197,7 @@ export function edenFetchTanstackQuery<
         queryFn: async (context) => {
           const resolvedArgs: any[] = [...args]
 
-          if (config.forwardSignal) {
+          if (config.abortOnUnmount) {
             resolvedArgs[2] = { ...resolvedArgs[2], fetch: resolvedArgs[2]?.fetch }
 
             linkAbortSignals(context.signal, resolvedArgs[2].fetch.signal)

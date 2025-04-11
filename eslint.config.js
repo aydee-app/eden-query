@@ -19,8 +19,7 @@ const FILE_PATTERNS = {
   TYPESCRIPT: ['**/*.ts', '**/*.tsx'],
   SVELTE: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
   NODE_MODULES: '/node_modules/',
-  WEB_BUILD_OUTPUT: 'apps/web/build/',
-  WEB_SVELTEKIT_OUTPUT: 'apps/web/.svelte-kit/',
+  TEST_DECLARATION_FILES: '**/*.test-d.ts',
 }
 
 /**
@@ -130,11 +129,7 @@ const typescriptConfigs = tsEslint.config(
  * File patterns to ignore.
  */
 const ignoresConfig = tsEslint.config({
-  ignores: [
-    FILE_PATTERNS.NODE_MODULES,
-    FILE_PATTERNS.WEB_SVELTEKIT_OUTPUT,
-    FILE_PATTERNS.WEB_BUILD_OUTPUT,
-  ],
+  ignores: [FILE_PATTERNS.NODE_MODULES, FILE_PATTERNS.TEST_DECLARATION_FILES],
 })
 
 const config = tsEslint.config(

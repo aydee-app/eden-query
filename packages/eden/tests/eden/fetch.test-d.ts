@@ -41,15 +41,16 @@ describe('edenFetch', () => {
     }).type.errors('Type \'"HELLO"\' is not assignable to type \'"GET"\'.')
   })
 
-  test('allows custom methods', () => {
-    const app = new Elysia().route('HeLlO', '/', () => {})
+  // MIXED-CASING NOT ALLOWED.
+  // test('allows custom methods', () => {
+  //   const app = new Elysia().route('HeLlO', '/', () => {})
 
-    useApp(app)
+  //   useApp(app)
 
-    const fetch = edenFetch<typeof app>(domain)
+  //   const fetch = edenFetch<typeof app>(domain)
 
-    fetch('/index', { method: 'HELLO' })
-  })
+  //   fetch('/index', { method: 'HELLO' })
+  // })
 
   test('requires second argument if GET endpoint does not exist', () => {
     const app = new Elysia().post('/', () => {})

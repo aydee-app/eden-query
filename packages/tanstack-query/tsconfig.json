@@ -4,5 +4,5 @@
     "jsx": "preserve",
     "outDir": "dist"
   },
-  "include": ["src"]
+  "exclude": ["dist", "coverage"]
 }

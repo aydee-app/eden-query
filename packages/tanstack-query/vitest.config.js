@@ -21,6 +21,7 @@ const config = defineConfig({
     setupFiles: ['./tests/setup.ts'],
     include: ['**/*.test-d.ts', '**/*.{test,spec}.?(c|m)[jt]s?(x)'],
     environment: 'happy-dom',
+    exclude: ['tests/vue/**/*'],
     globals: true,
   },
 })

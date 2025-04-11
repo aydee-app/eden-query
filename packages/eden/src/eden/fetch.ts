@@ -87,7 +87,7 @@ export type EdenFetchRequester<
               : [config?: EdenResolverConfig<TElysia, TConfig>]),
           ]),
     ]
-  ) => EdenFetchResponse<TMethod, TRoute>
+  ) => TMethod extends 'SUBSCRIBE' ? EdenWs<TRoute> : EdenFetchResponse<TMethod, TRoute>
 
 export type EdenFetchEndpoints<
   TElysia extends InternalElysia,

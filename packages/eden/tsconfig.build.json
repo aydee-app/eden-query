@@ -5,5 +5,5 @@
     "declarationMap": true,
     "outDir": "dist"
   },
-  "exclude": ["dist", "coverage"]
+  "include": ["src"]
 }

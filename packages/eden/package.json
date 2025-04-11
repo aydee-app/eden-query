@@ -25,7 +25,7 @@
       "default": "./src/index.ts"
     },
     "./plugins": {
-      "types": "./dist/plugins.d.ts",
+      "types": "./dist/plugins/index.d.ts",
       "import": "./dist/plugins.js",
       "node": "./dist/plugins.js",
       "require": "./dist/plugins.cjs",

@@ -1,4 +1,4 @@
-import { createQuery, QueryClient, setQueryClientContext } from '@tanstack/svelte-query'
+import { createQuery, QueryClient } from '@tanstack/svelte-query'
 import { act } from '@testing-library/svelte'
 import Elysia from 'elysia'
 import { get } from 'svelte/store'
@@ -27,7 +27,7 @@ describe('createQuery', () => {
 
     const duration = 500
 
-    const fetcher = vi.fn<typeof fetch>(async (_url, _init) => {
+    const fetcher = vi.fn(async (_url, _init) => {
       await new Promise((resolve) => setTimeout(resolve, duration))
 
       return new Response('OK')
@@ -48,7 +48,7 @@ describe('createQuery', () => {
       () => {
         const eden = edenTreatyTanstackQuery<typeof app>()
 
-        const query = createQuery(eden.hello.world.get.queryOptions({ eden: { fetcher } }))
+        const query = createQuery(eden.hello.world.get.queryOptions(undefined, { fetcher }))
 
         return query
       },
@@ -98,7 +98,7 @@ describe('createQuery', () => {
 
     const duration = 500
 
-    const fetcher = vi.fn<typeof fetch>(async (_url, init) => {
+    const fetcher = vi.fn(async (_url, init) => {
       init?.signal?.addEventListener('abort', abortListener)
 
       await new Promise((resolve) => setTimeout(resolve, duration))
@@ -108,16 +108,16 @@ describe('createQuery', () => {
 
     const data = ['A', 'B', 'C']
 
-    const app = new Elysia().get('/hello/world', async () => {
+    const _app = new Elysia().get('/hello/world', async () => {
       await new Promise((resolve) => setTimeout(resolve, duration))
       return data
     })
 
     const a = renderHook(
       () => {
-        const eden = edenTreatyTanstackQuery<typeof app>(undefined, { forwardSignal: true })
+        const eden = edenTreatyTanstackQuery<typeof _app>(undefined, { abortOnUnmount: true })
 
-        const query = createQuery(eden.hello.world.get.queryOptions({ eden: { fetcher } }))
+        const query = createQuery(eden.hello.world.get.queryOptions(undefined, { fetcher }))
 
         return query
       },
@@ -157,7 +157,7 @@ describe('createQuery', () => {
 
     const duration = 500
 
-    const fetcher = vi.fn<typeof fetch>(async (_url, init) => {
+    const fetcher = vi.fn(async (_url, init) => {
       init?.signal?.addEventListener('abort', abortListener)
 
       await new Promise((resolve) => setTimeout(resolve, duration))
@@ -167,16 +167,16 @@ describe('createQuery', () => {
 
     const data = ['A', 'B', 'C']
 
-    const app = new Elysia().get('/hello/world', async () => {
+    const _app = new Elysia().get('/hello/world', async () => {
       await new Promise((resolve) => setTimeout(resolve, duration))
       return data
     })
 
     const a = renderHook(
       () => {
-        const eden = edenTreatyTanstackQuery<typeof app>(undefined, { forwardSignal: true })
+        const eden = edenTreatyTanstackQuery<typeof _app>(undefined, { abortOnUnmount: true })
 
-        const query = createQuery(eden.hello.world.get.queryOptions({ eden: { fetcher } }))
+        const query = createQuery(eden.hello.world.get.queryOptions(undefined, { fetcher }))
 
         return query
       },
