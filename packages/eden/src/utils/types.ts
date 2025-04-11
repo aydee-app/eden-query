@@ -125,4 +125,11 @@ export type Join<
   ? Join<TTail, TSeparator, `${TResult}${TSeparator}${THead}`>
   : TResult
 
+export type Split<
+  T,
+  TSeparator extends Stringable = '/',
+> = T extends `${infer THead}${TSeparator}${infer TTail}`
+  ? [...(THead extends '' ? [] : Split<THead, TSeparator>), ...Split<TTail, TSeparator>]
+  : [T]
+
 export type IsAny<T> = 0 extends 1 & T ? true : false

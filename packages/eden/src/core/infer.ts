@@ -177,6 +177,11 @@ export type RouteErrorResponses<
 }
 
 /**
+ * Some errors that are generally possible on any routes.
+ */
+export type DefaultEdenFetchErrors = EdenFetchError<500, any>
+
+/**
  * Extract the keys from the {@link InternalRouteSchema.response} that correspond to error responses.
  *
  * @example
@@ -209,9 +214,11 @@ export type RouteErrorResponses<
 export type EdenRouteError<
   TRoute extends InternalRouteSchema = InternalRouteSchema,
   TSuccessResponses = RouteErrorResponses<TRoute>,
-> = {
-  [K in keyof TSuccessResponses]: EdenFetchError<Extract<K, number>, TSuccessResponses[K]>
-}[keyof TSuccessResponses]
+> =
+  | {
+      [K in keyof TSuccessResponses]: EdenFetchError<Extract<K, number>, TSuccessResponses[K]>
+    }[keyof TSuccessResponses]
+  | DefaultEdenFetchErrors
 
 /**
  * Based on tRPC error inference.

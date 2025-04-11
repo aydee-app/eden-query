@@ -1,5 +1,5 @@
 import { EdenClient } from '../client'
-import type { EdenRequestParams } from '../core/config'
+import type { EdenRequestParams, EdenResolverConfig } from '../core/config'
 import type { EdenFetchResult } from '../core/dto'
 import type {
   EdenRouteBody,
@@ -46,23 +46,48 @@ export type EdenFetchRequester<
   TRoutes extends Record<string, unknown>,
   TConfig extends InternalEdenTypesConfig = {},
   TEndpoints = EdenFetchEndpoints<TElysia, TRoutes, TConfig>,
-> = <
-  TPath extends keyof TEndpoints,
-  TEndpoint extends TEndpoints[TPath],
-  TMethod extends keyof TEndpoint,
-  TRoute extends InternalRouteSchema = Extract<
-    TEndpoint[Extract<TMethod extends string ? TMethod : 'get', keyof TEndpoint>],
-    InternalRouteSchema
-  >,
->(
-  path: TPath,
-  ...args: [
-    ...({} extends EdenFetchOptions<TMethod, TRoute>
-      ? [options?: EdenFetchOptions<TMethod, TRoute>]
-      : [options: EdenFetchOptions<TMethod, TRoute>]),
-    ...(TMethod extends 'subscribe' ? [clientOptions?: Partial<WebSocketClientOptions>] : []),
-  ]
-) => EdenFetchResponse<TMethod, TRoute>
+> =
+  /**
+   * @template TMethod The uppercase HTTP method.
+   *   IMPORTANT: will not work with mixed-case custom methods.
+   *   Eden-Fetch will attempt to find a matching route with either the fully uppercase or lowercase HTTP method.
+   *
+   *   @see https://elysiajs.com/essential/route.html#custom-method
+   *
+   *   BAD - mixed-case: app.route('M-search', '/m-search', 'connect')
+   *   OK - uppercase: app.route('M-SEARCH', '/m-search', 'connect')
+   *   OK - lowercase: app.route('m-search', '/m-search', 'connect')
+   */
+  <
+    TPath extends keyof TEndpoints,
+    TEndpoint extends TEndpoints[TPath],
+    TMethod extends Uppercase<keyof TEndpoint & string> | undefined,
+    TRoute extends InternalRouteSchema = Extract<
+      TEndpoint[Extract<
+        undefined extends TMethod ? 'GET' | 'get' : TMethod | Lowercase<TMethod & string>,
+        keyof TEndpoint
+      >],
+      InternalRouteSchema
+    >,
+    TOptions = EdenFetchOptions<TMethod, TRoute>,
+  >(
+    path: TPath,
+    ...args: [
+      ...({} extends TOptions
+        ? [
+            options?: EdenFetchOptions<TMethod, TRoute>,
+            ...(TMethod extends 'subscribe'
+              ? [clientOptions?: Partial<WebSocketClientOptions>]
+              : [config?: EdenResolverConfig<TElysia, TConfig>]),
+          ]
+        : [
+            options: EdenFetchOptions<TMethod, TRoute>,
+            ...(TMethod extends 'subscribe'
+              ? [clientOptions?: Partial<WebSocketClientOptions>]
+              : [config?: EdenResolverConfig<TElysia, TConfig>]),
+          ]),
+    ]
+  ) => EdenFetchResponse<TMethod, TRoute>
 
 export type EdenFetchEndpoints<
   TElysia extends InternalElysia,
@@ -90,16 +115,18 @@ export type EdenFetchDistinctEndpoints<
       >
 }[keyof TRoutes]
 
-export type EdenFetchOptions<TMethod, TRoute extends InternalRouteSchema> = (TMethod extends 'get'
-  ? {
-      method?: Uppercase<TMethod & string>
-    }
-  : {
-      method: Uppercase<TMethod & string>
-    }) &
-  (TMethod extends 'get' | 'subscribe'
-    ? EdenFetchQueryOptions<TRoute>
-    : EdenFetchMutationOptions<TRoute>)
+export type EdenFetchOptions<TMethod, TRoute extends InternalRouteSchema> =
+  'GET' extends NoInfer<TMethod>
+    ? {
+        method?: NonNullable<TMethod>
+      } & EdenFetchQueryOptions<TRoute>
+    : 'SUBSCRIBE' extends NoInfer<TMethod>
+      ? {
+          method: NonNullable<TMethod>
+        } & EdenFetchQueryOptions<TRoute>
+      : {
+          method: NonNullable<TMethod>
+        } & EdenFetchMutationOptions<TRoute>
 
 export type EdenFetchQueryOptions<T extends InternalRouteSchema> = EdenRouteOptions<T>
 
@@ -142,12 +169,12 @@ export function edenFetch<
    * `query` and `mutation` are essentially the same thing.
    */
   const hooks: EdenHooks = {
-    query(...args) {
-      const result = client?.query(...args) ?? resolveEdenRequest({ path: args[0], ...args[1] })
+    query(path, params) {
+      const result = client?.query(path, params) ?? resolveEdenRequest({ path, ...params })
       return result as any
     },
-    mutation(...args) {
-      const result = client?.mutation(...args) ?? resolveEdenRequest({ path: args[0], ...args[1] })
+    mutation(path, params) {
+      const result = client?.mutation(path, params) ?? resolveEdenRequest({ path, ...params })
       return result as any
     },
     subscription(options) {
@@ -162,11 +189,15 @@ export function edenFetch<
     apply(_target, _thisArg, argArray) {
       const method = argArray[1]?.method?.toUpperCase()
 
-      const { body, ...options } = argArray[1] ?? {}
+      const [rawPath, optionsOrBody] = argArray
 
-      let params: EdenRequestParams = { method, ...(config as any), body, options }
+      let params: EdenRequestParams = { method, ...(config as any), ...argArray[2] }
 
-      const rawPath: string = argArray[0]
+      if (!method || method === 'GET') {
+        params.options = optionsOrBody
+      } else {
+        params.body = optionsOrBody
+      }
 
       const pathParams = toArray(params.options?.params)
 

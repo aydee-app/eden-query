@@ -1,17 +1,17 @@
 import { EdenClient } from '../client'
 import { GET_OR_HEAD_HTTP_METHODS, HTTP_METHODS } from '../constants'
-import type { EdenRequestParams } from '../core/config'
+import type { EdenRequestParams, EdenResolverConfig } from '../core/config'
 import type { EdenFetchResult } from '../core/dto'
-import type { EdenRouteBody, EdenRouteError, EdenRouteSuccess } from '../core/infer'
+import type {
+  EdenRouteBody,
+  EdenRouteError,
+  EdenRouteOptions,
+  EdenRouteSuccess,
+} from '../core/infer'
 import { resolveEdenRequest } from '../core/resolve'
 import type { InternalElysia, InternalRouteSchema } from '../core/types'
 import type { WebSocketClientOptions } from '../ws/client'
-import type {
-  EdenConfig,
-  ExtendedEdenRouteOptions,
-  InternalEdenTypesConfig,
-  ResolveEdenTypeConfig,
-} from './config'
+import type { EdenConfig, InternalEdenTypesConfig, ResolveEdenTypeConfig } from './config'
 import {
   type FormatParam,
   getPathParam,
@@ -96,9 +96,9 @@ export type EdenTreatyParameterPathProxy<
 
 /**
  * A route typically has three signatures.
- * - query: Up to one argument is allowed, which is {@link EdenExtendedRouteOptions}.
- * - mutation: Up to two arguments are allowed, which are {@link EdenRouteBody} and {@link EdenExtendedRouteOptions}.
- * - subscription: Up to one argument is allowed, which is
+ * - query: Up to two arguments are allowed.
+ * - mutation: Up to three arguments are allowed.
+ * - subscription: Up to one argument is allowed.
  *
  * @internal
  */
@@ -132,12 +132,14 @@ export type EdenTreatyQueryRoute<
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
-  TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
+  TOptions = EdenRouteOptions<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
 > = (
-  options: {} extends TFinalOptions ? void | TFinalOptions : TFinalOptions,
+  ...args: {} extends TFinalOptions
+    ? [options?: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]
+    : [options: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]
 ) => Promise<EdenFetchResult<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>>>
 
 /**
@@ -158,33 +160,39 @@ export type EdenTreatyMutationRoute<
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
   TBody = EdenRouteBody<TRoute>,
-  TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
+  TOptions = EdenRouteOptions<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
 > = (
-  ...args: [
-    ...({} extends TBody ? [body?: TBody] : [body: TBody]),
-    ...({} extends TFinalOptions ? [options?: TFinalOptions] : [options: TFinalOptions]),
-  ]
+  ...args: {} extends TBody
+    ? [
+        body?: TBody,
+        ...({} extends TFinalOptions ? [options?: TFinalOptions] : [options: TFinalOptions]),
+        config?: EdenResolverConfig<TElysia, TConfig>,
+      ]
+    : [
+        body: TBody,
+        ...({} extends TFinalOptions ? [options?: TFinalOptions] : [options: TFinalOptions]),
+        config?: EdenResolverConfig<TElysia, TConfig>,
+      ]
 ) => Promise<EdenFetchResult<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>>>
 
 /**
  */
 export type EdenTreatySubscriptionRoute<
-  TElysia extends InternalElysia,
+  _TElysia extends InternalElysia,
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
-  TOptions = ExtendedEdenRouteOptions<TElysia, TRoute, TConfig>,
+  TOptions = EdenRouteOptions<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
 > = (
-  ...args: [
-    ...({} extends TFinalOptions ? [options?: TFinalOptions] : [options: TFinalOptions]),
-    clientOptions?: Partial<WebSocketClientOptions>,
-  ]
+  ...args: {} extends TFinalOptions
+    ? [options?: TFinalOptions, clientOptions?: Partial<WebSocketClientOptions>]
+    : [options: TFinalOptions, clientOptions?: Partial<WebSocketClientOptions>]
 ) => EdenWs<TRoute>
 
 /**
@@ -233,10 +241,10 @@ export function edenTreatyProxy<
       const allPathParams = pathParams
 
       if (GET_OR_HEAD_HTTP_METHODS.includes(lowercaseMethod)) {
-        params = { ...params, ...argArray[0]?.eden, options: argArray[0] }
+        params = { ...params, ...argArray[1], options: argArray[0] }
         if (argArray[0]?.params) allPathParams.push(argArray[0]?.params)
       } else {
-        params = { ...params, ...argArray[1]?.eden, body: argArray[0], options: argArray[1] }
+        params = { ...params, ...argArray[2], body: argArray[0], options: argArray[1] }
         if (argArray[1]?.params) allPathParams.push(argArray[1]?.params)
       }
 
