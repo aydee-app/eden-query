@@ -1,4 +1,4 @@
-import type { EdenRequestParams, EdenResolverConfig, EdenResolverTypeConfig } from '../core/config'
+import type { EdenRequestOptions, EdenResolverConfig, EdenResolverTypeConfig } from '../core/config'
 import { processHeaders } from '../core/headers'
 import type { HTTPHeaders } from '../core/http'
 import { resolveEdenRequest } from '../core/resolve'
@@ -86,7 +86,7 @@ export async function resolveHttpOperationParams<
     onRequest,
     onResponse,
     onResult,
-  } as EdenRequestParams
+  } as EdenRequestOptions
 
   return resolvedParams
 }

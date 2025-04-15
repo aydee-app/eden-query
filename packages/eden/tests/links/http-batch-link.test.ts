@@ -118,7 +118,7 @@ describe('http-batch-link', () => {
 
       const results = (await Promise.all(
         queries.map(async (query) => {
-          return client.query('/query', { options: { query } })
+          return client.query('/query', { input: { query } })
         }),
       )) as EdenResult[]
 

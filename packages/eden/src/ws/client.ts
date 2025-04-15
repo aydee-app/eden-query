@@ -1,6 +1,10 @@
 import type { MaybeArray } from 'elysia'
 
-import type { EdenWsIncomingMessage, EdenWsOutgoingMessage, EdenWsStateResult } from '../core/dto'
+import type {
+  EdenWebSocketIncomingMessage,
+  EdenWebSocketOutgoingMessage,
+  EdenWebSocketState,
+} from '../core/dto'
 import { type EdenError, EdenWebSocketClosedError } from '../core/error'
 import { type AnyDataTransformer, matchTransformer } from '../core/transform'
 import type { Operation, OperationLinkResult } from '../links/types'
@@ -80,7 +84,7 @@ export interface WebSocketRequestOptions {
   lastEventId?: string
 }
 
-export type WebSocketConnectionState = EdenWsStateResult<EdenError>
+export type WebSocketConnectionState = EdenWebSocketState<EdenError>
 
 export const WEBSOCKET_CONNECTION_STATES = {
   CONNECTING: {
@@ -367,7 +371,7 @@ export class WebSocketClient {
 
       if (typeof message.data !== 'string' || ['PING', 'PONG'].includes(message.data)) return
 
-      const incomingMessage: MaybeArray<EdenWsIncomingMessage> = JSON.parse(message.data)
+      const incomingMessage: MaybeArray<EdenWebSocketIncomingMessage> = JSON.parse(message.data)
 
       const incomingMessages = toArray(incomingMessage)
 
@@ -396,7 +400,7 @@ export class WebSocketClient {
     })
   }
 
-  private handleResponseMessage = (message: EdenWsIncomingMessage) => {
+  private handleResponseMessage = (message: EdenWebSocketIncomingMessage) => {
     // Special message that does not have an originating request.
     if (message.result?.type === 'reconnect') {
       const error = new EdenWebSocketClosedError({ message: 'Server requested reconnect' })
@@ -431,7 +435,7 @@ export class WebSocketClient {
   /**
    * Sends a message or batch of messages directly to the server.
    */
-  send(messageOrMessages: MaybeArray<EdenWsOutgoingMessage>) {
+  send(messageOrMessages: MaybeArray<EdenWebSocketOutgoingMessage>) {
     if (!this.activeConnection.isOpen()) {
       throw new Error('Active connection is not open')
     }
@@ -455,7 +459,7 @@ export class WebSocketClient {
    *
    * @returns A function to abort the batched request.
    */
-  private batchSend(message: EdenWsOutgoingMessage, callbacks: WebSocketRequestCallbacks) {
+  private batchSend(message: EdenWebSocketOutgoingMessage, callbacks: WebSocketRequestCallbacks) {
     this.inactivityTimeout.reset()
 
     this.#batchSend().catch((err) => {

@@ -2,24 +2,37 @@ import type { MaybeArray, MaybePromise, Nullish } from '../utils/types'
 import type { EdenFetchResult } from './dto'
 import type { EdenFetchError } from './error'
 import type { FetchEsque, HeadersEsque } from './http'
-import type { EdenRouteBody, EdenRouteOptions } from './infer'
+import type { EdenRouteBody, EdenRouteInput } from './infer'
 import type { TransformerConfig } from './transform'
 import type { InternalElysia, TypeConfig } from './types'
 
+/**
+ * Configuration that is introspected by Eden types to dynamically apply features.
+ * Primarily used to opt-in to strict type checking between the Eden client and Elysia.js server application.
+ *
+ * @internal
+ */
 export type EdenTypeConfig<T extends TypeConfig> = {
+  /**
+   * Either `true` to use the default configuration, or an object that satisfies the configuration.
+   *
+   * @default undefined
+   */
   types?: T
 }
 
 /**
  * Accepted headers includes any object that resembles headers, or a promise that resolves to one.
+ *
  * If a callback is provided, it will be called with the current params.
  * The callback can return header-esque objects to merge with the params, or mutate the params directly.
+ *
  * An array of the previously mentioned types can be provided, and each will be handled accordingly.
  */
 export type EdenRequestHeaders<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
-> = HeadersEsque<[EdenRequestParams<TElysia, TConfig>]>
+> = HeadersEsque<[EdenRequestOptions<TElysia, TConfig>]>
 
 /**
  */
@@ -29,7 +42,7 @@ export type EdenRequestTransformer<
 > = (
   path: string,
   options: RequestInit,
-  params: EdenRequestParams<TElysia, TConfig>,
+  params: EdenRequestOptions<TElysia, TConfig>,
 ) => MaybePromise<RequestInit | void>
 
 /**
@@ -37,7 +50,7 @@ export type EdenRequestTransformer<
 export type EdenResponseTransformer<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
-> = (response: Response, params: EdenRequestParams<TElysia, TConfig>) => MaybePromise<unknown>
+> = (response: Response, params: EdenRequestOptions<TElysia, TConfig>) => MaybePromise<unknown>
 
 /**
  */
@@ -46,7 +59,7 @@ export type EdenFetchResultTransformer<
   TConfig extends TypeConfig = undefined,
 > = (
   result: EdenFetchResult<any, EdenFetchError>,
-  params: EdenRequestParams<TElysia, TConfig>,
+  params: EdenRequestOptions<TElysia, TConfig>,
 ) => MaybePromise<EdenFetchResult<any, EdenFetchError> | Nullish>
 
 /**
@@ -155,33 +168,37 @@ export interface EdenResolverConfig<
  */
 export interface EdenRequestInput {
   /**
-   * Fetch options for a "query" method, i.e. "GET", "HEAD", "OPTIONS".
+   * Request input available for all requests. e.g. path parameters, query parameters, headers.
+   *
+   * These options are specifically nested under a sub-property to accommodate global options
+   * set by {@link EdenResolverConfig}.
+   *
+   * For example, {@link EdenRequestInput.input.query} will have greater precedence than {@link EdenResolverConfig.query}
+   * in the event of duplicate query parameters.
    */
-  options?: EdenRouteOptions
+  input?: EdenRouteInput
 
   /**
-   * The request body for "POST", "PATCH", etc. requests.
+   * Request body for mutation requests, e.g. anything **not** "GET" like "POST," "PATCH," etc.
    */
   body?: EdenRouteBody
 
   /**
+   * Request endpoint.
    */
   path?: string
 
   /**
+   * Request HTTP method.
    */
   method?: string
 }
 
 /**
- * Parameters that control how an Eden request is resolved.
- *
- * Some information is duplicated in the {@link EdenResolverTypeConfig} properties.
- * For example, {@link EdenRequestParams.options.headers} and {@link EdenResolverTypeConfig.headers}.
- * Values in the request-specific options will have greater precedence
- * than the global resolver configuration options.
+ * Options for configuring an individual request from Eden to an Elysia.js, REST server application.
+ * Like an extended {@link RequestInit} for usage by Eden.
  */
-export type EdenRequestParams<
+export type EdenRequestOptions<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
 > = EdenResolverTypeConfig<TElysia, TConfig> &

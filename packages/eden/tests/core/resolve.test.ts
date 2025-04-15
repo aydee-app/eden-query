@@ -203,6 +203,7 @@ describe('defaultOnResponse', () => {
 describe('defaultOnResult', () => {
   test('does not apply transformer if not provided', async () => {
     const result: EdenResult = {
+      type: 'data',
       error: null,
       data: {},
       response: new Response(),
@@ -227,6 +228,7 @@ describe('defaultOnResult', () => {
     const data = SuperJSON.serialize(rawData)
 
     const result: EdenResult = {
+      type: 'data',
       error: null,
       data,
       response: new Response(),
@@ -250,7 +252,7 @@ describe('resolveEdenFetchPath', () => {
       postId: 'POST',
     }
 
-    const result = resolveEdenFetchPath({ path, options: { params } })
+    const result = resolveEdenFetchPath({ path, input: { params } })
 
     const expectedResult = path.replace(':userId', params.userId).replace(':postId', params.postId)
 
@@ -264,7 +266,7 @@ describe('resolveEdenFetchPath', () => {
       userId: 'USER',
     }
 
-    const result = resolveEdenFetchPath({ path, options: { params } })
+    const result = resolveEdenFetchPath({ path, input: { params } })
 
     const expectedResult = path.replace(':userId', params.userId)
 
@@ -278,7 +280,7 @@ describe('resolveEdenFetchPath', () => {
 
     const path = undefined
 
-    const result = resolveEdenFetchPath({ path, options: { params } })
+    const result = resolveEdenFetchPath({ path, input: { params } })
 
     expect(result).toBe(path)
   })
@@ -290,7 +292,7 @@ describe('resolveEdenFetchPath', () => {
 
     const path = '/hello/world'
 
-    const result = resolveEdenFetchPath({ path, options: { params } })
+    const result = resolveEdenFetchPath({ path, input: { params } })
 
     expect(result).toBe(path)
   })
@@ -341,7 +343,7 @@ describe('resolveFetchOptions', () => {
       name: 'elysia',
     }
 
-    const result = await resolveFetchOptions({ options: { query } })
+    const result = await resolveFetchOptions({ input: { query } })
 
     expect(result.query).toBe(queryString.stringify(query))
   })
@@ -357,7 +359,7 @@ describe('resolveFetchOptions', () => {
       aponia: 'true',
     }
 
-    const result = await resolveFetchOptions({ query: rootQuery, options: { query: requestQuery } })
+    const result = await resolveFetchOptions({ query: rootQuery, input: { query: requestQuery } })
 
     expect(result.query).toBe(
       queryString.stringify({ ...rootQuery, ...requestQuery }, { sort: false }),

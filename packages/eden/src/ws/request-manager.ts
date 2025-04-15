@@ -1,4 +1,4 @@
-import type { EdenWsIncomingMessage, EdenWsOutgoingMessage } from '../core/dto'
+import type { EdenWebSocketIncomingMessage, EdenWebSocketOutgoingMessage } from '../core/dto'
 import type { EdenError } from '../core/error'
 import type { JSONRPC2 } from '../core/json-rpc'
 import type { Observer } from '../observable'
@@ -8,7 +8,7 @@ type MessageId = string
 
 type MessageIdLike = JSONRPC2.RequestId
 
-export type WebSocketRequestCallbacks = Observer<EdenWsIncomingMessage, EdenError>
+export type WebSocketRequestCallbacks = Observer<EdenWebSocketIncomingMessage, EdenError>
 
 /**
  * Represents a WebSocket request managed by the RequestManager.
@@ -16,7 +16,7 @@ export type WebSocketRequestCallbacks = Observer<EdenWsIncomingMessage, EdenErro
  * handled by `callbacks`, and a set of state monitoring callbacks.
  */
 interface WebSocketRequest {
-  message: EdenWsOutgoingMessage
+  message: EdenWebSocketOutgoingMessage
   end: Promise<void>
   callbacks: WebSocketRequestCallbacks
 }
@@ -50,7 +50,7 @@ export class RequestManager {
    * @param callbacks - Callback functions to observe the request's state.
    * @returns A cleanup function to manually remove the request.
    */
-  public register(message: EdenWsOutgoingMessage, callbacks: WebSocketRequestCallbacks) {
+  public register(message: EdenWebSocketOutgoingMessage, callbacks: WebSocketRequestCallbacks) {
     const { promise: end, resolve } = withResolvers<void>()
 
     this.outgoingRequests.push({

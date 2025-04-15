@@ -1,11 +1,11 @@
-import type { EdenRequestParams } from '../core/config'
+import type { EdenRequestOptions } from '../core/config'
 import type { InternalElysia } from '../core/types'
 import { Observable } from '../observable'
 import type { Operation, OperationLink, OperationLinkResultObservable } from './types'
 
 export type ChainOptions<
   TElysia extends InternalElysia = InternalElysia,
-  TInput extends EdenRequestParams = any,
+  TInput extends EdenRequestOptions = any,
   TOutput = unknown,
 > = {
   links: OperationLink<TElysia, TInput, TOutput>[]
@@ -14,7 +14,7 @@ export type ChainOptions<
 
 export function createChain<
   TElysia extends InternalElysia,
-  TInput extends EdenRequestParams = any,
+  TInput extends EdenRequestOptions = any,
   TOutput = unknown,
 >(
   options: ChainOptions<TElysia, TInput, TOutput>,

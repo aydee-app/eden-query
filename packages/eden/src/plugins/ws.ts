@@ -1,8 +1,12 @@
 import { Elysia } from 'elysia'
 
 import { EDEN_STATE_KEY, WS_ENDPOINT } from '../constants'
-import type { EdenRequestParams } from '../core/config'
-import type { EdenWsFetchRequest, EdenWsIncomingMessage, EdenWsOutgoingMessage } from '../core/dto'
+import type { EdenRequestOptions } from '../core/config'
+import type {
+  EdenWebSocketFetchRequest,
+  EdenWebSocketIncomingMessage,
+  EdenWebSocketOutgoingMessage,
+} from '../core/dto'
 import { resolveEdenRequest } from '../core/resolve'
 import type {
   DefinedTypeConfig,
@@ -56,7 +60,7 @@ export function wsPlugin<const T extends WsPluginConfig>(config: T = {} as any) 
 
     appWithState.ws(endpoint, {
       message: async (ws, raw) => {
-        const messageOrMessages: MaybeArray<EdenWsOutgoingMessage> =
+        const messageOrMessages: MaybeArray<EdenWebSocketOutgoingMessage> =
           typeof raw === 'string' ? JSON.parse(raw) : raw
 
         // For simplicity, if a single message was sent, respond in-kind with a single response.
@@ -78,7 +82,7 @@ export function wsPlugin<const T extends WsPluginConfig>(config: T = {} as any) 
   return plugin
 }
 
-async function handleWsMessage(domain: Elysia, message: EdenWsOutgoingMessage) {
+async function handleWsMessage(domain: Elysia, message: EdenWebSocketOutgoingMessage) {
   switch (message.method) {
     case 'query': // falls through
 
@@ -96,9 +100,9 @@ async function handleWsMessage(domain: Elysia, message: EdenWsOutgoingMessage) {
 
 async function handleWsFetchRequest(
   domain: Elysia,
-  message: Extract<EdenWsOutgoingMessage, EdenWsFetchRequest>,
+  message: Extract<EdenWebSocketOutgoingMessage, EdenWebSocketFetchRequest>,
 ) {
-  const resolvedParams: EdenRequestParams = {
+  const resolvedParams: EdenRequestOptions = {
     // Dummy origin as fallback. It will be routed to the Elysia.js server application instance regardless.
     base: 'http://e.ly',
     ...message.params.params,
@@ -108,7 +112,7 @@ async function handleWsFetchRequest(
   const result = await resolveEdenRequest(resolvedParams)
 
   if (result.error) {
-    const incomingMessage: EdenWsIncomingMessage = {
+    const incomingMessage: EdenWebSocketIncomingMessage = {
       id: message.id,
       error: { error: result.error, response: result.response },
       result: undefined,
@@ -117,7 +121,7 @@ async function handleWsFetchRequest(
     return incomingMessage
   }
 
-  const incomingMessage: EdenWsIncomingMessage = {
+  const incomingMessage: EdenWebSocketIncomingMessage = {
     id: message.id,
     error: result.error || undefined,
     result: {

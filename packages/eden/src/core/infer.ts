@@ -105,7 +105,7 @@ export type EdenRouteHeaders<T extends InternalRouteSchema> = undefined extends 
  *   Used primarily to omit the `cursor` property for infinite queries.
  *   This is because the cursor will be managed by tanstack-query and the user does not pass it in manually.
  */
-export type EdenRouteOptions<
+export type EdenRouteInput<
   TRoute extends InternalRouteSchema = InternalRouteSchema,
   TOmitInput extends PropertyKey = never,
 > = EdenRouteParams<TRoute> & EdenRouteQuery<TRoute, TOmitInput> & EdenRouteHeaders<TRoute>

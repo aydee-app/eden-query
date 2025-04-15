@@ -4,7 +4,7 @@ import { serializeBatchGetParams } from '../batch/serializers/get'
 import { serializeBatchPostParams } from '../batch/serializers/post'
 import type { BatchMethod } from '../batch/shared'
 import { BATCH_ENDPOINT, HTTP_SUBSCRIPTION_ERROR } from '../constants'
-import type { EdenRequestParams } from '../core/config'
+import type { EdenRequestOptions } from '../core/config'
 import type { EdenFetchResult } from '../core/dto'
 import type { EdenError } from '../core/error'
 import { processHeaders } from '../core/headers'
@@ -118,7 +118,7 @@ export type HTTPBatchLinkResult<
     : BatchingNotDetectedError
   : EdenLink<TElysia>
 
-export async function resolveBatchJson(result: EdenFetchResult, ops: EdenRequestParams[]) {
+export async function resolveBatchJson(result: EdenFetchResult, ops: EdenRequestOptions[]) {
   if (!Array.isArray(result.data)) return []
 
   const batchedData: EdenFetchResult[] = result.data
@@ -143,7 +143,7 @@ export async function resolveBatchJson(result: EdenFetchResult, ops: EdenRequest
   return results
 }
 
-export async function resolveBatchStream(result: EdenFetchResult, ops: EdenRequestParams[]) {
+export async function resolveBatchStream(result: EdenFetchResult, ops: EdenRequestOptions[]) {
   if (result.type !== 'data' || !result.response.body) return []
 
   const abortController = new AbortController()
@@ -259,7 +259,7 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
         transformer: undefined,
         path: endpoint,
         method,
-        options: {
+        input: {
           query: {
             ...options.query,
             ...resolvedBatchParams.query,
@@ -267,7 +267,7 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
         },
         body: resolvedBatchParams.body,
         headers: resolvedBatchParams.headers,
-      } as EdenRequestParams
+      } as EdenRequestOptions
 
       const batchSignals = batchOps.map((op) => op.signal)
 

@@ -1,13 +1,8 @@
 import { EdenClient } from '../client'
 import { GET_OR_HEAD_HTTP_METHODS, HTTP_METHODS } from '../constants'
-import type { EdenRequestParams, EdenResolverConfig } from '../core/config'
+import type { EdenRequestOptions, EdenResolverConfig } from '../core/config'
 import type { EdenFetchResult } from '../core/dto'
-import type {
-  EdenRouteBody,
-  EdenRouteError,
-  EdenRouteOptions,
-  EdenRouteSuccess,
-} from '../core/infer'
+import type { EdenRouteBody, EdenRouteError, EdenRouteInput, EdenRouteSuccess } from '../core/infer'
 import { resolveEdenRequest } from '../core/resolve'
 import type { InternalElysia, InternalRouteSchema } from '../core/types'
 import type { WebSocketClientOptions } from '../ws/client'
@@ -139,7 +134,7 @@ export type EdenTreatyQueryRoute<
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
-  TOptions = EdenRouteOptions<TRoute>,
+  TOptions = EdenRouteInput<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
@@ -167,7 +162,7 @@ export type EdenTreatyMutationRoute<
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
   TBody = EdenRouteBody<TRoute>,
-  TOptions = EdenRouteOptions<TRoute>,
+  TOptions = EdenRouteInput<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
@@ -192,7 +187,7 @@ export type EdenTreatySubscriptionRoute<
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
-  TOptions = EdenRouteOptions<TRoute>,
+  TOptions = EdenRouteInput<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
@@ -209,8 +204,8 @@ export type EdenTreatyInferInput<
 > = {
   [K in keyof TRoutes]: TRoutes[K] extends InternalRouteSchema
     ? Uppercase<K & string> extends 'GET'
-      ? EdenRouteOptions<TRoutes[K]>
-      : { body: EdenRouteBody<TRoutes[K]> } & EdenRouteOptions<TRoutes[K]>
+      ? EdenRouteInput<TRoutes[K]>
+      : { body: EdenRouteBody<TRoutes[K]> } & EdenRouteInput<TRoutes[K]>
     : EdenTreatyInferInput<TElysia, TConfig, TRoutes[K]>
 }
 
@@ -265,15 +260,15 @@ export function edenTreatyProxy<
         return edenTreatyProxy(root, config, pathsWithParams, allPathParams)
       }
 
-      let params: EdenRequestParams = { method, ...(config as any) }
+      let params: EdenRequestOptions = { method, ...(config as any) }
 
       const allPathParams = pathParams
 
       if (GET_OR_HEAD_HTTP_METHODS.includes(lowercaseMethod)) {
-        params = { ...params, ...argArray[1], options: argArray[0] }
+        params = { ...params, ...argArray[1], input: argArray[0] }
         if (argArray[0]?.params) allPathParams.push(argArray[0]?.params)
       } else {
-        params = { ...params, ...argArray[2], body: argArray[0], options: argArray[1] }
+        params = { ...params, ...argArray[2], body: argArray[0], input: argArray[1] }
         if (argArray[1]?.params) allPathParams.push(argArray[1]?.params)
       }
 

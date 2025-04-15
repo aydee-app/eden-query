@@ -1,4 +1,4 @@
-import type { EdenRequestParams } from '../../core/config'
+import type { EdenRequestOptions } from '../../core/config'
 import type { InternalContext, InternalElysia, TypeConfig } from '../../core/types'
 import { set } from '../../utils/set'
 import { BODY_KEYS, BODY_TYPES, IGNORED_HEADERS } from '../shared'
@@ -10,7 +10,7 @@ export async function deserializeBatchPostParams<
 >(context: InternalContext, _config: BatchDeserializerConfig) {
   const request = context.request
 
-  const result: Array<EdenRequestParams & { body_type?: string }> = []
+  const result: Array<EdenRequestOptions & { body_type?: string }> = []
 
   const globalHeaders: any = {}
 
@@ -136,5 +136,5 @@ export async function deserializeBatchPostParams<
     }
   }
 
-  return definedResults as Array<EdenRequestParams<TElysia, TConfig> & { body_type?: string }>
+  return definedResults as Array<EdenRequestOptions<TElysia, TConfig> & { body_type?: string }>
 }

@@ -1,6 +1,6 @@
 import type { EdenClient } from '../client'
 import type { EdenResolverConfig } from '../core/config'
-import type { EdenRouteOptions } from '../core/infer'
+import type { EdenRouteInput } from '../core/infer'
 import type { InternalElysia, InternalRouteSchema, InternalTypeConfig } from '../core/types'
 import type { EdenLink } from '../links/types'
 import type { WebSocketClientOptions } from '../ws/client'
@@ -44,7 +44,7 @@ export type ExtendedEdenRouteOptions<
   TElysia extends InternalElysia = InternalElysia,
   TRoute extends InternalRouteSchema = InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = InternalEdenTypesConfig,
-> = EdenRouteOptions<TRoute> & {
+> = EdenRouteInput<TRoute> & {
   eden?: EdenResolverConfig<TElysia, TConfig>
 }
 

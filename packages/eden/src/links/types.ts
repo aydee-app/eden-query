@@ -1,4 +1,4 @@
-import type { EdenRequestParams } from '../core/config'
+import type { EdenRequestOptions } from '../core/config'
 import type { EdenResult, Procedure } from '../core/dto'
 import type { EdenError } from '../core/error'
 import type { InternalElysia } from '../core/types'
@@ -24,7 +24,7 @@ export type OperationLinkResultObservable<TElysia extends InternalElysia, TOutpu
  */
 export type OperationLinkOptions<
   TElysia extends InternalElysia,
-  TInput extends EdenRequestParams = EdenRequestParams,
+  TInput extends EdenRequestOptions = EdenRequestOptions,
   TOutput = unknown,
 > = {
   op: Operation<TInput>
@@ -36,7 +36,7 @@ export type OperationLinkOptions<
  */
 export type OperationLink<
   TElysia extends InternalElysia,
-  TInput extends EdenRequestParams = EdenRequestParams,
+  TInput extends EdenRequestOptions = EdenRequestOptions,
   TOutput = unknown,
 > = (
   options: OperationLinkOptions<TElysia, TInput, TOutput>,
@@ -48,7 +48,7 @@ export type OperationLink<
  *
  * @see https://github.com/trpc/trpc/blob/187dfb41c28ef88117fd289859f84e4b101e3e34/packages/client/src/links/types.ts#L26
  */
-export interface OperationOptions<T extends EdenRequestParams = EdenRequestParams> {
+export interface OperationOptions<T extends EdenRequestOptions = EdenRequestOptions> {
   type: Procedure
   path: string
   context?: OperationContext
@@ -68,7 +68,7 @@ export interface OperationContext extends Record<string, unknown> {}
  *
  * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/links/types.ts#L26
  */
-export interface Operation<T extends EdenRequestParams = EdenRequestParams>
+export interface Operation<T extends EdenRequestOptions = EdenRequestOptions>
   extends OperationOptions<T> {
   id: number
   context: OperationContext

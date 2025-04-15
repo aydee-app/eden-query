@@ -1,4 +1,4 @@
-import type { EdenWsConnectionParamsRequest } from '../core/dto'
+import type { EdenWebSocketConnectionParamsRequest } from '../core/dto'
 import { behaviorSubject } from '../observable/behavior-subject'
 import { resolveCallbackOrValue } from '../utils/callback-or-value'
 import type { WebSocketUrlOptions } from './url'
@@ -168,7 +168,7 @@ export class WebSocketConnection {
 
     const connectionParams = await resolveCallbackOrValue(urlOptions.connectionParams)
 
-    const message: EdenWsConnectionParamsRequest = {
+    const message: EdenWebSocketConnectionParamsRequest = {
       method: 'connection-params',
       params: connectionParams,
     }

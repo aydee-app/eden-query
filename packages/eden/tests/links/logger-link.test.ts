@@ -184,7 +184,7 @@ describe('loggerLink', () => {
           ({ op }) => {
             op.context = context
             return new Observable((observer) => {
-              observer.next({ result: { data: 'OK', response } })
+              observer.next({ result: { type: 'data', data: 'OK', response } })
               observer.complete()
             })
           },

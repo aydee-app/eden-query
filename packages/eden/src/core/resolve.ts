@@ -4,7 +4,7 @@ import { jsonToFormData } from '../utils/form-data'
 import { buildQueryString } from '../utils/query'
 import type {
   EdenFetchResultTransformer,
-  EdenRequestParams,
+  EdenRequestOptions,
   EdenRequestTransformer,
   EdenResponseTransformer,
 } from './config'
@@ -116,10 +116,10 @@ export const defaultOnResult = (async (result, params) => {
 export function resolveEdenFetchPath<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
->(params: EdenRequestParams<TElysia, TConfig>) {
-  if (!params.options?.params || !params.path) return params.path
+>(params: EdenRequestOptions<TElysia, TConfig>) {
+  if (!params.input?.params || !params.path) return params.path
 
-  const paramEntries = Object.entries(params.options.params)
+  const paramEntries = Object.entries(params.input.params)
 
   const path = paramEntries.reduce((currentPath, [key, value]) => {
     return currentPath.replace(`:${key}`, String(value))
@@ -131,10 +131,10 @@ export function resolveEdenFetchPath<
 export async function resolveFetchOptions<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
->(params: EdenRequestParams<TElysia, TConfig> = {} as any) {
+>(params: EdenRequestOptions<TElysia, TConfig> = {} as any) {
   const path = resolveEdenFetchPath(params) ?? ''
 
-  const query = buildQueryString({ ...params.query, ...params.options?.query })
+  const query = buildQueryString({ ...params.query, ...params.input?.query })
 
   let fetchInit: RequestInit = { ...params?.fetch }
 
@@ -190,7 +190,7 @@ export async function resolveFetchOptions<
 export async function resolveEdenRequest<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
->(params: EdenRequestParams<TElysia, TConfig> = {} as any) {
+>(params: EdenRequestOptions<TElysia, TConfig> = {} as any) {
   const { path, query, fetchInit, onResult, onResponse } = await resolveFetchOptions(params)
 
   const domain = typeof params.domain === 'string' ? params.domain : ''

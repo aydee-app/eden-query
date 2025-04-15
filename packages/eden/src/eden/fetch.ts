@@ -1,12 +1,7 @@
 import { EdenClient } from '../client'
-import type { EdenRequestParams, EdenResolverConfig } from '../core/config'
+import type { EdenRequestOptions, EdenResolverConfig } from '../core/config'
 import type { EdenFetchResult } from '../core/dto'
-import type {
-  EdenRouteBody,
-  EdenRouteError,
-  EdenRouteOptions,
-  EdenRouteSuccess,
-} from '../core/infer'
+import type { EdenRouteBody, EdenRouteError, EdenRouteInput, EdenRouteSuccess } from '../core/infer'
 import { resolveEdenRequest } from '../core/resolve'
 import type { InternalElysia, InternalRouteSchema } from '../core/types'
 import { toArray } from '../utils/array'
@@ -128,12 +123,12 @@ export type EdenFetchOptions<TMethod, TRoute extends InternalRouteSchema> =
           method: NonNullable<TMethod>
         } & EdenFetchMutationOptions<TRoute>
 
-export type EdenFetchQueryOptions<T extends InternalRouteSchema> = EdenRouteOptions<T>
+export type EdenFetchQueryOptions<T extends InternalRouteSchema> = EdenRouteInput<T>
 
 export type EdenFetchMutationOptions<
   TRoute extends InternalRouteSchema,
   TBody = EdenRouteBody<TRoute>,
-> = EdenRouteOptions<TRoute> & (undefined extends TBody ? { body?: TBody } : { body: TBody })
+> = EdenRouteInput<TRoute> & (undefined extends TBody ? { body?: TBody } : { body: TBody })
 
 export type EdenFetchResponse<
   TMethod,
@@ -191,15 +186,15 @@ export function edenFetch<
 
       const [rawPath, optionsOrBody] = argArray
 
-      let params: EdenRequestParams = { method, ...(config as any), ...argArray[2] }
+      let params: EdenRequestOptions = { method, ...(config as any), ...argArray[2] }
 
       if (!method || method === 'GET') {
-        params.options = optionsOrBody
+        params.input = optionsOrBody
       } else {
         params.body = optionsOrBody
       }
 
-      const pathParams = toArray(params.options?.params)
+      const pathParams = toArray(params.input?.params)
 
       let path = replacePathParams(rawPath, pathParams, config?.types?.separator)
 

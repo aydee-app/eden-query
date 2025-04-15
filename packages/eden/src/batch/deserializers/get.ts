@@ -1,4 +1,4 @@
-import type { EdenRequestParams } from '../../core/config'
+import type { EdenRequestOptions } from '../../core/config'
 import type { InternalContext, InternalElysia, TypeConfig } from '../../core/types'
 import { BODY_KEYS, IGNORED_HEADERS } from '../shared'
 import type { BatchDeserializerConfig } from './config'
@@ -7,7 +7,7 @@ export async function deserializeBatchGetParams<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
 >(context: InternalContext, _config: BatchDeserializerConfig) {
-  const result: Array<EdenRequestParams> = []
+  const result: Array<EdenRequestOptions> = []
 
   const request = context.request
 
@@ -57,9 +57,9 @@ export async function deserializeBatchGetParams<
         if (queryKey == null) continue
 
         result[paramIndex] ??= {}
-        result[paramIndex].options ??= {}
-        result[paramIndex].options.query ??= {}
-        ;(result[paramIndex].options.query as any)[queryKey] = value
+        result[paramIndex].input ??= {}
+        result[paramIndex].input.query ??= {}
+        ;(result[paramIndex].input.query as any)[queryKey] = value
 
         continue
       }
@@ -86,11 +86,11 @@ export async function deserializeBatchGetParams<
 
   for (const key in globalQuery) {
     for (const result of definedResults) {
-      result.options ??= {}
-      result.options.query ??= {}
-      ;(result.options.query as any)[key] = globalQuery[key]
+      result.input ??= {}
+      result.input.query ??= {}
+      ;(result.input.query as any)[key] = globalQuery[key]
     }
   }
 
-  return definedResults as Array<EdenRequestParams<TElysia, TConfig>>
+  return definedResults as Array<EdenRequestOptions<TElysia, TConfig>>
 }

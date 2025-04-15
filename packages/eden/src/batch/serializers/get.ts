@@ -1,4 +1,4 @@
-import type { EdenRequestParams } from '../../core/config'
+import type { EdenRequestOptions } from '../../core/config'
 import { processHeaders } from '../../core/headers'
 import type { InternalElysia, TypeConfig } from '../../core/types'
 import { BODY_KEYS } from '../shared'
@@ -18,7 +18,7 @@ import { BODY_KEYS } from '../shared'
 export async function serializeBatchGetParams<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
->(batchParams: EdenRequestParams<TElysia, TConfig>[]) {
+>(batchParams: EdenRequestOptions<TElysia, TConfig>[]) {
   const query: Record<string, any> = {}
 
   const headers = new Headers()
@@ -27,10 +27,10 @@ export async function serializeBatchGetParams<
     let path = params.path ?? ''
 
     // Handle path params.
-    for (const key in params.options?.params) {
+    for (const key in params.input?.params) {
       const placeholder = `:${key}`
 
-      const param = params.options.params[key as never]
+      const param = params.input.params[key as never]
 
       if (param != null) {
         path = path.replace(placeholder, param)
@@ -39,7 +39,7 @@ export async function serializeBatchGetParams<
 
     query[`${index}.${BODY_KEYS.path}`] = path
 
-    const resolvedQuery = { ...params.query, ...params.options?.query }
+    const resolvedQuery = { ...params.query, ...params.input?.query }
 
     for (const key in resolvedQuery) {
       const value = resolvedQuery[key]
@@ -51,7 +51,7 @@ export async function serializeBatchGetParams<
 
     const currentHeaders = await processHeaders(params.headers, params)
 
-    const resolvedHeaders = { ...currentHeaders, ...params.options?.headers }
+    const resolvedHeaders = { ...currentHeaders, ...params.input?.headers }
 
     for (const key in resolvedHeaders) {
       const value = currentHeaders[key as keyof typeof currentHeaders]

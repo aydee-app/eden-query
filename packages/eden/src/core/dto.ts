@@ -5,124 +5,185 @@
  * @see https://github.com/trpc/trpc/blob/e543f3f3c86c9ad503a64d807ff4154ad6ec1637/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts
  */
 
-import type { EdenRequestParams } from './config'
+import type { EdenRequestOptions } from './config'
 import type { JSONRPC2 } from './json-rpc'
 
+/**
+ * Procedures that can be created on the server.
+ * Elysia.js follows REST instead of RPC, so these are mostly irrelevant except for defining interfaces.
+ *
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/procedure.ts#L4
+ */
 export const procedures = ['query', 'mutation', 'subscription'] as const
 
 /**
- * @public
+ * Generalization of a request type. Mirrors both tRPC ProcedureType and TRPCType.
+ *
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/procedure.ts#L8
+ * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/client/src/internals/TRPCUntypedClient.ts#L23
  */
 export type Procedure = (typeof procedures)[number]
 
 /**
- * Request that the WebSocket client can send to terminate the subscription.
+ * WebSocket client request to terminate the subscription.
  *
  * @see https://github.com/trpc/trpc/blob/e543f3f3c86c9ad503a64d807ff4154ad6ec1637/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L94
  */
-export interface EdenWsSubscriptionStopRequest extends JSONRPC2.Request {
+export interface EdenWebSocketSubscriptionStopRequest extends JSONRPC2.Request {
   method: 'subscription.stop'
 }
 
 /**
- * Request that the WebSocket client can send to update connection params.
+ * WebSocket client request to update connection params.
  *
  * @see https://github.com/trpc/trpc/blob/e543f3f3c86c9ad503a64d807ff4154ad6ec1637/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L94
  */
-export interface EdenWsConnectionParamsRequest extends JSONRPC2.Request {
+export interface EdenWebSocketConnectionParamsRequest extends JSONRPC2.Request {
   method: 'connection-params'
   params: Dict<string> | null
 }
 
 /**
- * A fetch request that's sent over WebSockets.
+ * Equivalent to the input for a TRPCRequest.
  *
- * @see https://github.com/trpc/trpc/blob/f6efa479190996c22bc1e541fdb1ad6a9c06f5b1/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L87
+ * https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L54
  */
-export interface EdenWsFetchRequest extends JSONRPC2.Request {
-  method: Procedure
+export interface EdenWebSocketFetchRequestParams {
+  /**
+   * The last event id that the client received
+   */
+  lastEventId?: string
 
-  params: {
-    /**
-     * The last event id that the client received
-     */
-    lastEventId?: string
-
-    /**
-     * EdenRequestParams for the request.
-     */
-    params?: EdenRequestParams
-  }
+  /**
+   * EdenRequestParams for the request.
+   */
+  params?: EdenRequestOptions
 }
 
-export type EdenWsRequest =
-  | (EdenWsSubscriptionStopRequest & { id: JSONRPC2.RequestId })
-  | EdenWsConnectionParamsRequest
-  | EdenWsFetchRequest
+/**
+ * A request, i.e. query or mutation, sent over a WebSocket connection.
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L51
+ *
+ * Equivalent to TRPCRequest.
+ * TRPCRequest seems a bit misleading because it does not seem to describe the shape of all requests.
+ * It is a possible type of TRPCClientOutgoingMessage, which describes the JSON shape of WebSocket client messages.
+ *
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L108
+ */
+export interface EdenWebSocketFetchRequest extends JSONRPC2.Request {
+  /**
+   * The request type. Not really important.
+   */
+  method: Procedure
+
+  /**
+   * The request information.
+   *
+   * This is used by the server to invoke endpoints directly, e.g. via `app.handle`.
+   */
+  params: EdenWebSocketFetchRequestParams
+}
 
 /**
- * This was originally a JSON-RPC 2.0 request object sent by the server.
- * @see https://github.com/trpc/trpc/blob/e543f3f3c86c9ad503a64d807ff4154ad6ec1637/packages/server/src/adapters/ws.ts#L566
- * @see https://www.jsonrpc.org/specification#request_object
+ * Types of WebSocket requests that the client can send to the server.
+ * https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L107
  *
- * This will be converted to a result that is encapsulated by a JSON-RPC 2.0 response object.
- * It does not look like this result has any corresponding request.
+ * Fully formed messages should always have an ID, e.g. {@link JSONRPC2.RequestId}.
+ *
+ * These are called "requests" based on the JSON-RPC client-server philosophy.
+ * @see https://www.simple-is-better.org/rpc/#differences-between-1-0-and-2-0
  */
-export interface EdenWsReconnectResult {
+export type EdenWebSocketRequest =
+  | EdenWebSocketSubscriptionStopRequest
+  | EdenWebSocketConnectionParamsRequest
+  | EdenWebSocketFetchRequest
+
+/**
+ * Server response asking the client to reconnect.
+ * This server "response" may be emitted without a corresponding client request.
+ *
+ * Technically, this is a request where the server "requests" the client to reconnect.
+ * As such, tRPC designates this as a JSON-RPC 2.0 request object sent by the server.
+ * @see https://github.com/trpc/trpc/blob/e543f3f3c86c9ad503a64d807ff4154ad6ec1637/packages/server/src/adapters/ws.ts#L566
+ */
+export interface EdenWebSocketReconnectResponse {
   type: 'reconnect'
   data?: never
   error?: never
 }
 
 /**
- * WebSocket client will emit this result once it has started.
+ * The WebSocket client will emit this result to subscribers once the WebSocket connection has been established.
  *
- * This is NOT emitted by the server, just generated by the client.
+ * This is NOT emitted by the server, only by the client.
  */
-export interface EdenWsStartedResult {
+export interface EdenWebSocketStartedClientResponse {
   type: 'started'
   data?: never
   error?: never
 }
 
 /**
- * WebSocket client will emit this result once it has stopped.
+ * The WebSocket client will emit this result to subscribers when the WebSocket connection has stopped.
  *
- * This is NOT emitted by the server, just generated by the client.
+ * This is NOT emitted by the server, only by the client.
  */
-export interface EdenWsStoppedResult {
+export interface EdenWebSocketStoppedResponse {
   type: 'stopped'
   data?: never
   error?: never
 }
 
-export interface EdenWsBaseState {
+/**
+ * Same as tRPC ConnectionStateBase.
+ *
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/client/src/links/internals/subscriptions.ts#L1
+ */
+export interface EdenWebSocketBaseState {
   type: 'state'
 }
 
-export interface EdenWsIdleState extends EdenWsBaseState {
+/**
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/client/src/links/internals/subscriptions.ts#L7
+ */
+export interface EdenWebSocketIdleState extends EdenWebSocketBaseState {
   state: 'idle'
   data?: never
   error?: never
 }
 
-export interface EdenWsConnectingState<T> extends EdenWsBaseState {
+/**
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/client/src/links/internals/subscriptions.ts#L11
+ */
+export interface EdenWebSocketConnectingState<T> extends EdenWebSocketBaseState {
   state: 'connecting'
   error?: T
   data?: never
 }
 
-export interface EdenWsPendingState extends EdenWsBaseState {
+/**
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/client/src/links/internals/subscriptions.ts#L16
+ */
+export interface EdenWebSocketPendingState extends EdenWebSocketBaseState {
   state: 'pending'
   error?: never
   data?: never
 }
 
-export type EdenWsStateResult<T> = EdenWsIdleState | EdenWsConnectingState<T> | EdenWsPendingState
+/**
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/client/src/links/internals/subscriptions.ts#L20
+ */
+export type EdenWebSocketState<T> =
+  | EdenWebSocketIdleState
+  | EdenWebSocketConnectingState<T>
+  | EdenWebSocketPendingState
 
 /**
- * Based on the official eden treaty response.
+ * Based on the official eden treaty response. Both the success and error responses will include the response object.
  * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/types.ts#L194-L218
+ *
+ * Be careful when sending this object from the server, e.g. via WebSockets or HTTP Response.
+ * It will probably be converted to an empty object, {}, but may cause errors during serialization/deserialization.
  *
  * The status and headers properties have been omitted because they seem redundant.
  */
@@ -131,19 +192,21 @@ export interface EdenFetchBaseResult {
 }
 
 /**
- * Based on the official eden success response result.
+ * Combination of the official Eden success result and TRPCResult.
+ *
  * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/types.ts#L196-L200
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L64
  */
 export interface EdenFetchSuccessResult<T> extends EdenFetchBaseResult {
   /**
-   * The id of the message to keep track of in case of a reconnect
+   * The request ID of the message to keep track of in case of a reconnect.
    */
   id?: string
 
   /**
    * Constant type to discriminate between results.
    */
-  type?: 'data'
+  type: 'data'
 
   /**
    * The data will be defined for a successful response.
@@ -157,8 +220,10 @@ export interface EdenFetchSuccessResult<T> extends EdenFetchBaseResult {
 }
 
 /**
- * Based on the official eden error response result.
+ * Combination of the official Eden error result and TRPCResult.
+ *
  * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/types.ts#L203-L217
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L64
  */
 export interface EdenFetchErrorResult<T> extends EdenFetchBaseResult {
   /**
@@ -189,8 +254,12 @@ export interface EdenFetchErrorResult<T> extends EdenFetchBaseResult {
   error: T
 }
 
+/**
+ */
 export type EdenErrorResult<T> = EdenFetchErrorResult<T>
 
+/**
+ */
 export type EdenFetchResult<TData = any, TError = any> =
   | EdenFetchSuccessResult<TData>
   | EdenFetchErrorResult<TError>
@@ -201,23 +270,16 @@ export type EdenFetchResult<TData = any, TError = any> =
  */
 export type EdenSuccessResult<T> =
   | EdenFetchSuccessResult<T>
-  | EdenWsStartedResult
-  | EdenWsStoppedResult
-  | EdenWsReconnectResult
+  | EdenWebSocketStartedClientResponse
+  | EdenWebSocketStoppedResponse
+  | EdenWebSocketReconnectResponse
 
 /**
- * Any valid result.
- */
-export type EdenResult<TData = any, TError = any> =
-  | EdenSuccessResult<TData>
-  | EdenErrorResult<TError>
-  | EdenWsStateResult<TError>
-
-/**
+ * JSON-RPC envelope for an Eden success result.
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L73
+ *
  * For convenience, both error and result are defined in the interface for discrimination capabilities.
  * Based on the JSON-RPC 2.0 specification, the presence of either is mutually exclusive.
- *
- * @see https://github.com/trpc/trpc/blob/e543f3f3c86c9ad503a64d807ff4154ad6ec1637/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L73
  * @see https://www.jsonrpc.org/specification#response_object
  */
 export interface EdenSuccessResponse<T> extends JSONRPC2.SuccessResponse {
@@ -226,6 +288,9 @@ export interface EdenSuccessResponse<T> extends JSONRPC2.SuccessResponse {
 }
 
 /**
+ * JSON-RPC envelope for an Eden error result.
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L76
+ *
  * For convenience, both error and result are defined in the interface for discrimination capabilities.
  * Based on the JSON-RPC 2.0 specification, the presence of either is mutually exclusive.
  *
@@ -237,22 +302,57 @@ export interface EdenErrorResponse<T = any> extends JSONRPC2.ErrorResponse {
 }
 
 /**
- * A union of all possible responses.
+ * Any valid result.
+ */
+export type EdenResult<TData = any, TError = any> =
+  | EdenSuccessResult<TData>
+  | EdenErrorResult<TError>
+  | EdenWebSocketState<TError>
+
+/**
+ * Any response.
+ *
+ * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L80
  */
 export type EdenResponse<TData = unknown, TError = unknown> =
   | EdenSuccessResponse<TData>
   | EdenErrorResponse<TError>
 
 /**
- * Basically like {@link EdenResponse} but with a defined ID.
+ * Any WebSocket response sent by the server and received by the client.
+ *
+ * A fully formed response message that is sent by the server should also contain a request ID.
  */
-export type EdenWsIncomingMessage<TData = unknown, TError = unknown> = {
-  id: JSONRPC2.RequestId
-} & EdenResponse<TData, TError>
+export type EdenWebSocketResponse<TData = unknown, TError = unknown> = EdenResponse<TData, TError>
 
 /**
- * Basically like {@link EdenWsRequest} but with a defined ID.
+ * When making requests, e.g. queries and mutations, with a WebSocket client,
+ * the server will receive request messages sent by the client via the connection.
+ *
+ * A request message is just a JSON that contains request information that would normally be used
+ * by the client to resolve a request, i.e. via basic HTTP networking, fetch request.
+ *
+ * Instead, if the server receives such a message, it can call `app.handle` with the same
+ * information and send the result back over the connection.
+ *
+ * Basically like {@link EdenWebSocketRequest} but with a defined ID.
  */
-export type EdenWsOutgoingMessage = {
+export type EdenWebSocketOutgoingMessage = {
   id: JSONRPC2.RequestId
-} & EdenWsRequest
+} & EdenWebSocketRequest
+
+/**
+ * When making requests, e.g. queries and mutations, with a WebSocket client,
+ * the client will receive response messages sent by the server via the connection.
+ *
+ * A response message is just a JSON that contains response information that would normally be returned
+ * by the client upon resolving a request, i.e. via basic HTTP networking, fetch request.
+ *
+ * Instead, if the server receives such a message, it can call `app.handle` with the same
+ * information and send the result back over the connection.
+ *
+ * Basically like {@link EdenWebSocketResponse} but with a defined ID.
+ */
+export type EdenWebSocketIncomingMessage<TData = unknown, TError = unknown> = {
+  id: JSONRPC2.RequestId
+} & EdenWebSocketResponse<TData, TError>

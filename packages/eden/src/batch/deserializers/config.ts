@@ -1,4 +1,4 @@
-import type { EdenRequestParams } from '../../core/config'
+import type { EdenRequestOptions } from '../../core/config'
 import type { InternalContext, InternalElysia, TypeConfig } from '../../core/types'
 import type { MaybeArray, MaybePromise } from '../../utils/types'
 import type { BatchMethod } from '../shared'
@@ -29,4 +29,4 @@ export type BatchDeserializer<> = <
 >(
   context: InternalContext,
   config: BatchDeserializerConfig,
-) => MaybePromise<Array<EdenRequestParams<TElysia, TConfig>>>
+) => MaybePromise<Array<EdenRequestOptions<TElysia, TConfig>>>

@@ -1,6 +1,6 @@
 import { type EventSourceLike, sseStreamConsumer } from '@trpc/server/unstable-core-do-not-import'
 
-import type { EdenResult, EdenWsStateResult } from '../core/dto'
+import type { EdenResult, EdenWebSocketState } from '../core/dto'
 import { EdenError } from '../core/error'
 import { EDEN_SERVER_ERROR_CODES } from '../core/error-codes'
 import { resolveEdenFetchPath } from '../core/resolve'
@@ -101,7 +101,7 @@ export function httpSubscriptionLink<
           EventSource,
         })
 
-        const connectionState = behaviorSubject<EdenWsStateResult<EdenError>>({
+        const connectionState = behaviorSubject<EdenWebSocketState<EdenError>>({
           type: 'state',
           state: 'connecting',
           error: undefined,
@@ -134,10 +134,12 @@ export function httpSubscriptionLink<
                   result = {
                     id: chunkData.id,
                     data: chunkData,
+                    type: 'data',
                     response: {} as any,
                   }
                 } else {
                   result = {
+                    type: 'data',
                     data: chunkData.data,
                     response: {} as any,
                   }

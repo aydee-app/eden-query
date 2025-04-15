@@ -20,9 +20,9 @@ describe('splitLink', () => {
       context: {},
     }
 
-    const trueResult: EdenResponse = { result: { data: true, response } }
+    const trueResult: EdenResponse = { result: { type: 'data', data: true, response } }
 
-    const falseResult: EdenResponse = { result: { data: false, response } }
+    const falseResult: EdenResponse = { result: { type: 'data', data: false, response } }
 
     const chain = createChain({
       op,
@@ -70,9 +70,9 @@ describe('splitLink', () => {
       context: {},
     }
 
-    const trueResult: EdenResponse = { result: { data: true, response } }
+    const trueResult: EdenResponse = { result: { type: 'data', data: true, response } }
 
-    const falseResult: EdenResponse = { result: { data: false, response } }
+    const falseResult: EdenResponse = { result: { type: 'data', data: false, response } }
 
     const chain = createChain({
       op,

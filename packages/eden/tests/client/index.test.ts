@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
 import { EdenClient } from '../../src/client'
-import type { EdenRequestParams } from '../../src/core/config'
+import type { EdenRequestOptions } from '../../src/core/config'
 import { Observable } from '../../src/observable'
 
 describe('EdenClient', () => {
@@ -63,14 +63,14 @@ describe('EdenClient', () => {
               string: 'string',
             },
           },
-        } satisfies EdenRequestParams
+        } satisfies EdenRequestOptions
 
         const client = new EdenClient({
           links: [
             () => {
               return ({ op }) => {
                 return new Observable((observer) => {
-                  observer.next({ result: { data: op.params, response } })
+                  observer.next({ result: { type: 'data', data: op.params, response } })
                 })
               }
             },
@@ -92,7 +92,7 @@ describe('EdenClient', () => {
               string: 'string',
             },
           },
-        } satisfies EdenRequestParams
+        } satisfies EdenRequestOptions
 
         const client = new EdenClient({
           links: [
@@ -105,7 +105,7 @@ describe('EdenClient', () => {
             () => {
               return ({ op }) => {
                 return new Observable((observer) => {
-                  observer.next({ result: { data: op.params, response } })
+                  observer.next({ result: { type: 'data', data: op.params, response } })
                 })
               }
             },
