@@ -1,5 +1,5 @@
 import { isObject } from '../utils/is-object'
-import type { EdenErrorResponse } from './dto'
+import type { EdenErrorResult } from './dto'
 import type { EDEN_ERROR_CODE } from './error-codes'
 import type { InternalElysia } from './types'
 
@@ -17,29 +17,29 @@ export interface EdenErrorShape<T = EdenErrorData> {
   cause?: unknown
 
   /**
-   * tRPC error code.
    */
   code: EDEN_ERROR_CODE
 
   /**
-   * tRPC error message.
    */
-  message: string
+  message?: string
 
   /**
-   * tRPC error data.
    */
   data?: T
+}
 
+export interface EdenFetchErrorShape<TStatus extends number = number, TValue = unknown>
+  extends EdenErrorShape {
   /**
    * Eden (HTTP) status.
    */
-  status?: number
+  status?: TStatus
 
   /**
    * Eden error value.
    */
-  value?: T
+  value?: TValue
 }
 
 /**
@@ -72,10 +72,10 @@ export interface EdenErrorData {
 
 /**
  */
-export interface EdenErrorOptions<T = any> {
+export interface EdenErrorOptions<T = EdenErrorShape> {
   /**
    */
-  result?: EdenErrorResponse<T>
+  result?: EdenErrorResult<T>
 
   /**
    */
@@ -109,27 +109,17 @@ export class EdenError<
    */
   error?: TError
 
-  /**
-   * The HTTP status of the error response, based on EdenFetchError.
-   *
-   * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/errors.ts#L5
-   */
-  status?: TError['status']
+  code?: TError['code']
 
-  /**
-   * The value of the error response, based on EdenFetchError.
-   *
-   * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/errors.ts#L5
-   */
-  value?: TError['value']
+  data?: TError['data']
 
   constructor(message?: string, options?: EdenErrorOptions<TError>) {
     super(message, options)
 
     this.meta = options?.meta
-    this.error = options?.result?.error.error
-    this.status = options?.result?.error.error.status
-    this.value = options?.result?.error.error.value
+    this.error = options?.result?.error
+    this.code = options?.result?.error.code
+    this.data = options?.result?.error.data
   }
 
   public static from<
@@ -167,9 +157,54 @@ export class EdenError<
 }
 
 /**
+ * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/errors.ts#L1
+ */
+export class EdenFetchError<TStatus extends number = number, TValue = unknown> extends EdenError<
+  any,
+  EdenFetchErrorShape<TStatus, TValue>
+> {
+  constructor(
+    public status: TStatus,
+    public value: TValue,
+  ) {
+    super(value + '')
+  }
+}
+
+/**
+ * @see https://github.com/trpc/trpc/blob/7d10d7b028f1d85f6523e995ee7deb17dc886874/packages/client/src/links/wsLink/wsClient/utils.ts#L11
+ */
+export class EdenWebSocketError extends EdenError {
+  override name = 'EdenWebSocketError'
+
+  constructor(options: EdenWebSocketErrorOptions) {
+    const resolvedOptions: EdenErrorOptions = { ...options }
+
+    if (options.code) {
+      resolvedOptions.result = {
+        response: {} as any,
+        error: {
+          message: options.code,
+          ...options,
+          code: options.code,
+        },
+      }
+    }
+
+    super(options.message, resolvedOptions)
+  }
+}
+
+export interface EdenWebSocketErrorOptions {
+  message?: string
+  cause?: any
+  code?: EDEN_ERROR_CODE
+}
+
+/**
  * @see https://github.com/trpc/trpc/blob/7d10d7b028f1d85f6523e995ee7deb17dc886874/packages/client/src/TRPCClientError.ts#L33
  */
-function isEdenErrorResponse(obj: unknown): obj is EdenErrorResponse {
+function isEdenErrorResponse(obj: unknown): obj is EdenErrorResult {
   return (
     isObject(obj) &&
     isObject(obj['error']) &&

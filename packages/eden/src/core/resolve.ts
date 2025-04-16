@@ -209,7 +209,7 @@ export async function resolveEdenRequest<
 
   let currentResponse: typeof response | undefined = undefined
 
-  let result: EdenFetchResult<any, EdenFetchError>
+  let result: EdenFetchResult
 
   try {
     for (const value of onResponse) {

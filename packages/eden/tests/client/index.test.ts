@@ -43,7 +43,7 @@ describe('EdenClient', () => {
             () => {
               return () => {
                 return new Observable((observer) => {
-                  observer.next({ result: { data, response } })
+                  observer.next({ result: { type: 'data', data, response } })
                 })
               }
             },

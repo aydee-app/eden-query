@@ -199,6 +199,11 @@ export interface EdenFetchBaseResult {
  */
 export interface EdenFetchSuccessResult<T> extends EdenFetchBaseResult {
   /**
+   * The request ID of the message to keep track of in case of a reconnect.
+   */
+  id?: string
+
+  /**
    * Constant type to discriminate between results.
    */
   type: 'data'
@@ -221,6 +226,11 @@ export interface EdenFetchSuccessResult<T> extends EdenFetchBaseResult {
  * @see https://github.com/trpc/trpc/blob/f159ab9c4fa2b428a8d1bd0d69232976032f7996/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L64
  */
 export interface EdenFetchErrorResult<T> extends EdenFetchBaseResult {
+  /**
+   * The request ID of the message to keep track of in case of a reconnect.
+   */
+  id?: string
+
   /**
    * This property is added for type discrimination, and it is omitted in the actual result.
    */
@@ -246,7 +256,7 @@ export interface EdenFetchErrorResult<T> extends EdenFetchBaseResult {
 
 /**
  */
-export type EdenErrorResult<T> = EdenFetchErrorResult<T>
+export type EdenErrorResult<T = any> = EdenFetchErrorResult<T>
 
 /**
  */
