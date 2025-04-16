@@ -87,45 +87,51 @@ export interface EdenErrorOptions<T = EdenErrorShape> {
 }
 
 /**
- * Type-safe wrapper around the basic {@link Error}.
+ * Combination of the official EdenFetchError, TRPCErrorShape, TRPCClientError.
  *
- * Combination of the official EdenFetchError, which captures the HTTP status and value of responses,
- * and TRPCClientError, which normalizes the shape of errors.
+ * - EdenFetchError is an object with a strongly typed, numeric HTTP status and a value.
+ *   It is used to map error HTTP status codes to the corresponding error value.
+ *
+ * - TRPCErrorShape describes JSON error information returned by the server when it encounters an error.
+ *   It is based on the JSON-RPC specification.
+ *   @see https://github.com/Afya-Global/admin-redesign/issues
+ *   Elysia.js does not have any error formatter by default, so errors may not conform to this RPC specification.
+ *
+ * - TRPCClientError is an error that wraps around a result. A result is just a wrapper around a raw response,
+ *   its data, and other information.
  *
  * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/errors.ts#L1
  * @see https://github.com/trpc/trpc/blob/7d10d7b028f1d85f6523e995ee7deb17dc886874/packages/client/src/TRPCClientError.ts#L52
+ *
+ * @remarks
+ * Eden always treats errors as values.
+ * tRPC treats errors as values on the server when it is returned in the response JSON.
+ * On the client, the error is encapsulated in a TRPCClientError and thrown.
+ *
+ * Therefore, the error will will not have properties like `result` with the response information.
+ * The error will be part of the result itself, and thus contain the error data directly from the server.
  */
-export class EdenError<
-  _TElysa extends InternalElysia = InternalElysia,
-  TError extends EdenErrorShape = EdenErrorShape,
-> extends Error {
+export class EdenError<_TElysa extends InternalElysia = InternalElysia> extends Error {
   /**
-   * Additional metadata attached to the error, based on tRPC.
+   * Based on tRPC.
+   *
+   * Additional meta data about the error.
+   * In the case of HTTP-errors, we'll have `response` and potentially `responseJSON` here.
+   *
+   * @see https://github.com/trpc/trpc/blob/7d10d7b028f1d85f6523e995ee7deb17dc886874/packages/client/src/TRPCClientError.ts#L66
    */
   public meta?: Record<string, unknown>
 
-  /**
-   * The normalized error shape, based on tRPC.
-   */
-  error?: TError
-
-  code?: TError['code']
-
-  data?: TError['data']
-
-  constructor(message?: string, options?: EdenErrorOptions<TError>) {
+  constructor(message?: string, options?: EdenErrorOptions) {
     super(message, options)
 
     this.meta = options?.meta
-    this.error = options?.result?.error
-    this.code = options?.result?.error.code
-    this.data = options?.result?.error.data
   }
 
-  public static from<
-    TElysa extends InternalElysia = InternalElysia,
-    TError extends EdenErrorShape = EdenErrorShape,
-  >(cause: unknown, options?: EdenErrorOptions<TError>): EdenError<TElysa, TError> {
+  public static from<TElysa extends InternalElysia = InternalElysia>(
+    cause: unknown,
+    options?: EdenErrorOptions,
+  ): EdenError<TElysa> {
     if (this.isEdenError(cause)) {
       cause.meta = { ...cause.meta, ...options?.meta }
       return cause as any
