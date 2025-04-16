@@ -1,75 +1,144 @@
 import { isObject } from '../utils/is-object'
-import type { Nullish } from '../utils/types'
 import type { EdenErrorResponse } from './dto'
 import type { EDEN_ERROR_CODE } from './error-codes'
+import type { InternalElysia } from './types'
+
+/**
+ * Error response.
+ *
+ * @template T Can be anything when there is no error formatter installed on the server.
+ *
+ * @TODO Create an error plugin that can format errors to form
+ *
+ * Combination of a standard tRPC error and an Eden error.
+ * @see https://github.com/trpc/trpc/blob/7d10d7b028f1d85f6523e995ee7deb17dc886874/packages/server/src/unstable-core-do-not-import/error/formatter.ts#L40
+ */
+export interface EdenErrorShape<T = EdenErrorData> {
+  cause?: unknown
+
+  /**
+   * tRPC error code.
+   */
+  code: EDEN_ERROR_CODE
+
+  /**
+   * tRPC error message.
+   */
+  message: string
+
+  /**
+   * tRPC error data.
+   */
+  data?: T
+
+  /**
+   * Eden (HTTP) status.
+   */
+  status?: number
+
+  /**
+   * Eden error value.
+   */
+  value?: T
+}
+
+/**
+ * @TODO
+ *
+ * Create an error plugin that can format errors or attach additional data.
+ * Similar to the transform plugin, maybe it can be opt-in and toggled on via a request header.
+ *
+ * @internal
+ */
+export interface EdenErrorData {
+  /**
+   */
+  code: EDEN_ERROR_CODE
+
+  /**
+   */
+  httpStatus: number
+
+  /**
+   * Path to the procedure that threw the error.
+   */
+  path?: string
+
+  /**
+   * Stack trace of the error (only in development).
+   */
+  stack?: string
+}
+
+/**
+ */
+export interface EdenErrorOptions<T = any> {
+  /**
+   */
+  result?: EdenErrorResponse<T>
+
+  /**
+   */
+  cause?: Error
+
+  /**
+   */
+  meta?: Record<string, unknown>
+}
 
 /**
  * Type-safe wrapper around the basic {@link Error}.
  *
- * Elysia.js provides strongly-typed routes that map numeric status codes to types.
+ * Combination of the official EdenFetchError, which captures the HTTP status and value of responses,
+ * and TRPCClientError, which normalizes the shape of errors.
  *
- * @example
- *
- * ```json
- * {
- *   200: string,
- *   400: string
- *   500: string
- * }
- * ```
- *
- * Based on this mapping, we can derive an error response mapping that looks like this.
- *
- * ```ts
- * class MyError extends Error {
- *   name = 'MyError'
- *   message = 'MyMessage'
- * }
- *
- * type PossibleErrorResponses =
- *   | EdenFetchError<400, string>
- *   | EdenFetchError<500, string>
- *   | EdenFetchError<600, MyError>
- *
- * function handlePossibleErrors(error: PossibleErrorResponses) {
- *   switch (error.status) {
- *     case 400: { ... }
- *     case 500: { ... }
- *     case 600: {
- *       const myError: MyError = error.value
- *
- *       console.log(myError.name)
- *       console.log(myError.message)
- *
- *       break
- *     }
- *     default: { ... }
- *   }
- * }
- * ```
+ * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/errors.ts#L1
+ * @see https://github.com/trpc/trpc/blob/7d10d7b028f1d85f6523e995ee7deb17dc886874/packages/client/src/TRPCClientError.ts#L52
  */
-export class EdenError<_T = any> extends Error {
+export class EdenError<
+  _TElysa extends InternalElysia = InternalElysia,
+  TError extends EdenErrorShape = EdenErrorShape,
+> extends Error {
+  /**
+   * Additional metadata attached to the error, based on tRPC.
+   */
   public meta?: Record<string, unknown>
 
-  public result?: EdenErrorResponse | Nullish
+  /**
+   * The normalized error shape, based on tRPC.
+   */
+  error?: TError
 
-  constructor(message?: string, options?: EdenErrorOptions) {
-    super(message, { cause: options?.cause })
+  /**
+   * The HTTP status of the error response, based on EdenFetchError.
+   *
+   * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/errors.ts#L5
+   */
+  status?: TError['status']
+
+  /**
+   * The value of the error response, based on EdenFetchError.
+   *
+   * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/errors.ts#L5
+   */
+  value?: TError['value']
+
+  constructor(message?: string, options?: EdenErrorOptions<TError>) {
+    super(message, options)
 
     this.meta = options?.meta
-    this.result = options?.result
+    this.error = options?.result?.error.error
+    this.status = options?.result?.error.error.status
+    this.value = options?.result?.error.error.value
   }
 
-  public static from(cause: unknown, options?: EdenErrorOptions): EdenError {
-    if (this.isEdenClientError(cause)) {
-      if (options?.meta) {
-        // Decorate with meta error data
-        cause.meta = {
-          ...cause.meta,
-          ...options.meta,
-        }
-      }
-      return cause
+  public static from<
+    TElysa extends InternalElysia = InternalElysia,
+    TError extends EdenErrorShape = EdenErrorShape,
+  >(cause: unknown, options?: EdenErrorOptions<TError>): EdenError<TElysa, TError> {
+    if (this.isEdenError(cause)) {
+      cause.meta = { ...cause.meta, ...options?.meta }
+      return cause as any
     }
 
     if (isEdenErrorResponse(cause)) {
@@ -81,33 +150,25 @@ export class EdenError<_T = any> extends Error {
     return new EdenError(message, { ...options, cause: cause as any })
   }
 
-  public static isEdenClientError(cause: unknown): cause is EdenError {
-    return (
-      cause instanceof EdenError ||
-      /**
-       * @deprecated
-       * Delete in next major
-       */
-      (cause instanceof Error && cause.name === EdenError.name)
-    )
+  /**
+   * @see https://github.com/trpc/trpc/blob/7d10d7b028f1d85f6523e995ee7deb17dc886874/packages/client/src/TRPCClientError.ts#L22
+   */
+  public static isEdenError(cause: unknown): cause is EdenError {
+    if (cause instanceof EdenError) return true
+
+    /**
+     * @deprecated
+     * Delete in next major
+     */
+    if (cause instanceof Error && cause.name === EdenError.name) return true
+
+    return false
   }
 }
 
-export class EdenFetchError<TStatus extends number = number, TValue = any> extends EdenError {
-  public status: TStatus
-
-  public value: TValue
-
-  constructor(status: TStatus, value: TValue, options?: EdenErrorOptions) {
-    const message = value + ''
-
-    super(message, options)
-
-    this.status = status
-    this.value = value
-  }
-}
-
+/**
+ * @see https://github.com/trpc/trpc/blob/7d10d7b028f1d85f6523e995ee7deb17dc886874/packages/client/src/TRPCClientError.ts#L33
+ */
 function isEdenErrorResponse(obj: unknown): obj is EdenErrorResponse {
   return (
     isObject(obj) &&
@@ -117,6 +178,9 @@ function isEdenErrorResponse(obj: unknown): obj is EdenErrorResponse {
   )
 }
 
+/**
+ * @see https://github.com/trpc/trpc/blob/7d10d7b028f1d85f6523e995ee7deb17dc886874/packages/client/src/TRPCClientError.ts#L42
+ */
 function getMessageFromUnknownError(err: unknown, fallback: string): string {
   if (typeof err === 'string') {
     return err
@@ -127,38 +191,4 @@ function getMessageFromUnknownError(err: unknown, fallback: string): string {
   }
 
   return fallback
-}
-
-/**
- * Error response
- */
-export interface EdenErrorShape<T> {
-  code: EDEN_ERROR_CODE
-  message: string
-  data: T
-}
-
-export interface EdenErrorOptions {
-  result?: EdenErrorResponse | Nullish
-  cause?: Error | Nullish
-  meta?: Record<string, unknown>
-}
-
-export interface EdenWebSocketClosedErrorOptions {
-  message: string
-  cause?: unknown
-}
-
-export class EdenWebSocketClosedError extends Error {
-  public status = undefined
-
-  public value = undefined
-
-  constructor(options: EdenWebSocketClosedErrorOptions) {
-    super(options.message, { cause: options.cause })
-
-    this.name = 'TRPCWebSocketClosedError'
-
-    Object.setPrototypeOf(this, EdenWebSocketClosedError.prototype)
-  }
 }
