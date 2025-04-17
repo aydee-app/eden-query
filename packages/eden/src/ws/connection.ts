@@ -1,23 +1,8 @@
 import type { EdenWebSocketConnectionParamsRequest } from '../core/dto'
 import { behaviorSubject } from '../observable/behavior-subject'
 import { resolveCallbackOrValue } from '../utils/callback-or-value'
+import { withResolvers } from '../utils/promise'
 import type { WebSocketUrlOptions } from './url'
-
-/**
- * Opens a WebSocket connection asynchronously and returns a promise
- * that resolves when the connection is successfully established.
- * The promise rejects if an error occurs during the connection attempt.
- */
-function asyncWsOpen(ws: WebSocket) {
-  return new Promise<void>((resolve, reject) => {
-    ws.addEventListener('error', reject)
-
-    ws.addEventListener('open', () => {
-      ws.removeEventListener('error', reject)
-      resolve()
-    })
-  })
-}
 
 interface PingPongOptions {
   /**
@@ -119,6 +104,8 @@ export class WebSocketConnection {
    */
   private openPromise?: Promise<void>
 
+  private closePromise?: Promise<void>
+
   constructor(public readonly options: WebSocketConnectionOptions) {
     this.WebSocket = options.WebSocket ?? WebSocket
 
@@ -162,7 +149,14 @@ export class WebSocketConnection {
       }
     })
 
-    await asyncWsOpen(ws)
+    await new Promise<void>((resolve, reject) => {
+      ws.addEventListener('error', reject)
+
+      ws.addEventListener('open', () => {
+        ws.removeEventListener('error', reject)
+        resolve()
+      })
+    })
 
     if (!urlOptions.connectionParams) return
 
@@ -187,19 +181,18 @@ export class WebSocketConnection {
    * Checks if the WebSocket connection is closed or in the process of closing.
    */
   public isClosed(): this is { ws: WebSocket } {
-    return (
-      !!this.ws &&
-      (this.ws.readyState === this.WebSocket.CLOSING ||
-        this.ws.readyState === this.WebSocket.CLOSED)
-    )
+    if (!this.ws) return true
+
+    const readyState = this.ws.readyState
+
+    return readyState === this.WebSocket.CLOSING || readyState === this.WebSocket.CLOSED
   }
 
   public async open() {
-    if (this.openPromise) return this.openPromise
-
-    this.id = ++WebSocketConnection.connectCount
-
-    this.openPromise = this.#open()
+    if (!this.openPromise) {
+      this.id = ++WebSocketConnection.connectCount
+      this.openPromise = this.#open()
+    }
 
     try {
       await this.openPromise
@@ -215,9 +208,39 @@ export class WebSocketConnection {
   public async close() {
     try {
       await this.openPromise
+    } catch {
+      // noop
     } finally {
-      this.ws?.close()
+      this.openPromise = undefined
     }
+
+    try {
+      this.closePromise ||= this.#close()
+      await this.closePromise
+    } catch {
+      // noop
+    } finally {
+      this.closePromise = undefined
+    }
+  }
+
+  async #close() {
+    const ws = this.ws
+
+    if (!ws) return
+
+    const { promise, reject, resolve } = withResolvers<void>()
+
+    ws.addEventListener('error', reject)
+
+    ws.addEventListener('close', () => {
+      ws.removeEventListener('error', reject)
+      resolve()
+    })
+
+    ws.close()
+
+    return promise
   }
 }
 
