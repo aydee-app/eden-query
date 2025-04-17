@@ -188,10 +188,10 @@ export function edenFetch<
 
       let params: EdenRequestOptions = { method, ...(config as any), ...argArray[2] }
 
-      if (!method || method === 'GET') {
-        params.input = optionsOrBody
-      } else {
-        params.body = optionsOrBody
+      params.input = optionsOrBody
+
+      if (method && method !== 'GET') {
+        params.body = optionsOrBody.body
       }
 
       const pathParams = toArray(params.input?.params)
