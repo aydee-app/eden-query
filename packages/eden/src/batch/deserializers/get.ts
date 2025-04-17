@@ -6,7 +6,7 @@ import type { BatchDeserializerConfig } from './config'
 export async function deserializeBatchGetParams<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
->(context: InternalContext, _config: BatchDeserializerConfig) {
+>(context: InternalContext, _config?: BatchDeserializerConfig) {
   const result: Array<EdenRequestOptions> = []
 
   const request = context.request
@@ -19,35 +19,12 @@ export async function deserializeBatchGetParams<
 
   const globalQuery: any = {}
 
-  for (const [key, value] of request.headers) {
-    const [index, name] = key.split('.')
-
-    if (!index) continue
-
-    if (!name) {
-      if (!IGNORED_HEADERS.includes(index.toLowerCase())) {
-        globalHeaders[index] = value
-      }
-      continue
-    }
-
-    if (IGNORED_HEADERS.includes(name.toLowerCase())) continue
-
-    const paramIndex = Number(index)
-
-    if (Number.isNaN(paramIndex)) continue
-
-    result[paramIndex] ??= {}
-    result[paramIndex].headers ??= {}
-    ;(result[paramIndex].headers as any)[name] = value
-  }
-
   for (const [key, value] of searchParams) {
-    const [index, name, queryKey] = key.split('.')
+    const [indexOrName, name, queryKey] = key.split('.')
 
-    const paramIndex = Number(index)
+    const index = Number(indexOrName)
 
-    if (Number.isNaN(paramIndex)) {
+    if (Number.isNaN(index)) {
       globalQuery[key] = value
       continue
     }
@@ -56,17 +33,17 @@ export async function deserializeBatchGetParams<
       case BODY_KEYS.query: {
         if (queryKey == null) continue
 
-        result[paramIndex] ??= {}
-        result[paramIndex].input ??= {}
-        result[paramIndex].input.query ??= {}
-        ;(result[paramIndex].input.query as any)[queryKey] = value
+        result[index] ??= {}
+        result[index].input ??= {}
+        result[index].input.query ??= {}
+        ;(result[index].input.query as any)[queryKey] = value
 
         continue
       }
 
       case BODY_KEYS.path: {
-        result[paramIndex] ??= {}
-        result[paramIndex].path = value
+        result[index] ??= {}
+        result[index].path = value
         continue
       }
 
@@ -77,7 +54,29 @@ export async function deserializeBatchGetParams<
 
   const definedResults = result.filter(Boolean)
 
+  for (const [key, value] of request.headers) {
+    const [indexOrName = '', name] = key.split('.')
+
+    if (!name) {
+      globalHeaders[indexOrName] = value
+      continue
+    }
+
+    if (IGNORED_HEADERS.includes(name.toLowerCase())) continue
+
+    const paramIndex = Number(indexOrName)
+
+    if (Number.isNaN(paramIndex)) continue
+
+    result[paramIndex] ??= {}
+    result[paramIndex].input ??= {}
+    result[paramIndex].input.headers ??= {}
+    ;(result[paramIndex].input.headers as any)[name] = value
+  }
+
   for (const key in globalHeaders) {
+    if (IGNORED_HEADERS.includes(key.toLowerCase())) continue
+
     for (const result of definedResults) {
       result.headers ??= {}
       ;(result.headers as any)[key] = globalHeaders[key]
@@ -86,9 +85,8 @@ export async function deserializeBatchGetParams<
 
   for (const key in globalQuery) {
     for (const result of definedResults) {
-      result.input ??= {}
-      result.input.query ??= {}
-      ;(result.input.query as any)[key] = globalQuery[key]
+      result.query ??= {}
+      result.query[key] = globalQuery[key]
     }
   }
 
