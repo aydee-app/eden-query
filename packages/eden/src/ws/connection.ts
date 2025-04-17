@@ -35,10 +35,7 @@ function setupPingInterval(ws: WebSocket, options: PingPongOptions) {
   function start() {
     pingTimeout = setTimeout(() => {
       ws.send('PING')
-
-      pongTimeout = setTimeout(() => {
-        ws.close()
-      }, options.pongTimeoutMs)
+      pongTimeout = setTimeout(ws.close.bind(ws), options.pongTimeoutMs)
     }, options.intervalMs)
   }
 
@@ -108,12 +105,6 @@ export class WebSocketConnection {
 
   constructor(public readonly options: WebSocketConnectionOptions) {
     this.WebSocket = options.WebSocket ?? WebSocket
-
-    if (!this.WebSocket) {
-      throw new Error(
-        "No WebSocket implementation found - you probably don't want to use this on the server, but if you do you need to pass a `WebSocket`-ponyfill",
-      )
-    }
   }
 
   public get ws() {
@@ -183,6 +174,8 @@ export class WebSocketConnection {
   public isClosed(): this is { ws: WebSocket } {
     if (!this.ws) return true
 
+    if (this.closePromise) return false
+
     const readyState = this.ws.readyState
 
     return readyState === this.WebSocket.CLOSING || readyState === this.WebSocket.CLOSED
@@ -242,33 +235,4 @@ export class WebSocketConnection {
 
     return promise
   }
-}
-
-/**
- * Provides a backward-compatible representation of the connection state.
- */
-export function backwardCompatibility(connection: WebSocketConnection) {
-  if (connection.isOpen()) {
-    return {
-      id: connection.id,
-      state: 'open',
-      ws: connection.ws,
-    } as const
-  }
-
-  if (connection.isClosed()) {
-    return {
-      id: connection.id,
-      state: 'closed',
-      ws: connection.ws,
-    } as const
-  }
-
-  if (!connection.ws) return null
-
-  return {
-    id: connection.id,
-    state: 'connecting',
-    ws: connection.ws,
-  } as const
 }

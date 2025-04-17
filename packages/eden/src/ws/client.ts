@@ -12,9 +12,38 @@ import { type BehaviorSubject, behaviorSubject, Observable } from '../observable
 import { toArray } from '../utils/array'
 import { ResettableTimeout } from '../utils/resettable-timeout'
 import { sleep } from '../utils/sleep'
-import { backwardCompatibility, type KeepAliveOptions, WebSocketConnection } from './connection'
+import { type KeepAliveOptions, WebSocketConnection } from './connection'
 import { RequestManager, type WebSocketRequestCallbacks } from './request-manager'
 import type { WebSocketUrlOptions } from './url'
+
+/**
+ * Provides a backward-compatible representation of the connection state.
+ */
+export function backwardCompatibility(connection: WebSocketConnection) {
+  if (connection.isOpen()) {
+    return {
+      id: connection.id,
+      state: 'open',
+      ws: connection.ws,
+    } as const
+  }
+
+  if (connection.isClosed()) {
+    return {
+      id: connection.id,
+      state: 'closed',
+      ws: connection.ws,
+    } as const
+  }
+
+  if (!connection.ws) return null
+
+  return {
+    id: connection.id,
+    state: 'connecting',
+    ws: connection.ws,
+  } as const
+}
 
 export interface WebSocketClientLazyOptions {
   /**

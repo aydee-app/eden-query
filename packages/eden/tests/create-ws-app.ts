@@ -33,10 +33,10 @@ export function createWsApp(origin: string) {
 
         const parseMessage = createWSMessageParser(parse)
 
-        const chat = ws.link(`${origin}${path}`)
+        const link = ws.link(`${origin}${path}`)
 
         server.use(
-          chat.addEventListener('connection', (connection) => {
+          link.addEventListener('connection', (connection) => {
             const { client } = connection
 
             const bunWs: ServerWebSocket<{}> = {
