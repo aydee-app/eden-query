@@ -101,12 +101,35 @@ export class EdenError<
   public meta?: Record<string, unknown>
 
   /**
+   * The client or server numeric error code. Based on TRPCErrorShape.
+   *
+   * @see https://github.com/trpc/trpc/blob/8cef54eaf95d8abc8484fe1d454b6620eeb57f2f/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L10
    */
   public code?: EDEN_ERROR_CODE_NUMBER
 
   /**
+   * Additional data about the error. Mainly intended for error data from the server.
+   * Based on TRPCErrorShape.
+   *
+   * @see https://github.com/trpc/trpc/blob/8cef54eaf95d8abc8484fe1d454b6620eeb57f2f/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L12
    */
   public data?: TData
+
+  /**
+   * HTTP status code if the error originated from a response.
+   * This will not exist if the error was thrown from the client prior to a request.
+   *
+   * Based on EdenFetchError from the official Eden library.
+   */
+  public status?: number
+
+  /**
+   * Raw value associated with the error.
+   * Eden will store the original value sent by the server in the error response.
+   *
+   * Based on EdenFetchError from the official Eden library.
+   */
+  value?: unknown
 
   constructor(options?: EdenErrorOptions<TData>) {
     super(options?.message, options)
@@ -154,14 +177,14 @@ export class EdenError<
  * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/errors.ts#L1
  */
 export class EdenFetchError<TStatus extends number = number, TValue = unknown> extends EdenError {
-  status: TStatus
+  public override status: TStatus
 
-  value: TValue
+  public override value: TValue
 
   constructor(status: TStatus, value: TValue, options?: EdenErrorOptions) {
     const message = value + ''
 
-    super({ ...options, message })
+    super({ message, ...options })
 
     this.status = status
     this.value = value
