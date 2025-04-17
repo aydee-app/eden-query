@@ -50,7 +50,7 @@ export type OperationLink<
  */
 export interface OperationOptions<T extends EdenRequestOptions = EdenRequestOptions> {
   type: Procedure
-  path: string
+  path?: string
   context?: OperationContext
   signal?: AbortSignal
   params: T
