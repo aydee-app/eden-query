@@ -5,7 +5,9 @@ import { WebSocketConnection } from '../../src/ws/connection'
 import { createWsApp } from '../create-ws-app'
 import { useApp } from '../setup'
 
-const url = 'http://localhost:3000'
+const domain = 'http://localhost:3000'
+
+const url = `${domain}/ws`
 
 describe('WebSocketConnection', () => {
   test('is open after open is called', async () => {
@@ -30,7 +32,7 @@ describe('WebSocketConnection', () => {
     expect(connection.isClosed()).toBe(true)
   })
 
-  test('only one WebSockdet is created at a time', async () => {
+  test('only one WebSocket is created at a time', async () => {
     const listener = vi.fn()
 
     class WS extends WebSocket {
@@ -54,13 +56,13 @@ describe('WebSocketConnection', () => {
   test('keep alive sends initial ping', async () => {
     const message = vi.fn()
 
-    const app = createWsApp(url).ws('/ws', { message })
+    const app = createWsApp(domain).ws('/ws', { message })
 
     useApp(app)
 
     const connection = new WebSocketConnection({
       url: {
-        url: 'http://localhost:3000/ws',
+        url,
       },
       keepAlive: {
         enabled: true,
@@ -81,7 +83,7 @@ describe('WebSocketConnection', () => {
 
     const pingListener = vi.fn()
 
-    const app = createWsApp(url).ws('/ws', {
+    const app = createWsApp(domain).ws('/ws', {
       message(ws, message) {
         if (message === 'PING') {
           pingListener(message)
@@ -97,7 +99,7 @@ describe('WebSocketConnection', () => {
 
     const connection = new WebSocketConnection({
       url: {
-        url: 'http://localhost:3000/ws',
+        url,
       },
       keepAlive: {
         enabled: true,
@@ -121,7 +123,7 @@ describe('WebSocketConnection', () => {
 
     const pongTimeoutMs = 1000
 
-    const app = createWsApp(url).ws('/ws', {
+    const app = createWsApp(domain).ws('/ws', {
       async message(ws, message) {
         if (message === 'PING') {
           pingListener(message)
@@ -138,7 +140,7 @@ describe('WebSocketConnection', () => {
 
     const connection = new WebSocketConnection({
       url: {
-        url: 'http://localhost:3000/ws',
+        url,
       },
       keepAlive: {
         enabled: true,
@@ -165,7 +167,7 @@ describe('WebSocketConnection', () => {
 
     const message = vi.fn()
 
-    const app = createWsApp(url).ws('/ws', { message })
+    const app = createWsApp(domain).ws('/ws', { message })
 
     useApp(app)
 
@@ -177,7 +179,7 @@ describe('WebSocketConnection', () => {
 
     const connection = new WebSocketConnection({
       url: {
-        url: 'http://localhost:3000/ws',
+        url,
         connectionParams,
       },
     })

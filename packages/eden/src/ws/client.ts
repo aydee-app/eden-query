@@ -16,35 +16,6 @@ import { type KeepAliveOptions, WebSocketConnection } from './connection'
 import { RequestManager, type WebSocketRequestCallbacks } from './request-manager'
 import type { WebSocketUrlOptions } from './url'
 
-/**
- * Provides a backward-compatible representation of the connection state.
- */
-export function backwardCompatibility(connection: WebSocketConnection) {
-  if (connection.isOpen()) {
-    return {
-      id: connection.id,
-      state: 'open',
-      ws: connection.ws,
-    } as const
-  }
-
-  if (connection.isClosed()) {
-    return {
-      id: connection.id,
-      state: 'closed',
-      ws: connection.ws,
-    } as const
-  }
-
-  if (!connection.ws) return null
-
-  return {
-    id: connection.id,
-    state: 'connecting',
-    ws: connection.ws,
-  } as const
-}
-
 export interface WebSocketClientLazyOptions {
   /**
    * Enable lazy mode
@@ -300,7 +271,7 @@ export class WebSocketClient {
   public request(options: WebSocketRequestOptions) {
     const { op, lastEventId } = options
 
-    const { id, type, params, signal } = op
+    const { id, type, params, signal, path } = op
 
     const transformer = matchTransformer(params.transformers, params.transformer)
 
@@ -310,7 +281,10 @@ export class WebSocketClient {
           id,
           method: type,
           params: {
-            params,
+            params: {
+              path,
+              ...params,
+            },
             lastEventId,
           },
         },
@@ -512,15 +486,21 @@ export class WebSocketClient {
 
     const messages = Array.isArray(messageOrMessages) ? messageOrMessages : [messageOrMessages]
 
+    if (this.options.batch !== false) {
+      const outgoing = messages.length === 1 ? messages[0] : messages
+
+      const data = typeof outgoing === 'object' ? JSON.stringify(outgoing) : outgoing + ''
+
+      this.activeConnection.ws?.send(data)
+
+      return
+    }
+
     // Replicates eden-treaty
     // @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty/index.ts#L68
-    if (this.options.batch == false) {
-      for (const message of messages) {
-        const data = typeof message === 'object' ? JSON.stringify(message) : String(message)
-        this.activeConnection.ws?.send(data)
-      }
-    } else {
-      this.activeConnection.ws?.send(JSON.stringify(messages.length === 1 ? messages[0] : messages))
+    for (const message of messages) {
+      const data = typeof message === 'object' ? JSON.stringify(message) : String(message)
+      this.activeConnection.ws?.send(data)
     }
   }
 
@@ -541,9 +521,7 @@ export class WebSocketClient {
   }
 
   #batchSend = async () => {
-    if (!this.activeConnection.isOpen()) {
-      await this.open()
-    }
+    if (!this.activeConnection.isOpen()) await this.open()
 
     await sleep()
 
@@ -555,4 +533,33 @@ export class WebSocketClient {
 
     this.send(messages)
   }
+}
+
+/**
+ * Provides a backward-compatible representation of the connection state.
+ */
+export function backwardCompatibility(connection: WebSocketConnection) {
+  if (connection.isOpen()) {
+    return {
+      id: connection.id,
+      state: 'open',
+      ws: connection.ws,
+    } as const
+  }
+
+  if (connection.isClosed()) {
+    return {
+      id: connection.id,
+      state: 'closed',
+      ws: connection.ws,
+    } as const
+  }
+
+  if (!connection.ws) return null
+
+  return {
+    id: connection.id,
+    state: 'connecting',
+    ws: connection.ws,
+  } as const
 }
