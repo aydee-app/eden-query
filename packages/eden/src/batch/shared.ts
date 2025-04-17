@@ -16,6 +16,7 @@ export const BODY_KEYS = {
 export const BODY_TYPES = {
   JSON: 'json',
   FORM_DATA: 'formdata',
+  RAW: 'raw',
 }
 
 /**

@@ -20,7 +20,7 @@ export async function deserializeBatchGetParams<
   const globalQuery: any = {}
 
   for (const [key, value] of searchParams) {
-    const [indexOrName, name, queryKey] = key.split('.')
+    const [indexOrName, name, ...queryKey] = key.split('.')
 
     const index = Number(indexOrName)
 
@@ -31,12 +31,14 @@ export async function deserializeBatchGetParams<
 
     switch (name) {
       case BODY_KEYS.query: {
-        if (queryKey == null) continue
+        const fullQueryKey = queryKey.join('.')
+
+        if (!fullQueryKey) continue
 
         result[index] ??= {}
         result[index].input ??= {}
         result[index].input.query ??= {}
-        ;(result[index].input.query as any)[queryKey] = value
+        ;(result[index].input.query as any)[fullQueryKey] = value
 
         continue
       }

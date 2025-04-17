@@ -7,7 +7,7 @@ import type { BatchDeserializerConfig } from './config'
 export async function deserializeBatchPostParams<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
->(context: InternalContext, _config: BatchDeserializerConfig) {
+>(context: InternalContext, _config?: BatchDeserializerConfig) {
   const request = context.request
 
   const result: Array<EdenRequestOptions & { body_type?: string }> = []
@@ -15,26 +15,25 @@ export async function deserializeBatchPostParams<
   const globalHeaders: any = {}
 
   for (const [key, value] of request.headers) {
-    const [index, name] = key.split('.')
+    const [indexOrName = '', ...name] = key.split('.')
 
-    if (!index) continue
+    const fullName = name.join('.')
 
-    if (!name) {
-      if (!IGNORED_HEADERS.includes(index.toLowerCase())) {
-        globalHeaders[index] = value
-      }
+    if (!fullName) {
+      globalHeaders[indexOrName] = value
       continue
     }
 
-    if (IGNORED_HEADERS.includes(name.toLowerCase())) continue
+    if (IGNORED_HEADERS.includes(fullName.toLowerCase())) continue
 
-    const paramIndex = Number(index)
+    const index = Number(indexOrName)
 
-    if (Number.isNaN(paramIndex)) continue
+    if (Number.isNaN(index)) continue
 
-    result[paramIndex] ??= {}
-    result[paramIndex].headers ??= {}
-    ;(result[paramIndex].headers as any)[name] = value
+    result[index] ??= {}
+    result[index].input ??= {}
+    result[index].input.headers ??= {}
+    ;(result[index].input.headers as any)[fullName] = value
   }
 
   const formData = await request.formData()
@@ -42,55 +41,45 @@ export async function deserializeBatchPostParams<
   const formDataEntries = formData.entries().toArray()
 
   for (const [key, value] of formDataEntries) {
-    const [index, name] = key.split('.')
+    const [indexOrName = '', ...name] = key.split('.')
 
-    if (!index) continue
+    const index = Number(indexOrName)
 
-    const paramIndex = Number(index)
+    if (Number.isNaN(index)) continue
 
-    if (Number.isNaN(paramIndex)) continue
+    const property = name[0]
 
-    switch (name) {
+    // What to do with rest of name...
+
+    switch (property) {
       case BODY_KEYS.body: {
-        const bodyType = formData.get(`${index}.${BODY_KEYS.bodyType}`)
+        const bodyType = formData.get(`${indexOrName}.${BODY_KEYS.bodyType}`)
 
         if (bodyType === BODY_TYPES.FORM_DATA) {
           const body = new FormData()
 
-          const baseKey = `${index}.${BODY_KEYS.body}`
+          const bodyKey = `${indexOrName}.${BODY_KEYS.body}`
 
           const bodyEntries = formDataEntries
-            .filter((entry) => {
-              return (
-                entry[0].startsWith(`${index}.${BODY_KEYS.body}`) &&
-                !entry[0].startsWith(`${index}.${BODY_KEYS.bodyType}`)
-              )
-            })
-            .map((entry) => {
-              const relativeKey = entry[0].slice(baseKey.length + 1)
-              return [relativeKey, entry[1]] as const
-            })
+            .filter((entry) => entry[0].startsWith(`${bodyKey}.`))
+            .map((entry) => [entry[0].slice(bodyKey.length + 1), entry[1]] as const)
 
           for (const entry of bodyEntries) {
             body.append(entry[0], entry[1])
           }
 
-          result[paramIndex] ??= {}
-          result[paramIndex].body = body
+          result[index] ??= {}
+          result[index].body = body
 
           continue
         }
 
         if (bodyType === BODY_TYPES.JSON) {
-          const rawBody = formData.get(`${index}.${BODY_KEYS.body}`)
+          const body = JSON.parse(value.toString())
 
-          if (rawBody == null) continue
+          const filePaths = formData.getAll(`${indexOrName}.${BODY_KEYS.filePaths}`)
 
-          const body = JSON.parse(rawBody.toString())
-
-          const filePaths = formData.getAll(`${index}.${BODY_KEYS.filePaths}`)
-
-          const files = formData.getAll(`${index}.${BODY_KEYS.files}`)
+          const files = formData.getAll(`${indexOrName}.${BODY_KEYS.files}`)
 
           files.forEach((file, index) => {
             const path = filePaths[index]
@@ -100,36 +89,33 @@ export async function deserializeBatchPostParams<
             set(body, path.toString(), file)
           })
 
-          result[paramIndex] ??= {}
-          result[paramIndex].body = body
+          result[index] ??= {}
+          result[index].body = body
         }
 
         continue
       }
 
-      case BODY_KEYS.bodyType: {
-        // noop because body handles this
-        continue
-      }
+      case BODY_KEYS.bodyType: // falls through
 
       case BODY_KEYS.method: // falls through
 
       case BODY_KEYS.path: {
-        result[paramIndex] ??= {}
-        result[paramIndex][name] = value.toString()
-
+        result[index] ??= {}
+        result[index][property] = value.toString()
         continue
       }
 
-      default: {
-        // noop
-      }
+      default:
+        continue
     }
   }
 
   const definedResults = result.filter(Boolean)
 
   for (const key in globalHeaders) {
+    if (IGNORED_HEADERS.includes(key.toLowerCase())) continue
+
     for (const result of definedResults) {
       result.headers ??= {}
       ;(result.headers as any)[key] = globalHeaders[key]

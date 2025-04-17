@@ -1,6 +1,6 @@
 import type { Context } from 'elysia'
 import queryString from 'query-string'
-import { describe, expect,test } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import { deserializeBatchGetParams } from '../../../src/batch/deserializers/get'
 
@@ -139,6 +139,23 @@ describe('deserializeBatchGetParams', () => {
       const result = await deserializeBatchGetParams(context)
 
       expect(result[0]?.query?.['hello']).toBe(query.hello)
+    })
+
+    test('query with dots', async () => {
+      const query = {
+        '0.path': '/',
+        '0.query.hello.world': 'bye',
+      }
+
+      const q = queryString.stringify(query)
+
+      const request = new Request(`http://localhost:3000?${q}`)
+
+      const context: Context = { request } as any
+
+      const result = await deserializeBatchGetParams(context)
+
+      expect(result[0]?.input?.query).toStrictEqual({ 'hello.world': 'bye' })
     })
 
     test('handles valid query and ignores queries without keys', async () => {
