@@ -19,9 +19,9 @@ export async function serializeBatchPostParams<
       body.append(`${index}.${BODY_KEYS.method}`, fetchInit.method)
     }
 
-    const fetchInitHeaders: any = fetchInit?.headers
-
     body.append(`${index}.${BODY_KEYS.path}`, `${path}${query ? '?' : ''}${query}`)
+
+    const fetchInitHeaders: any = fetchInit?.headers
 
     if (fetchInit?.headers) {
       for (const key in fetchInit.headers) {

@@ -1,5 +1,5 @@
 import type { EdenRequestOptions } from '../../core/config'
-import { processHeaders } from '../../core/headers'
+import { resolveFetchOptions } from '../../core/resolve'
 import type { InternalElysia, TypeConfig } from '../../core/types'
 import { BODY_KEYS } from '../shared'
 
@@ -24,18 +24,7 @@ export async function serializeBatchGetParams<
   const headers = new Headers()
 
   const parametizerOperations = batchParams.map(async (params, index) => {
-    let path = params.path ?? ''
-
-    // Handle path params.
-    for (const key in params.input?.params) {
-      const placeholder = `:${key}`
-
-      const param = params.input.params[key as never]
-
-      if (param != null) {
-        path = path.replace(placeholder, param)
-      }
-    }
+    const { path, fetchInit } = await resolveFetchOptions(params)
 
     query[`${index}.${BODY_KEYS.path}`] = path
 
@@ -49,15 +38,15 @@ export async function serializeBatchGetParams<
       }
     }
 
-    const currentHeaders = await processHeaders(params.headers, params)
+    const fetchInitHeaders: any = fetchInit?.headers
 
-    const resolvedHeaders = { ...currentHeaders, ...params.input?.headers }
+    if (fetchInit?.headers) {
+      for (const key in fetchInit.headers) {
+        const value = fetchInitHeaders[key]
 
-    for (const key in resolvedHeaders) {
-      const value = currentHeaders[key as keyof typeof currentHeaders]
-
-      if (value) {
-        headers.append(`${index}.${key}`, value)
+        if (value) {
+          headers.append(`${index}.${key}`, value)
+        }
       }
     }
   })
