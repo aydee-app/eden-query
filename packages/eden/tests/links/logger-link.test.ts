@@ -298,6 +298,7 @@ describe('loggerLink', () => {
             },
             Symbol(headers): Headers {},
           },
+          "type": "data",
         },
       },
     },
