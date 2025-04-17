@@ -26,7 +26,9 @@ import type { InternalElysia, TypeConfig } from './types'
 export const defaultOnRequest = (async (_path, fetchInit, params) => {
   let headers = await processHeaders(params?.headers, params)
 
-  fetchInit.headers = { ...fetchInit.headers, ...headers }
+  const inputHeaders = await processHeaders(params.input?.headers, params)
+
+  fetchInit.headers = { ...fetchInit.headers, ...headers, ...inputHeaders }
 
   headers = fetchInit.headers as any
 
