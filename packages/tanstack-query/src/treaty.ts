@@ -4,7 +4,7 @@ import {
   type EdenResult,
   type EdenRouteBody,
   type EdenRouteError,
-  type EdenRouteOptions,
+  type EdenRouteInput,
   type EdenRouteSuccess,
   type EdenTreaty,
   edenTreaty,
@@ -126,7 +126,7 @@ export type EdenTreatyTanstackQueryQueryRoute<
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   TPaths extends any[] = [],
-  TOptions = EdenRouteOptions<TRoute>,
+  TOptions = EdenRouteInput<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
@@ -141,7 +141,7 @@ export type EdenTreatyTanstackQueryQueryRoute<
     EdenRouteSuccess<TRoute>,
     EdenRouteError<TRoute>,
     EdenRouteSuccess<TRoute>,
-    [TPaths, { options: EdenRouteOptions; type: 'query' }],
+    [TPaths, { options: EdenRouteInput; type: 'query' }],
     TOptions extends { query?: { cursor?: any } } ? NonNullable<TOptions['query']>['cursor'] : never
   >
 
@@ -156,7 +156,7 @@ export type EdenTreatyTanstackQueryQueryRoute<
     EdenRouteSuccess<TRoute>,
     Error,
     EdenRouteSuccess<TRoute>,
-    [TPaths, { options: EdenRouteOptions; type: 'query' }],
+    [TPaths, { options: EdenRouteInput; type: 'query' }],
     TOptions extends { query?: { cursor?: any } } ? NonNullable<TOptions['query']>['cursor'] : never
   >
 }
@@ -167,7 +167,7 @@ export type EdenTreatyTanstackQueryMutationRoute<
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
   TBody = EdenRouteBody<TRoute>,
-  TOptions = EdenRouteOptions<TRoute>,
+  TOptions = EdenRouteInput<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
@@ -186,7 +186,7 @@ export type EdenTreatySubscriptionRoute<
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
-  TOptions = EdenRouteOptions<TRoute>,
+  TOptions = EdenRouteInput<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
