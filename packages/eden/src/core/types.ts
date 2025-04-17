@@ -112,3 +112,18 @@ export type ResolveTypeConfig<T> = T extends InternalTypeConfig
     : {
         key?: undefined
       }
+
+/**
+ * Shared configuration usable for both client and server integrations.
+ *
+ * @see https://github.com/trpc/trpc/blob/8cef54eaf95d8abc8484fe1d454b6620eeb57f2f/packages/server/src/unstable-core-do-not-import/rootConfig.ts#L32
+ */
+export interface EdenRootConfig {
+  /**
+   * Whether the application is running in development mode. Based on tRPC `isDev` configuration option.
+   * Determines whether stack traces will be returned with server errors.
+   *
+   * @see https://github.com/trpc/trpc/blob/8cef54eaf95d8abc8484fe1d454b6620eeb57f2f/packages/server/src/unstable-core-do-not-import/rootConfig.ts#L65
+   */
+  development?: boolean
+}

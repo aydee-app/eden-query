@@ -217,7 +217,7 @@ export function httpSubscriptionLink<
                 connectionState.next({
                   type: 'state',
                   state: 'connecting',
-                  error: new EdenError(message),
+                  error: new EdenError({ message }),
                 })
               }
             }
