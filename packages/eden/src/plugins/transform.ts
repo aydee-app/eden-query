@@ -57,7 +57,7 @@ export function transformPlugin<const T extends TransformerPluginConfig>(config:
       const result = {}
 
       if (key) {
-        result[key as never] = { ws: config } as never
+        result[key as never] = { transform: config } as never
       }
 
       return result as TResolvedState
