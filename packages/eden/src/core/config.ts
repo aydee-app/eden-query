@@ -204,3 +204,18 @@ export type EdenRequestOptions<
 > = EdenResolverTypeConfig<TElysia, TConfig> &
   EdenRequestInput &
   EdenResolverConfig<TElysia, TConfig>
+
+/**
+ * An internal version of request options with a simpler, more consistent interface.
+ *
+ * @internal
+ */
+export type InternalEdenRequestOptions<
+  TElysia extends InternalElysia = InternalElysia,
+  TConfig extends TypeConfig = undefined,
+> = EdenResolverTypeConfig<TElysia, TConfig> &
+  EdenRequestInput &
+  Omit<EdenResolverConfig<TElysia, TConfig>, 'query' | 'headers'> & {
+    headers?: Headers
+    query?: URLSearchParams
+  }

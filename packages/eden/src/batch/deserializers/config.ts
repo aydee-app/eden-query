@@ -3,6 +3,9 @@ import type { InternalContext, InternalElysia, TypeConfig } from '../../core/typ
 import type { MaybeArray, MaybePromise } from '../../utils/types'
 import type { BatchMethod } from '../shared'
 
+/**
+ * Configuration options for a batch request deserializer.
+ */
 export interface BatchDeserializerConfig {
   /**
    * The endpoint for batch requests.
