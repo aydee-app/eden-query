@@ -1,0 +1,27 @@
+{
+  "name": "@ap0nia/eden-svelte-query",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "rslib build",
+    "test": "ATTEST_skipTypes=1 vitest",
+    "test:types": "vitest test-d"
+  },
+  "dependencies": {
+    "@ap0nia/eden": "workspace:^"
+  },
+  "devDependencies": {
+    "@ark/attest": "^0.45.6",
+    "@rslib/core": "^0.6.2",
+    "@tanstack/svelte-query": "^5.72.2",
+    "devalue": "^5.1.1",
+    "elysia": "^1.2.25",
+    "rslib": "^0.0.10",
+    "superjson": "^2.2.2",
+    "svelte": "^5.25.11",
+    "typescript": "^5.8.2"
+  }
+}
