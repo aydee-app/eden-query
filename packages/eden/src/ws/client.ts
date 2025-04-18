@@ -192,7 +192,7 @@ export class WebSocketClient {
    * Opens the WebSocket connection. Handles reconnection attempts and updates
    * the connection state accordingly.
    */
-  private async open() {
+  async open() {
     this.allowReconnect = true
 
     if (this.connectionState.get().state !== 'connecting') {

@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "rslib build",
-    "test": "ATTEST_skipTypes=1 vitest tests/ws",
+    "test": "ATTEST_skipTypes=1 vitest",
     "test:types": "vitest test-d"
   },
   "repository": {

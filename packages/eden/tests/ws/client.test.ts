@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 import {
   type EdenWebSocketIncomingMessage,
   type EdenWebSocketOutgoingMessage,
+  WEBSOCKET_CONNECTION_STATES,
   WebSocketClient,
 } from '../../src'
 import { observableToPromise } from '../../src/observable'
@@ -133,5 +134,52 @@ describe('WebSocketClient', () => {
         expect(message).toHaveBeenNthCalledWith(index + 1, expect.anything(), m)
       })
     })
+  })
+
+  test('only notifies for connecting state once', async () => {
+    const next = vi.fn()
+
+    const app = createWsApp(domain).ws('/ws', {})
+
+    useApp(app)
+
+    const client = new WebSocketClient({
+      url,
+      batch: false,
+      lazy: { enabled: true, closeMs: 1_000 },
+    })
+
+    client.connectionState.subscribe({ next })
+
+    client.open()
+    client.open()
+
+    await client.open()
+
+    expect(next).toHaveBeenNthCalledWith(2, WEBSOCKET_CONNECTION_STATES.CONNECTING)
+    expect(next).not.toHaveBeenNthCalledWith(3, WEBSOCKET_CONNECTION_STATES.CONNECTING)
+    expect(next).not.toHaveBeenNthCalledWith(4, WEBSOCKET_CONNECTION_STATES.CONNECTING)
+    expect(next).not.toHaveBeenNthCalledWith(4, WEBSOCKET_CONNECTION_STATES.CONNECTING)
+  })
+
+  test('stops requests if any are pending when closed', async () => {
+    const app = createWsApp(domain).ws('/ws', {})
+
+    useApp(app)
+
+    const client = new WebSocketClient({ url })
+
+    await client.open()
+
+    const request = client.request({
+      op: {
+        context: {},
+        id: 0,
+        type: 'query',
+        params: {},
+      },
+    })
+
+    await Promise.all([expect(observableToPromise(request)).rejects.toThrow(), client.close()])
   })
 })
