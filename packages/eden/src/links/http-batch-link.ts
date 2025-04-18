@@ -2,8 +2,7 @@ import { jsonlStreamConsumer } from '@trpc/server/unstable-core-do-not-import'
 
 import { serializeBatchGetParams } from '../batch/serializers/get'
 import { serializeBatchPostParams } from '../batch/serializers/post'
-import type { BatchMethod } from '../batch/shared'
-import { BATCH_ENDPOINT, HTTP_SUBSCRIPTION_ERROR } from '../constants'
+import { BATCH_ENDPOINT, HTTP_SUBSCRIPTION_ERROR, type HTTPMethod } from '../constants'
 import type { EdenRequestOptions } from '../core/config'
 import type { EdenFetchResult } from '../core/dto'
 import type { EdenError } from '../core/error'
@@ -72,7 +71,7 @@ export type HTTPBatchLinkOptions<
    *
    * @default "POST"
    */
-  method?: BatchMethod
+  method?: HTTPMethod | (string & {})
 
   /**
    * Headers to be set on outgoing requests or a callback that of said headers
@@ -242,11 +241,19 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
         return false
       })
 
-      const method = (nonGetRequest && 'POST') || options.method || 'POST'
+      const serializerMethod =
+        (nonGetRequest && 'POST') || (options.method === 'GET' && 'GET') || 'POST'
+
+      let method = options.method || 'POST'
+
+      // Force batch method to be POST if it is GET and that method is not compatible.
+      if (method === 'GET' && serializerMethod !== 'GET') {
+        method = 'POST'
+      }
 
       const resolvedBatchOps = await Promise.all(batchOps.map(edenParamsResolver))
 
-      const serializer = batchSerializers[method]
+      const serializer = batchSerializers[serializerMethod]
 
       const resolvedBatchParams = await serializer(resolvedBatchOps)
 

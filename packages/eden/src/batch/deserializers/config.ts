@@ -17,7 +17,7 @@ export interface BatchDeserializerConfig {
    *
    * @default true.
    */
-  method?: MaybeArray<HTTPMethod | true>
+  method?: MaybeArray<HTTPMethod | true | (string & {})>
 }
 
 /**
