@@ -66,7 +66,7 @@ function setupPingInterval(ws: WebSocket, options: PingPongOptions) {
 }
 
 export interface KeepAliveOptions extends PingPongOptions {
-  enabled: boolean
+  enabled?: boolean
 }
 
 export interface WebSocketConnectionOptions {

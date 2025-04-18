@@ -27,6 +27,26 @@ describe('WebSocketClient', () => {
     await client.activeConnection.open()
 
     expect(onOpen).toHaveBeenCalledOnce()
+
+    expect(client.connection?.state).toBe('open')
+  })
+
+  test('closes correctly', async () => {
+    const app = createWsApp(domain).ws('/ws', {})
+
+    useApp(app)
+
+    const onClose = vi.fn()
+
+    const client = new WebSocketClient({ url, onClose })
+
+    await client.activeConnection.open()
+
+    await client.close()
+
+    expect(onClose).toHaveBeenCalledOnce()
+
+    expect(client.connection?.state).toBe('closed')
   })
 
   test('sends messages correctly', async () => {

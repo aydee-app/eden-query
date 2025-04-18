@@ -21,13 +21,13 @@ export interface WebSocketClientLazyOptions {
    * Enable lazy mode
    * @default false
    */
-  enabled: boolean
+  enabled?: boolean
 
   /**
    * Close the WebSocket after this many milliseconds
    * @default 0
    */
-  closeMs: number
+  closeMs?: number
 }
 
 export interface WebSocketClientOptions extends WebSocketUrlOptions {
@@ -539,6 +539,8 @@ export class WebSocketClient {
  * Provides a backward-compatible representation of the connection state.
  */
 export function backwardCompatibility(connection: WebSocketConnection) {
+  // if (!connection.ws) return null
+
   if (connection.isOpen()) {
     return {
       id: connection.id,
@@ -554,8 +556,6 @@ export function backwardCompatibility(connection: WebSocketConnection) {
       ws: connection.ws,
     } as const
   }
-
-  if (!connection.ws) return null
 
   return {
     id: connection.id,
