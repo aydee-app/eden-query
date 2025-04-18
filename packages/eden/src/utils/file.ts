@@ -5,23 +5,6 @@ export function isFile(value: unknown) {
   return value instanceof FileList || value instanceof File
 }
 
-/**
- * FormData is 1 level deep.
- */
-export function hasFile(object?: unknown) {
-  if (!object) return false
-
-  if (typeof object !== 'object') return
-
-  const hasFileValue = Object.values(object).some((v) => {
-    if (isFile(v)) return true
-    if (Array.isArray(v) && v.find(isFile)) return true
-    return false
-  })
-
-  return hasFileValue
-}
-
 export type ExtractedFile = {
   path: string
   file: File

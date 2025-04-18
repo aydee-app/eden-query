@@ -58,7 +58,7 @@ describe('defaultOnRequest', () => {
 
     assert(init.body instanceof FormData)
 
-    expect(init.body.get('file')).toBe(body.file)
+    expect(init.body.get('body.file')).toBe(body.file)
   })
 
   test('converts body to JSON string if object', async () => {
@@ -392,7 +392,7 @@ describe('resolveFetchOptions', () => {
 
       assert(result.fetchInit.body instanceof FormData)
 
-      expect(result.fetchInit.body.get('file')).toBe(body.file)
+      expect(result.fetchInit.body.get('body.file')).toBe(body.file)
     })
 
     test('converts body to JSON string if object', async () => {

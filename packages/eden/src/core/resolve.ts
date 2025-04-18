@@ -1,6 +1,5 @@
 import { toArray } from '../utils/array'
 import { extractFiles } from '../utils/file'
-import { jsonToFormData } from '../utils/form-data'
 import { buildQueryString, mergeQuery } from '../utils/query'
 import type {
   EdenFetchResultTransformer,
@@ -34,58 +33,48 @@ export const defaultOnRequest = (async (_path, fetchInit, params) => {
 
   const transformer = matchTransformer(params.transformers, params.transformer)
 
-  // Set the headers so the response body is transformed properly.
-  // Transform the request body when needed.
   if (transformer) {
-    if (transformer.id) {
-      headers['transformer-id'] = transformer.id.toString()
-    }
-
     headers['transformed'] = 'true'
   }
 
-  if (fetchInit.body == null) return
+  if (transformer?.id) {
+    headers['transformer-id'] = transformer.id.toString()
+  }
 
-  if (fetchInit.body instanceof FormData) return
+  if (fetchInit.body == null || fetchInit.body instanceof FormData) return
 
   if (typeof fetchInit.body !== 'object') return
 
   const files = extractFiles(fetchInit.body)
 
-  if (!files.length) {
-    headers['content-type'] = 'application/json'
-  }
-
   if (transformer) {
     fetchInit.body = await transformer.input.serialize(fetchInit.body)
+  }
 
-    const stringified = JSON.stringify(fetchInit.body)
+  const stringified = JSON.stringify(fetchInit.body)
 
-    if (!files.length) {
-      headers['content-type'] = 'application/json'
-      fetchInit.body = stringified
-      return
-    }
+  if (!files.length) {
+    headers['content-type'] = 'application/json'
 
-    fetchInit.body = new FormData()
+    fetchInit.body = stringified
 
-    fetchInit.body.append('body', stringified)
+    return
+  }
 
-    for (const file of files) {
+  fetchInit.body = new FormData()
+
+  fetchInit.body.append('body', stringified)
+
+  // TODO: decide on strategy for serializing/deserializing JSON body with files.
+
+  for (const file of files) {
+    if (transformer) {
       fetchInit.body.append('files.file', file.file)
       fetchInit.body.append('files.path', file.path)
+    } else {
+      fetchInit.body.append(`body.${file.path}`, file.file)
     }
-
-    return
   }
-
-  if (files.length) {
-    const formData = await jsonToFormData(fetchInit.body)
-    fetchInit.body = formData
-    return
-  }
-
-  fetchInit.body = JSON.stringify(fetchInit.body)
 }) satisfies EdenRequestTransformer
 
 export const defaultOnResponse = (async (response) => {
