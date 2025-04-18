@@ -156,10 +156,11 @@ describe('WebSocketClient', () => {
 
     await client.open()
 
+    expect(next).toHaveBeenNthCalledWith(1, WEBSOCKET_CONNECTION_STATES.IDLE)
     expect(next).toHaveBeenNthCalledWith(2, WEBSOCKET_CONNECTION_STATES.CONNECTING)
-    expect(next).not.toHaveBeenNthCalledWith(3, WEBSOCKET_CONNECTION_STATES.CONNECTING)
-    expect(next).not.toHaveBeenNthCalledWith(4, WEBSOCKET_CONNECTION_STATES.CONNECTING)
-    expect(next).not.toHaveBeenNthCalledWith(4, WEBSOCKET_CONNECTION_STATES.CONNECTING)
+    expect(next).toHaveBeenNthCalledWith(3, WEBSOCKET_CONNECTION_STATES.PENDING)
+
+    expect(next.mock.calls.length).toBeLessThanOrEqual(3)
   })
 
   test('stops requests if any are pending when closed', async () => {
