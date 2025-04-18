@@ -4,7 +4,6 @@ import { Elysia } from 'elysia'
 import type { BatchDeserializer, BatchDeserializerConfig } from '../batch/deserializers/config'
 import { deserializeBatchGetParams } from '../batch/deserializers/get'
 import { deserializeBatchPostParams } from '../batch/deserializers/post'
-import type { BatchMethod } from '../batch/shared'
 import { BATCH_ENDPOINT, EDEN_STATE_KEY } from '../constants'
 import type { EdenResult } from '../core/dto'
 import { resolveEdenRequest } from '../core/resolve'
@@ -28,7 +27,7 @@ export interface BatchPluginConfig<
 export const batchDeserializers = {
   GET: deserializeBatchGetParams,
   POST: deserializeBatchPostParams,
-} satisfies Record<BatchMethod, BatchDeserializer>
+}
 
 /**
  * Stream individual batch responses.

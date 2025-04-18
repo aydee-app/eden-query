@@ -8,7 +8,7 @@ import { resolveTransformer } from '../core/transform'
 import type { InternalElysia } from '../core/types'
 import { behaviorSubject, Observable } from '../observable'
 import { type CallbackOrValue, resolveCallbackOrValue } from '../utils/callback-or-value'
-import { buildQueryString } from '../utils/query'
+import { buildQueryString, mergeQuery } from '../utils/query'
 import { raceAbortSignals } from '../utils/signal'
 import type { MaybePromise } from '../utils/types'
 import type { WebSocketUrlOptions } from '../ws/url'
@@ -83,15 +83,15 @@ export function httpSubscriptionLink<
 
         const eventSourceStream = sseStreamConsumer<TConsumerConfig>({
           url: async () => {
-            const queryObject = { ...params.query }
+            const query = mergeQuery(params.query, params.input?.query)
 
             if (lastEventId) {
-              queryObject['lastEventId'] = lastEventId
+              query.append('lastEventId', lastEventId)
             }
 
-            const query = buildQueryString(queryObject)
+            const queryString = buildQueryString(query)
 
-            const pathWithQuery = `${resolvedPath}${query ? '?' : ''}${query}`
+            const pathWithQuery = `${resolvedPath}${queryString ? '?' : ''}${queryString}`
 
             return options.url + pathWithQuery
           },

@@ -1,7 +1,7 @@
 import { toArray } from '../utils/array'
 import { extractFiles } from '../utils/file'
 import { jsonToFormData } from '../utils/form-data'
-import { buildQueryString } from '../utils/query'
+import { buildQueryString, mergeQuery } from '../utils/query'
 import type {
   EdenFetchResultTransformer,
   EdenRequestOptions,
@@ -136,7 +136,9 @@ export async function resolveFetchOptions<
 >(params: EdenRequestOptions<TElysia, TConfig> = {} as any) {
   const path = resolveEdenFetchPath(params) ?? ''
 
-  const query = buildQueryString({ ...params.query, ...params.input?.query })
+  const mergedQuery = mergeQuery(params.query, params.input?.query)
+
+  const query = buildQueryString(mergedQuery)
 
   let fetchInit: RequestInit = { ...params?.fetch }
 

@@ -15,6 +15,7 @@ import { Observable } from '../observable'
 import { toArray } from '../utils/array'
 import type { CallbackOrValue } from '../utils/callback-or-value'
 import { type BatchLoader, dataLoader } from '../utils/data-loader'
+import { mergeQuery } from '../utils/query'
 import { linkAbortSignals, raceAbortSignals } from '../utils/signal'
 import type { MaybeArray, MaybePromise, Nullish, TypeError } from '../utils/types'
 import {
@@ -253,18 +254,15 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
         resolvedBatchParams.headers.set('accept', 'text/event-stream')
       }
 
+      const query = mergeQuery(options.query, resolvedBatchParams.query)
+
       const resolvedParams = {
         ...options,
         // Batch requests either use FormData (POST) or URL query (GET), no transformer needed.
         transformer: undefined,
         path: endpoint,
         method,
-        input: {
-          query: {
-            ...options.query,
-            ...resolvedBatchParams.query,
-          },
-        },
+        query,
         body: resolvedBatchParams.body,
         headers: resolvedBatchParams.headers,
       } as EdenRequestOptions

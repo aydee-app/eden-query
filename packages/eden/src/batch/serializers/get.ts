@@ -1,6 +1,7 @@
 import type { EdenRequestOptions } from '../../core/config'
 import { resolveFetchOptions } from '../../core/resolve'
 import type { InternalElysia, TypeConfig } from '../../core/types'
+import { mergeQuery } from '../../utils/query'
 import { BODY_KEYS } from '../shared'
 
 /**
@@ -19,24 +20,20 @@ export async function serializeBatchGetParams<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
 >(batchParams: EdenRequestOptions<TElysia, TConfig>[]) {
-  const query: Record<string, any> = {}
+  const query = new URLSearchParams()
 
   const headers = new Headers()
 
   const parametizerOperations = batchParams.map(async (params, index) => {
     const { path, fetchInit } = await resolveFetchOptions(params)
 
-    query[`${index}.${BODY_KEYS.path}`] = path
+    query.append(`${index}.${BODY_KEYS.path}`, path)
 
-    const resolvedQuery = { ...params.query, ...params.input?.query }
+    const requestQuery = mergeQuery(params.query, params.input?.query)
 
-    for (const key in resolvedQuery) {
-      const value = resolvedQuery[key]
-
-      if (value != null) {
-        query[`${index}.${BODY_KEYS.query}.${key}`] = value
-      }
-    }
+    requestQuery.entries().forEach(([key, value]) => {
+      query.append(`${index}.${BODY_KEYS.query}.${key}`, value)
+    })
 
     const fetchInitHeaders: any = fetchInit?.headers
 

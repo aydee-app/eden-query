@@ -19,45 +19,41 @@ function getAsPrimitive(value: unknown) {
 
 export type QueryValue = string | number | boolean | ReadonlyArray<string | number | boolean> | null
 
-export function buildQueryString(input?: Record<string, QueryValue>): string {
+export interface QueryStringOptions {
+  /**
+   * @default '&'
+   */
+  separator?: string
+}
+
+export function buildQueryString(init?: URLSearchParamsInit, options?: QueryStringOptions): string {
   let result = ''
 
-  if (input === null || typeof input !== 'object') return result
+  if (init === null || typeof init !== 'object') return result
 
-  const separator = '&'
-  const keys = Object.keys(input)
-  const keyLength = keys.length
-  let valueLength = 0
+  const input = new URLSearchParams(init as any)
 
-  for (let i = 0; i < keyLength; i++) {
-    const key = keys[i]
+  const separator = options?.separator ?? '&'
 
-    if (key == null) continue
-
-    const value = input[key]
+  input.entries().forEach(([key, value], i) => {
     const encodedKey = encodeURIComponent(key) + '='
-
-    if (i) {
-      result += separator
-    }
-
-    if (Array.isArray(value)) {
-      valueLength = value.length
-      for (let j = 0; j < valueLength; j++) {
-        if (j) {
-          result += separator
-        }
-
-        // Optimization: Dividing into multiple lines improves the performance.
-        // Since v8 does not need to care about the '+' character if it was one-liner.
-        result += encodedKey
-        result += getAsPrimitive(value[j])
-      }
-    } else {
-      result += encodedKey
-      result += getAsPrimitive(value)
-    }
-  }
+    if (i) result += separator
+    result += encodedKey
+    result += getAsPrimitive(value)
+  })
 
   return result
+}
+
+export type URLSearchParamsInit =
+  | ConstructorParameters<typeof URLSearchParams>
+  | URLSearchParams
+  | Record<string, any>
+  | undefined
+
+export function mergeQuery(...queries: Array<URLSearchParamsInit>) {
+  const params = queries.map((q) => new URLSearchParams(q as any))
+  const entries = params.flatMap((p) => p.entries().toArray())
+  const merged = new URLSearchParams(entries)
+  return merged
 }

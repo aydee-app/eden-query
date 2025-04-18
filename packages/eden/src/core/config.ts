@@ -80,7 +80,7 @@ export interface EdenResolverConfig<
   /**
    * Global query parameters for requests.
    */
-  query?: Record<string, any>
+  query?: Record<string, any> | URLSearchParams
 
   /**
    * Global fetch options.
@@ -218,4 +218,5 @@ export type InternalEdenRequestOptions<
   Omit<EdenResolverConfig<TElysia, TConfig>, 'query' | 'headers'> & {
     headers?: Headers
     query?: URLSearchParams
+    body_type?: string
   }

@@ -49,7 +49,7 @@ describe('deserializeBatchGetParams', () => {
 
       const result = await deserializeBatchGetParams(context)
 
-      expect(result[0]?.input?.query).toBeUndefined()
+      expect(result[0]?.input?.query).toStrictEqual({ '': 'world' })
     })
 
     test('handles valid query and ignores queries without keys', async () => {
@@ -66,7 +66,7 @@ describe('deserializeBatchGetParams', () => {
 
       const result = await deserializeBatchGetParams(context)
 
-      expect(result[0]?.input?.query).toStrictEqual({ hello: 'world' })
+      expect(result[0]?.input?.query).toStrictEqual({ hello: 'world', '': 'my-query' })
     })
 
     test('headers ', async () => {
@@ -105,7 +105,7 @@ describe('deserializeBatchGetParams', () => {
       expect(result[0]).toStrictEqual({ path: '/' })
     })
 
-    test('ignores unknown keys', async () => {
+    test('handles unknown keys', async () => {
       const query = {
         '0.path': '/',
         '0.invalid': 'request invalid',
@@ -119,7 +119,7 @@ describe('deserializeBatchGetParams', () => {
 
       const result = await deserializeBatchGetParams(context)
 
-      expect(result[0]).toStrictEqual({ path: '/' })
+      expect(result[0]).toStrictEqual({ path: '/', invalid: 'request invalid' })
     })
   })
 
@@ -138,7 +138,7 @@ describe('deserializeBatchGetParams', () => {
 
       const result = await deserializeBatchGetParams(context)
 
-      expect(result[0]?.query?.['hello']).toBe(query.hello)
+      expect(result[0]?.query).toStrictEqual(new URLSearchParams({ hello: query.hello }))
     })
 
     test('query with dots', async () => {
@@ -173,8 +173,8 @@ describe('deserializeBatchGetParams', () => {
 
       const result = await deserializeBatchGetParams(context)
 
-      expect(result[0]?.query).toStrictEqual({ hello: 'world' })
-      expect(result[0]?.input?.query).toStrictEqual({ yes: 'no' })
+      expect(result[0]?.query).toStrictEqual(new URLSearchParams({ hello: 'world' }))
+      expect(result[0]?.input?.query).toStrictEqual({ yes: 'no', '': 'my-query' })
     })
 
     test('headers', async () => {
@@ -193,7 +193,7 @@ describe('deserializeBatchGetParams', () => {
 
       const result = await deserializeBatchGetParams(context)
 
-      expect(result[0]?.headers).toStrictEqual({ auth: 'global auth' })
+      expect(result[0]?.headers).toStrictEqual(new Headers({ auth: 'global auth' }))
       expect(result[0]?.input?.headers?.['auth']).toBe(headers['0.auth'])
     })
 
@@ -215,7 +215,7 @@ describe('deserializeBatchGetParams', () => {
       expect(result[0]).toStrictEqual({ path: '/' })
     })
 
-    test('ignores header if invalid index', async () => {
+    test('handles header name with dots', async () => {
       const headers = {
         'first.auth': '123',
       }
@@ -230,7 +230,7 @@ describe('deserializeBatchGetParams', () => {
 
       const result = await deserializeBatchGetParams(context)
 
-      expect(result[0]).toStrictEqual({ path: '/' })
+      expect(result[0]).toStrictEqual({ path: '/', headers: new Headers(headers) })
     })
   })
 })

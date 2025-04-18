@@ -1,19 +1,21 @@
 export const isServer = typeof FileList === 'undefined'
 
-export const GET_OR_HEAD_HTTP_METHODS = ['get', 'head', 'subscribe'] as const
+export const GET_OR_HEAD_HTTP_METHODS = ['GET', 'HEAD', 'SUBSCRIBE'] as const
 
 /**
  * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/treaty2/index.ts#L11C1-L21C11
  */
 export const HTTP_METHODS = [
   ...GET_OR_HEAD_HTTP_METHODS,
-  'post',
-  'put',
-  'delete',
-  'patch',
-  'options',
-  'connect',
+  'POST',
+  'PUT',
+  'DELETE',
+  'PATCH',
+  'OPTIONS',
+  'CONNECT',
 ] as const
+
+export type HTTPMethod = (typeof HTTP_METHODS)[number]
 
 export const LOOPBACK_ADDRESSES = ['localhost', '127.0.0.1', '0.0.0.0']
 

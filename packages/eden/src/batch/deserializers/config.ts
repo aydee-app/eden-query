@@ -1,7 +1,7 @@
-import type { EdenRequestOptions } from '../../core/config'
+import type { HTTPMethod } from '../../constants'
+import type { InternalEdenRequestOptions } from '../../core/config'
 import type { InternalContext, InternalElysia, TypeConfig } from '../../core/types'
 import type { MaybeArray, MaybePromise } from '../../utils/types'
-import type { BatchMethod } from '../shared'
 
 /**
  * Configuration options for a batch request deserializer.
@@ -13,11 +13,11 @@ export interface BatchDeserializerConfig {
   endpoint?: string
 
   /**
-   * The supported method(s) for batch requests.
+   * The supported method(s) for batch requests or `true` to handle all HTTP methods.
    *
-   * @default "POST".
+   * @default true.
    */
-  method?: MaybeArray<BatchMethod | true>
+  method?: MaybeArray<HTTPMethod | true>
 }
 
 /**
@@ -32,4 +32,4 @@ export type BatchDeserializer<> = <
 >(
   context: InternalContext,
   config: BatchDeserializerConfig,
-) => MaybePromise<Array<EdenRequestOptions<TElysia, TConfig>>>
+) => MaybePromise<Array<InternalEdenRequestOptions<TElysia, TConfig>>>

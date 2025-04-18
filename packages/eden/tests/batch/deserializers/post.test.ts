@@ -243,25 +243,29 @@ describe('deserializeBatchPostParams', () => {
         {
           path: '/p',
           method: 'POST',
+          key: 'key',
+          value: 'index',
+          index: '1',
         },
         {
           path: '/pa',
           method: 'PATCH',
+          key: 'key',
+          value: 'index',
+          index: '1',
         },
         {
           path: '/de',
           method: 'DELETE',
+          key: 'key',
+          value: 'index',
+          index: '1',
         },
       ]
 
       requests.forEach((request, index) => {
         Object.entries(request).forEach(([key, value]) => {
           body.append(`${index}.${key}`, value)
-
-          // add unknown keys
-          body.append(`${index}.key`, key)
-          body.append(`${index}.value`, value)
-          body.append(`${index}.index`, index.toString())
         })
       })
 
@@ -500,7 +504,7 @@ describe('deserializeBatchPostParams', () => {
 
       const result = await deserializeBatchPostParams(context)
 
-      expect(result[0]?.headers).toStrictEqual({ auth: 'global auth' })
+      expect(result[0]?.headers).toStrictEqual(new Headers({ auth: 'global auth' }))
       expect(result[0]?.input?.headers?.['auth']).toBe(headers['0.auth'])
     })
 

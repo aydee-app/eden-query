@@ -246,11 +246,9 @@ export function edenTreatyProxy<
 
       const method = pathsCopy.pop()?.toUpperCase()
 
-      const lowercaseMethod: any = method?.toLowerCase()
-
       const pathParam = getPathParam(argArray)
 
-      const isMethod = HTTP_METHODS.includes(lowercaseMethod)
+      const isMethod = HTTP_METHODS.includes(method as any)
 
       if (pathParam?.key != null && !isMethod) {
         const allPathParams = [...pathParams, pathParam.param]
@@ -264,7 +262,7 @@ export function edenTreatyProxy<
 
       const allPathParams = pathParams
 
-      if (GET_OR_HEAD_HTTP_METHODS.includes(lowercaseMethod)) {
+      if (!method || GET_OR_HEAD_HTTP_METHODS.includes(method as any)) {
         params = { ...params, ...argArray[1], input: argArray[0] }
         if (argArray[0]?.params) allPathParams.push(argArray[0]?.params)
       } else {

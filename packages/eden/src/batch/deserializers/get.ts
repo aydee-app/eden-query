@@ -1,5 +1,6 @@
-import type { EdenRequestOptions } from '../../core/config'
+import type { InternalEdenRequestOptions } from '../../core/config'
 import type { InternalContext, InternalElysia, TypeConfig } from '../../core/types'
+import { deepMerge } from '../../utils/deep-merge'
 import { BODY_KEYS, IGNORED_HEADERS } from '../shared'
 import type { BatchDeserializerConfig } from './config'
 
@@ -14,25 +15,23 @@ export async function deserializeBatchGetParams<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
 >(context: InternalContext, _config?: BatchDeserializerConfig) {
-  const options: Array<EdenRequestOptions> = []
+  const options: Array<InternalEdenRequestOptions> = []
 
   const request = context.request
 
   const url = new URL(request.url)
 
-  const searchParams = url.searchParams.entries()
-
   /**
    * Headers that do not start with `${number}.` will be added to headers for all requests.
    */
-  const globalHeaders: any = {}
+  const globalHeaders = new Headers()
 
   /**
    * Query parameters that do not start with `${number}.` will be added to query for all requests.
    */
-  const globalQuery: any = {}
+  const globalQuery = new URLSearchParams()
 
-  for (const [key, value] of searchParams) {
+  url.searchParams.forEach((value, key) => {
     /**
      * @example
      *
@@ -44,48 +43,47 @@ export async function deserializeBatchGetParams<
      * ['key', 'with', 'dots'] -> all requests have query '?key.with.dots=value'.
      * ['0', 'path'] -> first request is for endpoint 'value'.
      */
-    const [maybeIndex, property, ...queryKey] = key.split('.')
+    const [maybeIndex, property = '', ...queryKeySegments] = key.split('.')
 
     const index = Number(maybeIndex)
 
     // If first item is not a numeric index, then apply the raw key and value to all request queries.
     if (Number.isNaN(index)) {
-      globalQuery[key] = value
-      continue
+      globalQuery.append(key, value)
+
+      return
     }
 
     // If the first item is a numeric index, try to map it to a request property.
     switch (property) {
       case BODY_KEYS.query: {
         // Join the remaining entries to accommodate query keys with dots.
-        const fullQueryKey = queryKey.join('.')
+        const queryKey = queryKeySegments.join('.')
 
-        options[index] ??= {}
-        options[index].input ??= {}
-        options[index].input.query ??= {}
-        options[index].input.query[fullQueryKey] = value
+        options[index] = deepMerge(options[index], { input: { query: { [queryKey]: value } } })
 
-        continue
-      }
-
-      case BODY_KEYS.path: {
-        options[index] ??= {}
-        options[index].path = value
-
-        continue
+        return
       }
 
       default: {
-        continue
+        options[index] = { ...options[index], [property]: value }
       }
     }
-  }
+  })
 
   // Array items are added based on index, but may be out of order or contain missing items.
   // TODO: handle missing items, i.e. holes, in the array.
 
   for (const [key, value] of request.headers) {
-    const [maybeIndex = '', name] = key.split('.')
+    const [maybeIndex = '', ...nameSegments] = key.split('.')
+
+    const name = nameSegments.join('.')
+
+    const possibleHeaderNames = [key.toLowerCase(), name.toLowerCase()]
+
+    // Some headers from the batch request should not be forwarded to the individual requests.
+    // For example, "content-length" describes the size of the batch request, not the individual request.
+    if (possibleHeaderNames.some((k) => IGNORED_HEADERS.includes(k))) continue
 
     const index = Number(maybeIndex)
 
@@ -93,33 +91,23 @@ export async function deserializeBatchGetParams<
     // apply the header to all requests.
 
     if (Number.isNaN(index) || !name) {
-      globalHeaders[key] = value
-      continue
+      globalHeaders.append(key, value)
+    } else {
+      options[index] = deepMerge(options[index], { input: { headers: { [name]: value } } })
     }
-
-    options[index] ??= {}
-    options[index].input ??= {}
-    options[index].input.headers ??= {}
-    ;(options[index].input.headers as any)[name] = value
   }
 
-  for (const key in globalHeaders) {
-    // Some headers from the batch request should not be forwarded to the individual requests.
-    // For example, "content-length" describes the size of the batch request, not the individual request.
-    if (IGNORED_HEADERS.includes(key.toLowerCase())) continue
-
+  if (globalHeaders.entries().toArray().length) {
     for (const result of options) {
-      result.headers ??= {}
-      ;(result.headers as any)[key] = globalHeaders[key]
+      result.headers = new Headers([...(result.headers ?? []), ...globalHeaders])
     }
   }
 
-  for (const key in globalQuery) {
+  if (globalQuery.size) {
     for (const result of options) {
-      result.query ??= {}
-      result.query[key] = globalQuery[key]
+      result.query = new URLSearchParams([...(result.query ?? []), ...globalQuery])
     }
   }
 
-  return options as Array<EdenRequestOptions<TElysia, TConfig>>
+  return options as Array<InternalEdenRequestOptions<TElysia, TConfig>>
 }
