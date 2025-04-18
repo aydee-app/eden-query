@@ -26,10 +26,6 @@ export interface InternalEdenTypesConfig extends InternalTypeConfig {
    * Custom separator, $param = treaty.posts.$postId.users.$userId.get({ params: { postId: 'my-post-id', userId: 'my-user-id' } })
    */
   separator?: ParamSeparator
-
-  omit?: string
-
-  pick?: string
 }
 
 export type EdenConfig<

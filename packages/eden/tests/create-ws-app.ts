@@ -93,8 +93,7 @@ export function createWsApp(origin: string) {
 
               if (validateMessage?.Check(message) === false) {
                 const error = new ValidationError('message', validateMessage, message)
-                const r = error.message
-                client.send(r)
+                client.send(error.message)
                 return
               }
 

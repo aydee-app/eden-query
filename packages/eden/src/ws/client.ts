@@ -137,11 +137,7 @@ export class WebSocketClient {
   private reconnecting?: Promise<void>
 
   constructor(public readonly options: WebSocketClientOptions) {
-    const lazyOptions = {
-      enabled: false,
-      closeMs: 0,
-      ...options.lazy,
-    }
+    const lazyOptions = { enabled: false, closeMs: 0, ...options.lazy }
 
     this.inactivityTimeout = new ResettableTimeout(() => {
       if (this.requestManager.hasOutgoingRequests() || this.requestManager.hasPendingRequests()) {

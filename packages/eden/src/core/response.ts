@@ -1,13 +1,3 @@
-/**
- * Roughly correlates to tRPC responses.
- * @see https://github.com/trpc/trpc/blob/5597551257ad8d83dbca7272cc6659756896bbda/packages/server/src/unstable-core-do-not-import/rpc/envelopes.ts#L73-L83
- *
- * The main difference is that {@link EdenErrorResult} does not conform to any shape
- * since this library does not provide any wrapping around the errors returned from the server.
- *
- * i.e. If your endpoint returns a string as an error, this library will give you the returned string.
- */
-
 import { parseStringifiedValue } from '../utils/parse'
 import type { ResponseEsque } from './http'
 

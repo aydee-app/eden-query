@@ -157,7 +157,7 @@ export interface EdenWebSocketIdleState extends EdenWebSocketBaseState {
  */
 export interface EdenWebSocketConnectingState<T> extends EdenWebSocketBaseState {
   state: 'connecting'
-  error?: T
+  error?: T | null
   data?: never
 }
 

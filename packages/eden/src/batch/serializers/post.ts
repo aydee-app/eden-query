@@ -21,15 +21,11 @@ export async function serializeBatchPostParams<
 
     body.append(`${index}.${BODY_KEYS.path}`, `${path}${query ? '?' : ''}${query}`)
 
-    const fetchInitHeaders: any = fetchInit?.headers
+    const requestHeaders = new Headers(fetchInit?.headers)
 
-    if (fetchInit?.headers) {
-      for (const key in fetchInit.headers) {
-        const value = fetchInitHeaders[key]
-
-        if (value) {
-          headers.append(`${index}.${key}`, value)
-        }
+    for (const [key, value] of requestHeaders) {
+      if (value) {
+        headers.append(`${index}.${key}`, value)
       }
     }
 
@@ -45,20 +41,20 @@ export async function serializeBatchPostParams<
       return
     }
 
-    const contentType = fetchInitHeaders['content-type']?.split(';')[0]
+    const contentType = requestHeaders.get('content-type')?.split(';')[0]
 
-    if (contentType !== 'application/json') return
-
-    const fetchInitBody: any = fetchInit?.body
+    if (!contentType?.startsWith('application/json')) return
 
     body.append(`${index}.${BODY_KEYS.bodyType}`, BODY_TYPES.JSON)
-    body.set(`${index}.${BODY_KEYS.body}`, fetchInitBody)
+    body.set(`${index}.${BODY_KEYS.body}`, fetchInit.body as any)
 
-    const files = extractFiles(fetchInitBody)
+    if (typeof fetchInit.body === 'object') {
+      const files = extractFiles(fetchInit.body)
 
-    for (const file of files) {
-      body.append(`${index}.${BODY_KEYS.filePaths}`, file.path)
-      body.append(`${index}.${BODY_KEYS.files}`, file.file)
+      for (const file of files) {
+        body.append(`${index}.${BODY_KEYS.filePaths}`, file.path)
+        body.append(`${index}.${BODY_KEYS.files}`, file.file)
+      }
     }
   })
 

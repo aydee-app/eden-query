@@ -19,7 +19,7 @@ import type { EdenLink, Operation, OperationLink } from './types'
  * tRPC error codes that are considered retryable
  * With out of the box SSE, the client will reconnect when these errors are encountered
  */
-const internalServerErrorCodes = Object.values(EDEN_SERVER_ERROR_CODES)
+const internalServerErrorCodes: number[] = Object.values(EDEN_SERVER_ERROR_CODES)
 
 type HTTPSubscriptionLinkOptions<
   TElysia extends InternalElysia,
@@ -62,10 +62,7 @@ export function httpSubscriptionLink<
           throw new Error('httpSubscriptionLink only supports subscriptions')
         }
 
-        const resolvedParams = {
-          path,
-          ...params,
-        }
+        const resolvedParams = { path, ...params }
 
         const resolvedPath = resolveEdenFetchPath(resolvedParams)
 
@@ -109,9 +106,7 @@ export function httpSubscriptionLink<
 
         const connectionSub = connectionState.subscribe({
           next(state) {
-            observer.next({
-              result: state,
-            })
+            observer.next({ result: state })
           },
         })
 
@@ -145,12 +140,7 @@ export function httpSubscriptionLink<
                   }
                 }
 
-                observer.next({
-                  result,
-                  context: {
-                    eventSource: chunk.eventSource,
-                  },
-                })
+                observer.next({ result, context: { eventSource: chunk.eventSource } })
 
                 break
               }
@@ -165,78 +155,56 @@ export function httpSubscriptionLink<
                   },
                 })
 
-                connectionState.next({
-                  type: 'state',
-                  state: 'pending',
-                  error: undefined,
-                })
+                connectionState.next({ type: 'state', state: 'pending', error: undefined })
 
                 break
               }
 
               case 'serialized-error': {
-                // const error = TRPCClientError.from({ error: chunk.error })
-                const error: any = chunk.error
+                const error = EdenError.from({ error: chunk.error })
 
-                if (internalServerErrorCodes.includes(error.code)) {
-                  //
-                  connectionState.next({
-                    type: 'state',
-                    state: 'connecting',
-                    error,
-                  })
+                if (error.code && internalServerErrorCodes.includes(error.code)) {
+                  connectionState.next({ type: 'state', state: 'connecting', error })
+
                   break
                 }
 
-                //
-                // non-retryable error, cancel the subscription
+                // Unrecoverable error, cancel the subscription.
                 throw error
               }
 
               case 'connecting': {
                 const lastState = connectionState.get()
 
-                // const error = chunk.event && TRPCClientError.from(chunk.event)
-                const error: any = chunk.event
+                const error = chunk.event && EdenError.from(chunk.event)
 
-                if (!error && lastState.state === 'connecting') {
-                  break
+                if (error || lastState.state === 'connecting') {
+                  connectionState.next({ type: 'state', state: 'connecting', error })
                 }
 
-                connectionState.next({
-                  type: 'state',
-                  state: 'connecting',
-                  error,
-                })
                 break
               }
 
               case 'timeout': {
                 const message = `Timeout of ${chunk.ms}ms reached while waiting for a response`
 
-                connectionState.next({
-                  type: 'state',
-                  state: 'connecting',
-                  error: new EdenError({ message }),
-                })
+                const error = new EdenError({ message })
+
+                connectionState.next({ type: 'state', state: 'connecting', error })
               }
             }
           }
 
           observer.next({ result: { type: 'stopped' } })
 
-          connectionState.next({
-            type: 'state',
-            state: 'idle',
-            error: undefined,
-          })
+          connectionState.next({ type: 'state', state: 'idle', error: undefined })
 
           observer.complete()
         }
 
-        run().catch((error: any) => {
+        run().catch((err: any) => {
+          const error = EdenError.from(err)
           observer.error(error)
-          // observer.error(TRPCClientError.from(error))
         })
 
         return () => {

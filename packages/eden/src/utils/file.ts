@@ -10,7 +10,7 @@ export type ExtractedFile = {
   file: File
 }
 
-export function extractFiles(object: Record<string, any>, path: string[] = []): ExtractedFile[] {
+export function extractFiles(object?: Record<string, any>, path: string[] = []): ExtractedFile[] {
   const result: ExtractedFile[] = []
 
   for (const key in object) {
@@ -22,8 +22,6 @@ export function extractFiles(object: Record<string, any>, path: string[] = []): 
       const extracted: ExtractedFile = { path: [...path, key].join('.'), file: value }
 
       result.push(extracted)
-
-      // delete object[key]
 
       continue
     }

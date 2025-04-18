@@ -119,17 +119,12 @@ export function httpLink<TElysia extends InternalElysia, const TConfig>(
 
     const operationLink = (({ op }) => {
       if (op.type === 'subscription') {
-        const client = new WebSocketClient({
-          url: `${options.domain}${op.path}`,
-        })
+        const client = new WebSocketClient({ url: `${options.domain}${op.path}` })
 
         return new Observable((observer) => {
           const connectionStateSubscription = client.connectionState.subscribe({
-            next(result: any) {
-              observer.next({
-                result,
-                context: op.context,
-              })
+            next(result) {
+              observer.next({ result, context: op.context })
             },
           })
 
