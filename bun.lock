@@ -76,6 +76,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@ap0nia/eden": "workspace:^",
+        "@ap0nia/eden-tanstack-query": "workspace:^",
       },
       "devDependencies": {
         "@ark/attest": "^0.45.6",
