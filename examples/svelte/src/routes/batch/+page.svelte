@@ -1,11 +1,11 @@
 <script lang="ts">
   import { createQuery } from '@tanstack/svelte-query'
 
-  import { eden } from '$lib/eden'
+  import { aponia, eden } from '$lib/eden'
 
   const hello = createQuery(eden.api.index.get.queryOptions())
 
-  const bye = createQuery(eden.api.bye.get.queryOptions())
+  const bye = aponia.api.bye.get.createQuery()
 </script>
 
 <main>

@@ -38,7 +38,7 @@ export type EdenQueryOptions<
 export type EdenMutationOptions<
   TData = unknown,
   TError = Error,
-  TVariables = unknown,
+  TVariables = void,
   TContext = unknown,
 > =
   // prettier-ignore At least one property with TError needs to be selected.

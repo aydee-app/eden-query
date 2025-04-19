@@ -1,13 +1,14 @@
 <script lang="ts">
   import { QueryClientProvider } from '@tanstack/svelte-query'
 
-  import { eden } from '$lib/eden'
+  import { aponia, eden } from '$lib/eden'
 
   import type { LayoutProps } from './$types'
 
   let { data, children }: LayoutProps = $props()
 
   eden.treaty.client = data.client
+  aponia.treaty.client = data.client
 </script>
 
 <QueryClientProvider client={data.queryClient}>

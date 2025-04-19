@@ -203,7 +203,7 @@ export type EdenTreatySubscriptionRoute<
 export type EdenTreatyTanstackQuery<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends InternalEdenTypesConfig = {},
-> = EdenTreatyTanstackQueryRoot<TElysia> &
+> = EdenTreatyTanstackQueryRoot<TElysia, TConfig> &
   EdenTreatyTanstackQueryProxy<TElysia, TElysia['_routes'], TConfig>
 
 export function edenTreatyTanstackQueryProxy<

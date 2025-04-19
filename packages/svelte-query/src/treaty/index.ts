@@ -1,7 +1,6 @@
 import {
   type EdenConfig,
   type EdenResolverConfig,
-  type EdenResult,
   type EdenRouteBody,
   type EdenRouteError,
   type EdenRouteInput,
@@ -14,26 +13,22 @@ import {
   type InternalEdenTypesConfig,
   type InternalElysia,
   type InternalRouteSchema,
-  linkAbortSignals,
   type ParameterFunctionArgs,
   type ResolveEdenTypeConfig,
   type WebSocketClientOptions,
 } from '@ap0nia/eden'
-import type {
-  EdenMutationOptions,
-  EdenQueryOptions,
-  EdenTanstackQueryConfig,
-} from '@ap0nia/eden-tanstack-query'
+import { type EdenTanstackQueryConfig, edenTreatyTanstackQuery } from '@ap0nia/eden-tanstack-query'
 import {
   createInfiniteQuery,
+  type CreateInfiniteQueryOptions,
   type CreateInfiniteQueryResult,
   createMutation,
   type CreateMutationResult,
   createQuery,
+  type CreateQueryOptions,
   type CreateQueryResult,
   type InfiniteData,
   type MutationOptions,
-  type QueryOptions,
 } from '@tanstack/svelte-query'
 
 export interface EdenSvelteQueryConfig<
@@ -160,14 +155,11 @@ export type EdenTreatySvelteQueryQueryRoute<
         ? [
             options?: TFinalOptions,
             config?: Partial<
-              QueryOptions<
+              CreateQueryOptions<
                 EdenRouteSuccess<TRoute>,
                 EdenRouteError<TRoute>,
                 EdenRouteSuccess<TRoute>,
-                [TPaths, { options: EdenRouteInput; type: 'query' }],
-                TOptions extends { query?: { cursor?: any } }
-                  ? NonNullable<TOptions['query']>['cursor']
-                  : never
+                [TPaths, { options: EdenRouteInput; type: 'query' }]
               >
             > & {
               eden?: EdenResolverConfig<TElysia, TConfig>
@@ -176,14 +168,11 @@ export type EdenTreatySvelteQueryQueryRoute<
         : [
             options: TFinalOptions,
             config?: Partial<
-              QueryOptions<
+              CreateQueryOptions<
                 EdenRouteSuccess<TRoute>,
                 EdenRouteError<TRoute>,
                 EdenRouteSuccess<TRoute>,
-                [TPaths, { options: EdenRouteInput; type: 'query' }],
-                TOptions extends { query?: { cursor?: any } }
-                  ? NonNullable<TOptions['query']>['cursor']
-                  : never
+                [TPaths, { options: EdenRouteInput; type: 'query' }]
               >
             > & {
               eden?: EdenResolverConfig<TElysia, TConfig>
@@ -204,41 +193,18 @@ export type EdenTreatySvelteQueryInfiniteQueryRoute<
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
 > = {
   createInfiniteQuery: (
-    ...args: [
-      ...({} extends TFinalOptions
-        ? [
-            options?: TFinalOptions,
-            config?: Partial<
-              QueryOptions<
-                EdenRouteSuccess<TRoute>,
-                EdenRouteError<TRoute>,
-                EdenRouteSuccess<TRoute>,
-                [TPaths, { options: EdenRouteInput; type: 'query' }],
-                TOptions extends { query?: { cursor?: any } }
-                  ? NonNullable<TOptions['query']>['cursor']
-                  : never
-              >
-            > & {
-              eden?: EdenResolverConfig<TElysia, TConfig>
-            },
-          ]
-        : [
-            options: TFinalOptions,
-            config?: Partial<
-              QueryOptions<
-                EdenRouteSuccess<TRoute>,
-                EdenRouteError<TRoute>,
-                EdenRouteSuccess<TRoute>,
-                [TPaths, { options: EdenRouteInput; type: 'query' }],
-                TOptions extends { query?: { cursor?: any } }
-                  ? NonNullable<TOptions['query']>['cursor']
-                  : never
-              >
-            > & {
-              eden?: EdenResolverConfig<TElysia, TConfig>
-            },
-          ]),
-    ]
+    options: TFinalOptions,
+    config: CreateInfiniteQueryOptions<
+      EdenRouteSuccess<TRoute>,
+      EdenRouteError<TRoute>,
+      EdenRouteSuccess<TRoute>,
+      [TPaths, { options: EdenRouteInput; type: 'query' }],
+      TOptions extends { query?: { cursor?: any } }
+        ? NonNullable<TOptions['query']>['cursor']
+        : never
+    > & {
+      eden?: EdenResolverConfig<TElysia, TConfig>
+    },
   ) => CreateInfiniteQueryResult<InfiniteData<EdenRouteSuccess<TRoute>>, EdenRouteError<TRoute>>
 }
 
@@ -301,7 +267,7 @@ export type EdenTreatySVelteQuery<
 > = EdenTreatySvelteQueryRoot<TElysia> &
   EdenTreatySvelteQueryProxy<TElysia, TElysia['_routes'], TConfig>
 
-export function edenTreatySvelteQueryProxy<
+function edenTreatySvelteQueryProxy<
   TElysia extends InternalElysia = any,
   TConfig extends InternalEdenTypesConfig = any,
 >(
@@ -361,72 +327,44 @@ export function edenTreatySvelteQuery<
   domain?: string,
   config: EdenSvelteQueryConfig<TElysia, TConfig> = {},
 ): EdenTreatySVelteQuery<TElysia, ResolveEdenTypeConfig<TConfig>> {
+  const tanstack = edenTreatyTanstackQuery(domain, config)
+
   const hooks: EdenTreatySvelteQueryHooks<TElysia, TConfig> = {
     createQuery: (treaty, paths, argArray) => {
-      const queryKey = [paths, { options: argArray[0], type: 'query' }]
+      const { eden, ...userOptions } = argArray[1] ?? {}
 
-      const queryOptions: EdenQueryOptions = {
-        queryKey,
-        queryFn: async (context) => {
-          if (config.abortOnUnmount) {
-            argArray[1] = { ...argArray[1], fetch: { ...argArray[1]?.fetch } }
+      const baseQueryOptions = tanstack.hooks.queryOptions(treaty, paths, [argArray[0], eden])
 
-            linkAbortSignals(context.signal, argArray[1]?.fetch.signal)
-
-            argArray[1].fetch.signal = context.signal
-          }
-
-          const result: EdenResult = await (treaty as any)(...argArray)
-
-          return result.data
-        },
-      }
+      const queryOptions = { ...baseQueryOptions, ...userOptions }
 
       const query = createQuery(queryOptions)
 
       return query
     },
     createInfiniteQuery: (treaty, paths, argArray) => {
-      const queryKey = [paths, { options: argArray[0], type: 'query' }]
+      const { eden, ...userOptions } = argArray[1] ?? {}
 
-      const queryOptions: EdenQueryOptions = {
-        queryKey,
-        queryFn: async (context) => {
-          if (config.abortOnUnmount) {
-            argArray[1] = { ...argArray[1], fetch: { ...argArray[1]?.fetch } }
+      const baseQueryOptions = tanstack.hooks.queryOptions(treaty, paths, [argArray[0], eden])
 
-            linkAbortSignals(context.signal, argArray[1]?.fetch.signal)
-
-            argArray[1].fetch.signal = context.signal
-          }
-
-          const result: EdenResult = await (treaty as any)(...argArray)
-
-          return result.data
-        },
-      }
-
-      const infiniteQueryOptions = { ...queryOptions, ...argArray[1] }
+      const infiniteQueryOptions = { ...baseQueryOptions, ...userOptions }
 
       const infiniteQuery = createInfiniteQuery(infiniteQueryOptions)
 
       return infiniteQuery
     },
     createMutation: (treaty, paths, argArray) => {
-      const mutationOptions: EdenMutationOptions = {
-        mutationKey: paths,
-        mutationFn: async (_context) => {
-          const result: EdenResult = await (treaty as any)(...argArray)
-          return result.data
-        },
-      }
+      const { eden, ...userOptions } = argArray[1] ?? {}
 
-      const mutation = createMutation(mutationOptions)
+      const baseMutationOptions = tanstack.hooks.mutationOptions(treaty, paths, [argArray[0], eden])
+
+      const mutationOptions = { ...baseMutationOptions, ...userOptions }
+
+      const mutation = createMutation<unknown, Error, unknown, unknown>(mutationOptions)
 
       return mutation
     },
-    createSubscription: (treaty, _paths, argArray) => {
-      const edenWs = (treaty as any)(...argArray)
+    createSubscription: (treaty, paths, argArray) => {
+      const edenWs = tanstack.hooks.subscribe(treaty, paths, argArray)
       return edenWs
     },
   }
@@ -438,7 +376,7 @@ export function edenTreatySvelteQuery<
     hooks,
   }
 
-  const innerProxy = edenTreatySvelteQueryProxy(root, { domain, ...config } as any)
+  const innerProxy = edenTreatySvelteQueryProxy(root, { domain, ...config })
 
   const proxy: any = new Proxy(() => {}, {
     get(_target, p, _receiver) {

@@ -34,6 +34,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@ap0nia/eden": "workspace:^",
+        "@ap0nia/eden-svelte-query": "workspace:^",
         "@ap0nia/eden-tanstack-query": "workspace:^",
         "@tanstack/svelte-query": "^5.72.2",
         "elysia": "^1.2.25",
@@ -77,11 +78,11 @@
       "dependencies": {
         "@ap0nia/eden": "workspace:^",
         "@ap0nia/eden-tanstack-query": "workspace:^",
+        "@tanstack/svelte-query": "^5.72.2",
       },
       "devDependencies": {
         "@ark/attest": "^0.45.6",
         "@rslib/core": "^0.6.2",
-        "@tanstack/svelte-query": "^5.72.2",
         "devalue": "^5.1.1",
         "elysia": "^1.2.25",
         "rslib": "^0.0.10",
