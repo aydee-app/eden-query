@@ -17,24 +17,22 @@ import {
   type ResolveEdenTypeConfig,
   type WebSocketClientOptions,
 } from '@ap0nia/eden'
-import { type EdenTanstackQueryConfig, edenTreatyTanstackQuery } from '@ap0nia/eden-tanstack-query'
+import { edenTreatyTanstackQuery } from '@ap0nia/eden-tanstack-query'
 import {
   createInfiniteQuery,
   type CreateInfiniteQueryOptions,
   type CreateInfiniteQueryResult,
   createMutation,
+  type CreateMutationOptions,
   type CreateMutationResult,
   createQuery,
   type CreateQueryOptions,
   type CreateQueryResult,
   type InfiniteData,
-  type MutationOptions,
 } from '@tanstack/svelte-query'
 
-export interface EdenSvelteQueryConfig<
-  TElysia extends InternalElysia,
-  TConfig extends InternalEdenTypesConfig = {},
-> extends EdenTanstackQueryConfig<TElysia, TConfig> {}
+import type { InfiniteQueryKeys } from './fetch'
+import type { EdenSvelteQueryConfig } from './types'
 
 export interface EdenTreatySvelteQueryHooks<
   TElysia extends InternalElysia = {},
@@ -180,7 +178,11 @@ export type EdenTreatySvelteQueryQueryRoute<
           ]),
     ]
   ) => CreateQueryResult<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>>
-}
+} & (TOptions extends { query?: any }
+  ? InfiniteQueryKeys extends keyof TOptions['query']
+    ? EdenTreatySvelteQueryInfiniteQueryRoute<TElysia, TRoute, TConfig, TPaths>
+    : {}
+  : {})
 
 export type EdenTreatySvelteQueryInfiniteQueryRoute<
   TElysia extends InternalElysia,
@@ -194,14 +196,17 @@ export type EdenTreatySvelteQueryInfiniteQueryRoute<
 > = {
   createInfiniteQuery: (
     options: TFinalOptions,
-    config: CreateInfiniteQueryOptions<
-      EdenRouteSuccess<TRoute>,
-      EdenRouteError<TRoute>,
-      EdenRouteSuccess<TRoute>,
-      [TPaths, { options: EdenRouteInput; type: 'query' }],
-      TOptions extends { query?: { cursor?: any } }
-        ? NonNullable<TOptions['query']>['cursor']
-        : never
+    config: Omit<
+      CreateInfiniteQueryOptions<
+        EdenRouteSuccess<TRoute>,
+        EdenRouteError<TRoute>,
+        EdenRouteSuccess<TRoute>,
+        [TPaths, { options: EdenRouteInput; type: 'query' }],
+        TOptions extends { query?: { cursor?: any } }
+          ? NonNullable<TOptions['query']>['cursor']
+          : never
+      >,
+      'queryKey'
     > & {
       eden?: EdenResolverConfig<TElysia, TConfig>
     },
@@ -225,7 +230,12 @@ export type EdenTreatySvelteQueryMutationRoute<
         ? [
             options?: TFinalOptions,
             config?: Partial<
-              MutationOptions<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>, TBody, TContext>
+              CreateMutationOptions<
+                EdenRouteSuccess<TRoute>,
+                EdenRouteError<TRoute>,
+                TBody,
+                TContext
+              >
             > & {
               eden?: EdenResolverConfig<TElysia, TConfig>
             },
@@ -233,7 +243,12 @@ export type EdenTreatySvelteQueryMutationRoute<
         : [
             options: TFinalOptions,
             config?: Partial<
-              MutationOptions<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>, TBody, TContext>
+              CreateMutationOptions<
+                EdenRouteSuccess<TRoute>,
+                EdenRouteError<TRoute>,
+                TBody,
+                TContext
+              >
             > & {
               eden?: EdenResolverConfig<TElysia, TConfig>
             },
