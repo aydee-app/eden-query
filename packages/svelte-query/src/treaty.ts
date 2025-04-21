@@ -14,10 +14,9 @@ import {
   type InternalElysia,
   type InternalRouteSchema,
   type ParameterFunctionArgs,
-  type ResolveEdenTypeConfig,
   type WebSocketClientOptions,
 } from '@ap0nia/eden'
-import { edenTreatyTanstackQuery } from '@ap0nia/eden-tanstack-query'
+import { type EdenTreatyTanstackQuery,edenTreatyTanstackQuery } from '@ap0nia/eden-tanstack-query'
 import {
   createInfiniteQuery,
   type CreateInfiniteQueryOptions,
@@ -25,11 +24,15 @@ import {
   createMutation,
   type CreateMutationOptions,
   type CreateMutationResult,
+  createQueries,
   createQuery,
   type CreateQueryOptions,
   type CreateQueryResult,
   type InfiniteData,
+  type QueriesOptions,
+  type QueriesResults,
 } from '@tanstack/svelte-query'
+import type { Readable } from 'svelte/store'
 
 import type { InfiniteQueryKeys } from './fetch'
 import type { EdenSvelteQueryConfig } from './types'
@@ -38,26 +41,31 @@ export interface EdenTreatySvelteQueryHooks<
   TElysia extends InternalElysia = {},
   TConfig extends InternalEdenTypesConfig = {},
 > {
+  createQueries: <T extends any[], TCombinedResult = QueriesResults<T>>(
+    callback: (eden: EdenTreatyTanstackQuery<TElysia, TConfig>) => QueriesOptions<T>,
+    combine?: (result: QueriesResults<T>) => TCombinedResult,
+  ) => Readable<TCombinedResult>
+
   createQuery: (
-    treaty: EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>>,
+    treaty: EdenTreaty<TElysia, TConfig>,
     paths: string[],
     argArray: any[],
   ) => CreateQueryResult
 
   createInfiniteQuery: (
-    treaty: EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>>,
+    treaty: EdenTreaty<TElysia, TConfig>,
     paths: string[],
     argArray: any[],
   ) => CreateInfiniteQueryResult
 
   createMutation: (
-    treaty: EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>>,
+    treaty: EdenTreaty<TElysia, TConfig>,
     paths: string[],
     argArray: any[],
   ) => CreateMutationResult
 
   createSubscription: (
-    treaty: EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>>,
+    treaty: EdenTreaty<TElysia, TConfig>,
     paths: string[],
     argArray: any[],
   ) => EdenWs
@@ -80,9 +88,9 @@ export type EdenTreatySvelteQueryRoot<
     types?: U,
   ): EdenTreatySvelteQueryProxy<TElysia, TElysia['_routes'], U>
 
-  treaty: EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>>
+  treaty: EdenTreaty<TElysia, TConfig>
 
-  config(config?: EdenSvelteQueryConfig<TElysia, TConfig>): EdenTreatySVelteQuery<TElysia, TConfig>
+  config(config?: EdenSvelteQueryConfig<TElysia, TConfig>): EdenTreatySvelteQuery<TElysia, TConfig>
 
   hooks: EdenTreatySvelteQueryHooks<TElysia, TConfig>
 }
@@ -276,7 +284,7 @@ export type EdenTreatySubscriptionRoute<
 /**
  * @public
  */
-export type EdenTreatySVelteQuery<
+export type EdenTreatySvelteQuery<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends InternalEdenTypesConfig = {},
 > = EdenTreatySvelteQueryRoot<TElysia> &
@@ -327,7 +335,7 @@ function edenTreatySvelteQueryProxy<
       }
 
       if (isHook) {
-        return root.hooks[hook as keyof typeof root.hooks](root.treaty, pathsCopy, argArray)
+        return root.hooks[hook as 'createQuery'](root.treaty, pathsCopy, argArray)
       }
     },
   })
@@ -341,10 +349,14 @@ export function edenTreatySvelteQuery<
 >(
   domain?: string,
   config: EdenSvelteQueryConfig<TElysia, TConfig> = {},
-): EdenTreatySVelteQuery<TElysia, ResolveEdenTypeConfig<TConfig>> {
+): EdenTreatySvelteQuery<TElysia, TConfig> {
   const tanstack = edenTreatyTanstackQuery(domain, config)
 
   const hooks: EdenTreatySvelteQueryHooks<TElysia, TConfig> = {
+    createQueries: (callback, options) => {
+      const queries = callback(tanstack)
+      return createQueries({ queries, ...options })
+    },
     createQuery: (treaty, paths, argArray) => {
       const { eden, ...userOptions } = argArray[1] ?? {}
 

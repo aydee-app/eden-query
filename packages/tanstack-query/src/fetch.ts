@@ -1,8 +1,10 @@
 import {
+  type EdenFetch,
   edenFetch,
   type EdenFetchOptions,
-  type EdenFetchRequester,
+  type EdenRequestOptions,
   type EdenResolverConfig,
+  type EdenResult,
   type EdenRouteBody,
   type EdenRouteError,
   type EdenRouteSuccess,
@@ -19,19 +21,27 @@ import {
 } from '@ap0nia/eden'
 import type { MutationOptions } from '@tanstack/query-core'
 
-import type { EdenMutationOptions, EdenQueryOptions, EdenTanstackQueryConfig } from './shared'
+import type {
+  EdenMutationOptions,
+  EdenQueryOptions,
+  EdenTanstackQueryConfig,
+  QueryMethod,
+} from './shared'
 
-export type EdenFetchTanstackQueryHooks<
+export type EdenFetchTanstackQueryRoot<
   TElysia extends InternalElysia = {},
   TConfig extends InternalEdenTypesConfig = { separator: ':param' },
   TEndpoints = EdenFetchEndpoints<TElysia, TElysia['_routes'], TConfig>,
   TQueryEndpoints = {
-    [K in keyof TEndpoints as 'get' extends keyof TEndpoints[K] ? K : never]: TEndpoints[K]
+    [K in keyof TEndpoints as 'get' extends keyof TEndpoints[K] ? K : never]: Pick<
+      TEndpoints[K],
+      Extract<'get', keyof TEndpoints[K]>
+    >
   },
   TMutationEndpoints = {
-    [K in keyof TEndpoints as 'get' | 'subscribe' extends keyof TEndpoints[K]
+    [K in keyof TEndpoints as Exclude<keyof TEndpoints[K], QueryMethod> extends never
       ? never
-      : K]: TEndpoints[K]
+      : K]: Omit<TEndpoints[K], QueryMethod>
   },
 > = {
   /**
@@ -106,14 +116,14 @@ export type EdenFetchTanstackQueryHooks<
       >],
       InternalRouteSchema
     >,
-    TOptions = EdenFetchOptions<TMethod, TRoute>,
+    TOptions = Omit<EdenFetchOptions<TMethod, TRoute>, 'body'>,
     TBody = EdenRouteBody<TRoute>,
   >(
     path: TPath,
     ...args: [
       ...({} extends TOptions
         ? [
-            options?: EdenFetchOptions<TMethod, TRoute>,
+            options?: Omit<EdenFetchOptions<TMethod, TRoute>, 'body'>,
             mutationOptions?: MutationOptions<
               EdenRouteSuccess<TRoute>,
               EdenRouteError<TRoute>,
@@ -122,7 +132,7 @@ export type EdenFetchTanstackQueryHooks<
             >,
           ]
         : [
-            options: EdenFetchOptions<TMethod, TRoute>,
+            options: Omit<EdenFetchOptions<TMethod, TRoute>, 'body'>,
             mutationOptions?: MutationOptions<
               EdenRouteSuccess<TRoute>,
               EdenRouteError<TRoute>,
@@ -143,8 +153,7 @@ export type EdenFetchTanstackQuery<
   TElysia extends InternalElysia = {},
   TConfig extends InternalEdenTypesConfig = { separator: ':param' },
   TEndpoints = EdenFetchEndpoints<TElysia, TElysia['_routes'], TConfig>,
-> = EdenFetchTanstackQueryHooks<TElysia, TConfig, TEndpoints> &
-  EdenFetchRequester<TElysia, TElysia['_routes'], TConfig, TEndpoints>
+> = EdenFetchTanstackQueryRoot<TElysia, TConfig, TEndpoints> & EdenFetch<TElysia, TConfig>
 
 export type EdenFetchEndpoints<
   TElysia extends InternalElysia,
@@ -181,58 +190,76 @@ export function edenFetchTanstackQuery<
 ): EdenFetchTanstackQuery<TElysia, TConfig> {
   const fetch = edenFetch(domain, config)
 
-  const hooks: EdenFetchTanstackQueryHooks<TElysia, TConfig> = {
+  const root = {
     types: (types) => {
       return edenFetchTanstackQuery(domain, { ...config, types } as any) as any
     },
-    queryOptions: (...args) => {
-      const path = args[0] as string
+    queryOptions: (...argArray: any[]) => {
+      const [path, options] = argArray as [string, EdenRequestOptions, EdenResolverConfig]
 
-      const paths = path.split('/').filter((p) => p !== 'index')
+      const paths = path
+        .split('/')
+        .filter((p) => p !== 'index')
+        .filter(Boolean)
 
-      const queryKey = [paths, { options: args[1], type: 'query' }]
+      const queryKey = [paths, { options, type: 'query' }]
 
       const queryOptions: EdenQueryOptions = {
         queryKey,
         queryFn: async (context) => {
-          const resolvedArgs: any[] = [...args]
+          const resolvedOptions: EdenRequestOptions = { ...options }
 
           if (config.abortOnUnmount) {
-            resolvedArgs[2] = { ...resolvedArgs[2], fetch: resolvedArgs[2]?.fetch }
-
-            linkAbortSignals(context.signal, resolvedArgs[2].fetch.signal)
-
-            resolvedArgs[2].fetch.signal = context.signal
+            const signal = linkAbortSignals(context.signal, resolvedOptions.fetch?.signal)
+            resolvedOptions.fetch = { ...resolvedOptions.fetch, signal }
           }
 
-          const result = await (fetch as any)(...resolvedArgs)
-          return result
+          const result: EdenResult = await (fetch as any)(path, resolvedOptions)
+
+          return result.data
         },
       }
 
       return queryOptions as any
     },
-    mutationOptions: (...args) => {
+    mutationOptions: (...argArray: any[]) => {
+      const [path, options] = argArray as [string, EdenRequestOptions]
+
+      const paths = path.split('/').filter((p) => p !== 'index')
+
+      const mutationKey = [paths, { options, type: 'mutation' }]
+
       const mutationOptions: EdenMutationOptions = {
-        mutationKey: [],
+        mutationKey,
         mutationFn: async (body) => {
-          const resolvedArgs: any[] = [...args]
+          const optionsWithBody = { ...options, body }
 
-          resolvedArgs[1] = { ...resolvedArgs[1], body }
+          const result: EdenResult = await (fetch as any)(path, optionsWithBody)
 
-          const result = await (fetch as any)(...resolvedArgs)
-
-          return result
+          return result.data
         },
       }
 
       return mutationOptions as any
     },
-  }
+  } satisfies EdenFetchTanstackQueryRoot<TElysia, TConfig>
 
   const proxy: any = new Proxy(fetch as any, {
     get(_target, p, _receiver) {
-      return hooks[p as never]
+      if (Object.prototype.hasOwnProperty.call(root, p)) {
+        return root[p as never]
+      } else {
+        return fetch[p as never]
+      }
+    },
+    set(_target, p, newValue, _receiver) {
+      if (Object.prototype.hasOwnProperty.call(root, p)) {
+        root[p as keyof typeof root] = newValue
+      } else {
+        fetch[p as keyof typeof fetch] = newValue
+      }
+
+      return true
     },
     apply(target, _thisArg, argArray) {
       return target(...argArray)

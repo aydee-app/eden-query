@@ -1,4 +1,4 @@
-import { EdenClient, httpBatchLink } from '@ap0nia/eden'
+import { EdenClient, httpBatchSubscriptionLink } from '@ap0nia/eden'
 import { QueryClient } from '@tanstack/svelte-query'
 import SuperJSON from 'superjson'
 
@@ -25,7 +25,7 @@ export const load: LayoutLoad = async (event) => {
 
   const client = new EdenClient<App>({
     links: [
-      httpBatchLink({
+      httpBatchSubscriptionLink({
         types: true,
         endpoint: '/api/batch',
         transformer: SuperJSON,
@@ -34,5 +34,7 @@ export const load: LayoutLoad = async (event) => {
     ],
   })
 
-  return { client, queryClient }
+  const dehydrated = event.data.dehydrated
+
+  return { client, queryClient, dehydrated }
 }

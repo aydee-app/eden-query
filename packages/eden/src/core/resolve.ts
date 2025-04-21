@@ -1,4 +1,5 @@
 import { toArray } from '../utils/array'
+import { isAsyncIterable, mapAsyncIterable } from '../utils/async-iterable'
 import { extractFiles } from '../utils/file'
 import { buildQueryString, mergeQuery } from '../utils/query'
 import type {
@@ -96,7 +97,11 @@ export const defaultOnResult = (async (result, params) => {
   if (!transformer) return
 
   if (result.data) {
-    result.data = await transformer.output.deserialize(result.data)
+    if (isAsyncIterable(result.data)) {
+      result.data = mapAsyncIterable(result.data, transformer.output.deserialize)
+    } else {
+      result.data = await transformer.output.deserialize(result.data)
+    }
   }
 
   if (result.error && 'value' in result.error) {

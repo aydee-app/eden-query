@@ -1,4 +1,9 @@
-import type { EdenConfig, InternalEdenTypesConfig, InternalElysia } from '@ap0nia/eden'
+import type {
+  EdenConfig,
+  GetOrHeadHttpMethod,
+  InternalEdenTypesConfig,
+  InternalElysia,
+} from '@ap0nia/eden'
 import type {
   DefaultError,
   MutationFunction,
@@ -6,7 +11,6 @@ import type {
   MutationOptions,
   QueryFunction,
   QueryKey,
-  QueryOptions,
 } from '@tanstack/query-core'
 
 export interface EdenTanstackQueryConfig<
@@ -25,7 +29,7 @@ export interface EdenTanstackQueryConfig<
 export type EdenQueryOptions<
   TQueryFnData = unknown,
   TError = DefaultError,
-  TData = TQueryFnData,
+  _TData = TQueryFnData,
   TQueryKey extends QueryKey = QueryKey,
   TPageParam = never,
 > =
@@ -33,16 +37,33 @@ export type EdenQueryOptions<
   {
     queryFn: QueryFunction<TQueryFnData, TQueryKey, TPageParam>
     queryKey: TQueryKey
-  } & Pick<QueryOptions<TQueryFnData, TError, TData, TQueryKey, TPageParam>, 'retry'>
+    error?: TError
+  }
 
 export type EdenMutationOptions<
   TData = unknown,
   TError = Error,
   TVariables = void,
   TContext = unknown,
+  TMutationKey = MutationKey,
 > =
   // prettier-ignore At least one property with TError needs to be selected.
   {
     mutationFn: MutationFunction<TData, TVariables>
-    mutationKey: MutationKey
+    mutationKey: TMutationKey
   } & Pick<MutationOptions<TData, TError, TVariables, TContext>, 'retry'>
+
+export type AnyCapitalization<T extends string> = Capitalize<T> | Uncapitalize<T>
+
+export type AnyCase<T extends string> = T | Lowercase<T> | Uppercase<T>
+
+/**
+ * lmao
+ */
+export type AnyCaseOrCapitalization<T extends string> =
+  | AnyCapitalization<T>
+  | AnyCase<T>
+  | AnyCase<AnyCapitalization<T>>
+  | AnyCapitalization<AnyCase<T>>
+
+export type QueryMethod = AnyCaseOrCapitalization<GetOrHeadHttpMethod>

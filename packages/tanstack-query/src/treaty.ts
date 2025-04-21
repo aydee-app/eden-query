@@ -1,5 +1,6 @@
 import {
   type EdenConfig,
+  type EdenRequestOptions,
   type EdenResolverConfig,
   type EdenResult,
   type EdenRouteBody,
@@ -11,12 +12,12 @@ import {
   type EdenWs,
   type FormatParam,
   getPathParam,
+  HTTP_METHODS,
   type InternalEdenTypesConfig,
   type InternalElysia,
   type InternalRouteSchema,
   linkAbortSignals,
   type ParameterFunctionArgs,
-  type ResolveEdenTypeConfig,
   type WebSocketClientOptions,
 } from '@ap0nia/eden'
 
@@ -27,22 +28,18 @@ export interface EdenTreatyTanstackQueryHooks<
   TConfig extends InternalEdenTypesConfig = {},
 > {
   queryOptions: (
-    treaty: EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>>,
+    treaty: EdenTreaty<TElysia, TConfig>,
     paths: string[],
     argArray: any[],
   ) => EdenQueryOptions
 
   mutationOptions: (
-    treaty: EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>>,
+    treaty: EdenTreaty<TElysia, TConfig>,
     paths: string[],
     argArray: any[],
   ) => EdenMutationOptions
 
-  subscribe: (
-    treaty: EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>>,
-    paths: string[],
-    argArray: any[],
-  ) => EdenWs
+  subscribe: (treaty: EdenTreaty<TElysia, TConfig>, paths: string[], argArray: any[]) => EdenWs
 }
 
 /**
@@ -62,11 +59,7 @@ export type EdenTreatyTanstackQueryRoot<
     types?: U,
   ): EdenTreatyTanstackQueryProxy<TElysia, TElysia['_routes'], U>
 
-  treaty: EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>>
-
-  config(
-    config?: EdenTanstackQueryConfig<TElysia, TConfig>,
-  ): EdenTreatyTanstackQuery<TElysia, TConfig>
+  treaty: EdenTreaty<TElysia, TConfig>
 
   hooks: EdenTreatyTanstackQueryHooks<TElysia, TConfig>
 }
@@ -144,21 +137,6 @@ export type EdenTreatyTanstackQueryQueryRoute<
     [TPaths, { options: EdenRouteInput; type: 'query' }],
     TOptions extends { query?: { cursor?: any } } ? NonNullable<TOptions['query']>['cursor'] : never
   >
-
-  // createQueries and useQueries may not be able to strongly type TError.
-  queriesOptions: (
-    ...args: [
-      ...({} extends TFinalOptions
-        ? [options?: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]
-        : [options: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]),
-    ]
-  ) => EdenQueryOptions<
-    EdenRouteSuccess<TRoute>,
-    Error,
-    EdenRouteSuccess<TRoute>,
-    [TPaths, { options: EdenRouteInput; type: 'query' }],
-    TOptions extends { query?: { cursor?: any } } ? NonNullable<TOptions['query']>['cursor'] : never
-  >
 }
 
 export type EdenTreatyTanstackQueryMutationRoute<
@@ -190,12 +168,15 @@ export type EdenTreatySubscriptionRoute<
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
-> = (
-  ...args: [
-    ...({} extends TFinalOptions ? [options?: TFinalOptions] : [options: TFinalOptions]),
-    clientOptions?: Partial<WebSocketClientOptions>,
-  ]
-) => EdenWs<TRoute>
+> = {
+  subscribe: (
+    ...args: [
+      ...({} extends TFinalOptions
+        ? [options?: TFinalOptions, clientOptions?: Partial<WebSocketClientOptions>]
+        : [options: TFinalOptions, clientOptions?: Partial<WebSocketClientOptions>]),
+    ]
+  ) => EdenWs<TRoute>
+}
 
 /**
  * @public
@@ -250,9 +231,26 @@ export function edenTreatyTanstackQueryProxy<
         return edenTreatyTanstackQueryProxy(nextRoot, config, pathsWithParams, allPathParams)
       }
 
-      if (isHook) {
-        return root.hooks[hook as keyof typeof root.hooks](root.treaty, pathsCopy, argArray)
+      if (!isHook) {
+        throw new Error(`Unknown hook: ${hook}`)
       }
+
+      const params = Object.fromEntries(pathParams.flatMap((p) => Object.entries(p)))
+
+      const [options, configOrWsOptions] = argArray as [
+        EdenRequestOptions,
+        EdenResolverConfig | Partial<WebSocketClientOptions>,
+      ]
+
+      const optionsWithParams = { ...options, params }
+
+      const resolvedArgs = [optionsWithParams, configOrWsOptions]
+
+      const maybeMethod = pathsCopy.at(-1)?.toUpperCase()
+
+      if (HTTP_METHODS.includes(maybeMethod as any)) pathsCopy.pop()
+
+      return root.hooks[hook as keyof typeof root.hooks](root.treaty, pathsCopy, resolvedArgs)
     },
   })
 
@@ -265,23 +263,26 @@ export function edenTreatyTanstackQuery<
 >(
   domain?: string,
   config: EdenTanstackQueryConfig<TElysia, TConfig> = {},
-): EdenTreatyTanstackQuery<TElysia, ResolveEdenTypeConfig<TConfig>> {
+): EdenTreatyTanstackQuery<TElysia, TConfig> {
   const hooks: EdenTreatyTanstackQueryHooks<TElysia, TConfig> = {
     queryOptions: (treaty, paths, argArray) => {
-      const queryKey = [paths, { options: argArray[0], type: 'query' }]
+      const [options, conf] = argArray as [EdenRequestOptions, EdenResolverConfig]
+
+      const resolvedConfig = { ...config, ...conf }
+
+      const queryKey = [paths, { options, type: 'query' }]
 
       const queryOptions: EdenQueryOptions = {
         queryKey,
         queryFn: async (context) => {
+          const resolvedOptions: EdenRequestOptions = { ...options }
+
           if (config.abortOnUnmount) {
-            argArray[1] = { ...argArray[1], fetch: { ...argArray[1]?.fetch } }
-
-            linkAbortSignals(context.signal, argArray[1]?.fetch.signal)
-
-            argArray[1].fetch.signal = context.signal
+            const signal = linkAbortSignals(context.signal, resolvedOptions.fetch?.signal)
+            resolvedOptions.fetch = { ...resolvedOptions.fetch, signal }
           }
 
-          const result: EdenResult = await (treaty as any)(...argArray)
+          const result: EdenResult = await (treaty as any)(resolvedOptions, resolvedConfig)
 
           return result.data
         },
@@ -290,10 +291,16 @@ export function edenTreatyTanstackQuery<
       return queryOptions
     },
     mutationOptions: (treaty, paths, argArray) => {
+      const [options, conf] = argArray as [EdenRequestOptions, EdenResolverConfig]
+
+      const resolvedConfig = { ...config, ...conf }
+
+      const mutationKey = [paths, { options, type: 'mutation' }]
+
       const mutationOptions: EdenMutationOptions = {
-        mutationKey: paths,
-        mutationFn: async (_context) => {
-          const result: EdenResult = await (treaty as any)(...argArray)
+        mutationKey,
+        mutationFn: async (body) => {
+          const result: EdenResult = await (treaty as any)(body, options, resolvedConfig)
           return result.data
         },
       }
@@ -301,14 +308,16 @@ export function edenTreatyTanstackQuery<
       return mutationOptions
     },
     subscribe: (treaty, _paths, argArray) => {
-      const edenWs = (treaty as any)(...argArray)
+      const [options, wsOptions] = argArray as [EdenRequestOptions, WebSocketClientOptions]
+
+      const edenWs = (treaty as any)(options, wsOptions)
+
       return edenWs
     },
   }
 
   const root: EdenTreatyTanstackQueryRoot<TElysia, TConfig> = {
     types: (types) => edenTreatyTanstackQuery(domain, { ...config, types } as any) as any,
-    config: (newConfig) => edenTreatyTanstackQuery(domain, { ...config, ...newConfig }) as any,
     treaty: edenTreaty(domain, config),
     hooks,
   }

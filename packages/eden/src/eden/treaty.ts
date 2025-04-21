@@ -6,7 +6,7 @@ import type { EdenRouteBody, EdenRouteError, EdenRouteInput, EdenRouteSuccess } 
 import { resolveEdenRequest } from '../core/resolve'
 import type { InternalElysia, InternalRouteSchema } from '../core/types'
 import type { WebSocketClientOptions } from '../ws/client'
-import type { EdenConfig, InternalEdenTypesConfig, ResolveEdenTypeConfig } from './config'
+import type { EdenConfig, InternalEdenTypesConfig } from './config'
 import {
   type FormatParam,
   getPathParam,
@@ -161,23 +161,15 @@ export type EdenTreatyMutationRoute<
   TRoute extends InternalRouteSchema,
   TConfig extends InternalEdenTypesConfig = {},
   _TPaths extends any[] = [],
-  TBody = EdenRouteBody<TRoute>,
   TOptions = EdenRouteInput<TRoute>,
   TFinalOptions = TConfig['separator'] extends string
     ? TOptions
     : Omit<TOptions, 'params'> & { params?: Record<string, any> },
 > = (
-  ...args: {} extends TBody
-    ? [
-        body?: TBody,
-        ...({} extends TFinalOptions ? [options?: TFinalOptions] : [options: TFinalOptions]),
-        config?: EdenResolverConfig<TElysia, TConfig>,
-      ]
-    : [
-        body: TBody,
-        ...({} extends TFinalOptions ? [options?: TFinalOptions] : [options: TFinalOptions]),
-        config?: EdenResolverConfig<TElysia, TConfig>,
-      ]
+  body: EdenRouteBody<TRoute>,
+  ...args: {} extends TFinalOptions
+    ? [options?: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]
+    : [options: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]
 ) => Promise<EdenFetchResult<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>>>
 
 /**
@@ -309,10 +301,7 @@ export type EdenTreaty<
 export function edenTreaty<
   TElysia extends InternalElysia,
   const TConfig extends InternalEdenTypesConfig = {},
->(
-  domain?: string,
-  config: EdenConfig<TElysia, TConfig> = {},
-): EdenTreaty<TElysia, ResolveEdenTypeConfig<TConfig>> {
+>(domain?: string, config: EdenConfig<TElysia, TConfig> = {}): EdenTreaty<TElysia, TConfig> {
   const root: EdenTreatyRoot<TElysia, TConfig> = {
     types: (types) => edenTreaty(domain, { ...config, types } as any) as any,
     config: (config) => edenTreaty(domain, config) as any,

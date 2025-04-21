@@ -1,6 +1,6 @@
 import {
+  type EdenFetch,
   type EdenFetchOptions,
-  type EdenFetchRequester,
   type EdenResolverConfig,
   type EdenRouteBody,
   type EdenRouteError,
@@ -15,7 +15,11 @@ import {
   type Split,
   type UnionToIntersection,
 } from '@ap0nia/eden'
-import { edenFetchTanstackQuery } from '@ap0nia/eden-tanstack-query'
+import {
+  type EdenFetchTanstackQuery,
+  edenFetchTanstackQuery,
+  type QueryMethod,
+} from '@ap0nia/eden-tanstack-query'
 import {
   createInfiniteQuery,
   type CreateInfiniteQueryOptions,
@@ -23,11 +27,15 @@ import {
   createMutation,
   type CreateMutationOptions,
   type CreateMutationResult,
+  createQueries,
   createQuery,
   type CreateQueryOptions,
   type CreateQueryResult,
   type InfiniteData,
+  type QueriesOptions,
+  type QueriesResults,
 } from '@tanstack/svelte-query'
+import type { Readable } from 'svelte/store'
 
 import type { EdenSvelteQueryConfig } from './types'
 
@@ -36,19 +44,22 @@ export type EdenFetchSvelteQueryHooks<
   TConfig extends InternalEdenTypesConfig = { separator: ':param' },
   TEndpoints = EdenFetchEndpoints<TElysia, TElysia['_routes'], TConfig>,
   TQueryEndpoints = {
-    [K in keyof TEndpoints as 'get' extends keyof TEndpoints[K] ? K : never]: TEndpoints[K]
+    [K in keyof TEndpoints as 'get' extends keyof TEndpoints[K] ? K : never]: Pick<
+      TEndpoints[K],
+      Extract<'get', keyof TEndpoints[K]>
+    >
   },
   TMutationEndpoints = {
-    [K in keyof TEndpoints as 'get' | 'subscribe' extends keyof TEndpoints[K]
+    [K in keyof TEndpoints as Exclude<keyof TEndpoints[K], QueryMethod> extends never
       ? never
-      : K]: TEndpoints[K]
+      : K]: Omit<TEndpoints[K], QueryMethod>
   },
   TInfiniteEndpoints = {
     [K in keyof TEndpoints as TEndpoints[K] extends InfiniteQueryRoute
       ? { cursor?: any } extends TEndpoints[K]['get']['query']
         ? K
         : never
-      : never]: TEndpoints[K]
+      : never]: Pick<TEndpoints[K], Extract<'get', keyof TEndpoints[K]>>
   },
 > = {
   /**
@@ -173,7 +184,7 @@ export type EdenFetchSvelteQueryHooks<
       >],
       InternalRouteSchema
     >,
-    TOptions = EdenFetchOptions<TMethod, TRoute>,
+    TOptions = Omit<EdenFetchOptions<TMethod, TRoute>, 'body'>,
     TBody = EdenRouteBody<TRoute>,
   >(
     path: TPath,
@@ -207,7 +218,41 @@ export type EdenFetchSvelteQueryHooks<
           ]),
     ]
   ) => CreateMutationResult<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>, TBody, TContext>
+
+  /**
+   * Type only!
+   *
+   * @internal for testing.
+   */
+  endpoints: TEndpoints
+
+  /**
+   * Type only!
+   *
+   * @internal for testing.
+   */
+  queryEndpoints: TQueryEndpoints
+
+  /**
+   * Type only!
+   *
+   * @internal for testing.
+   */
+  infiniteQueryEndpoints: TEndpoints
+
+  /**
+   * Type only!
+   *
+   * @internal for testing.
+   */
+  mutationEndpoints: TMutationEndpoints
+
+  createQueries: <T extends any[], TCombinedResult = QueriesResults<T>>(
+    callback: (fetch: EdenFetchTanstackQuery<TElysia, TConfig>) => QueriesOptions<T>,
+    combine?: (result: QueriesResults<T>) => TCombinedResult,
+  ) => Readable<TCombinedResult>
 }
+
 /**
  * Properties available at the Eden-treaty proxy root.
  * Also double as shared hooks and cached configuration for nested proxies.
@@ -218,8 +263,7 @@ export type EdenFetchSvelteQuery<
   TElysia extends InternalElysia = {},
   TConfig extends InternalEdenTypesConfig = { separator: ':param' },
   TEndpoints = EdenFetchEndpoints<TElysia, TElysia['_routes'], TConfig>,
-> = EdenFetchSvelteQueryHooks<TElysia, TConfig, TEndpoints> &
-  EdenFetchRequester<TElysia, TElysia['_routes'], TConfig, TEndpoints>
+> = EdenFetchSvelteQueryHooks<TElysia, TConfig, TEndpoints> & EdenFetch<TElysia, TConfig>
 
 export type EdenFetchEndpoints<
   TElysia extends InternalElysia,
@@ -256,7 +300,7 @@ export function edenFetchSvelteQuery<
 ): EdenFetchSvelteQuery<TElysia, TConfig> {
   const tanstack = edenFetchTanstackQuery(domain, config)
 
-  const hooks: EdenFetchSvelteQueryHooks<TElysia, TConfig> = {
+  const hooks = {
     types: (types) => {
       return edenFetchSvelteQuery(domain, { ...config, types } as any) as any
     },
@@ -299,11 +343,28 @@ export function edenFetchSvelteQuery<
 
       return mutation as any
     },
-  }
+    endpoints: {} as any,
+    queryEndpoints: {} as any,
+    infiniteQueryEndpoints: {} as any,
+    mutationEndpoints: {} as any,
+    createQueries: (callback, options) => {
+      const queries = callback(tanstack)
+      return createQueries({ queries, ...options })
+    },
+  } satisfies EdenFetchSvelteQueryHooks<TElysia, TConfig>
 
   const proxy: any = new Proxy(tanstack as any, {
     get(_target, p, _receiver) {
       return hooks[p as never]
+    },
+    set(_target, p, newValue, _receiver) {
+      if (Object.prototype.hasOwnProperty.call(hooks, p)) {
+        hooks[p as keyof typeof hooks] = newValue
+      } else {
+        tanstack[p as keyof typeof tanstack] = newValue
+      }
+
+      return true
     },
     apply(target, _thisArg, argArray) {
       return target(...argArray)

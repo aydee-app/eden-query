@@ -27,6 +27,8 @@ export type EdenFetchRoot<T extends InternalElysia = {}> = {
    * Utility function to update the types configuration.
    */
   types<U extends InternalEdenTypesConfig>(types?: U): EdenFetch<T, U>
+
+  client?: EdenClient<T>
 }
 
 /**
@@ -110,22 +112,26 @@ export type EdenFetchDistinctEndpoints<
       >
 }[keyof TRoutes]
 
-export type EdenFetchOptions<TMethod, TRoute extends InternalRouteSchema> =
-  'GET' extends NoInfer<TMethod>
+/**
+ * Does NOT include body.
+ */
+export type EdenFetchOptions<
+  TMethod,
+  TRoute extends InternalRouteSchema,
+> = ('GET' extends NoInfer<TMethod>
+  ? {
+      method?: NonNullable<TMethod>
+    }
+  : 'SUBSCRIBE' extends NoInfer<TMethod>
     ? {
-        method?: NonNullable<TMethod>
-      } & EdenFetchQueryOptions<TRoute>
-    : 'SUBSCRIBE' extends NoInfer<TMethod>
-      ? {
-          method: NonNullable<TMethod>
-        } & EdenFetchQueryOptions<TRoute>
-      : {
-          method: NonNullable<TMethod>
-        } & EdenFetchMutationOptions<TRoute>
+        method: NonNullable<TMethod>
+      }
+    : {
+        method: NonNullable<TMethod>
+      }) &
+  EdenRouteInput<TRoute>
 
-export type EdenFetchQueryOptions<T extends InternalRouteSchema> = EdenRouteInput<T>
-
-export type EdenFetchMutationOptions<
+export type EdenFetchFullInput<
   TRoute extends InternalRouteSchema,
   TBody = EdenRouteBody<TRoute>,
 > = EdenRouteInput<TRoute> & (undefined extends TBody ? { body?: TBody } : { body: TBody })
@@ -153,9 +159,8 @@ export function edenFetch<
 
   const root: EdenFetchRoot<TElysia> = {
     types: (types) => edenFetch(domain, { ...config, types } as any) as any,
+    client: config.links ? new EdenClient({ links: config.links, ...config }) : undefined,
   }
-
-  const client = config.links ? new EdenClient({ links: config.links, ...config }) : undefined
 
   /**
    * There is not much of a difference between inlining these function calls inside the proxy
@@ -165,11 +170,11 @@ export function edenFetch<
    */
   const hooks: EdenHooks = {
     query(path, params) {
-      const result = client?.query(path, params) ?? resolveEdenRequest({ path, ...params })
+      const result = root.client?.query(path, params) ?? resolveEdenRequest({ path, ...params })
       return result as any
     },
     mutation(path, params) {
-      const result = client?.mutation(path, params) ?? resolveEdenRequest({ path, ...params })
+      const result = root.client?.mutation(path, params) ?? resolveEdenRequest({ path, ...params })
       return result as any
     },
     subscription(options) {
@@ -180,6 +185,12 @@ export function edenFetch<
   const proxy: any = new Proxy(() => {}, {
     get(_target, p, _receiver) {
       return root[p as never]
+    },
+    set(_target, p, newValue, _receiver) {
+      if (Object.prototype.hasOwnProperty.call(root, p)) {
+        root[p as keyof typeof root] = newValue
+      }
+      return true
     },
     apply(_target, _thisArg, argArray) {
       const method = argArray[1]?.method?.toUpperCase()

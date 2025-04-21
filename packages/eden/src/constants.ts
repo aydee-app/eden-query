@@ -15,6 +15,8 @@ export const HTTP_METHODS = [
   'CONNECT',
 ] as const
 
+export type GetOrHeadHttpMethod = (typeof GET_OR_HEAD_HTTP_METHODS)[number]
+
 export type HTTPMethod = (typeof HTTP_METHODS)[number]
 
 export const LOOPBACK_ADDRESSES = ['localhost', '127.0.0.1', '0.0.0.0']
