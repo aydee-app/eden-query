@@ -93,6 +93,50 @@ export type EdenFetchTanstackQueryRoot<
     TOptions extends { query: { cursor?: any } } ? TOptions['query']['cursor'] : never
   >
 
+  infiniteQueryOptions: /**
+   * @template TMethod The uppercase HTTP method.
+   *   IMPORTANT: will not work with mixed-case custom methods.
+   *   Eden-Fetch will attempt to find a matching route with either the fully uppercase or lowercase HTTP method.
+   *
+   *   @see https://elysiajs.com/essential/route.html#custom-method
+   *
+   *   BAD - mixed-case: app.route('M-search', '/m-search', 'connect')
+   *   OK - uppercase: app.route('M-SEARCH', '/m-search', 'connect')
+   *   OK - lowercase: app.route('m-search', '/m-search', 'connect')
+   */
+  <
+    TPath extends keyof TQueryEndpoints,
+    TEndpoint extends TQueryEndpoints[TPath],
+    TMethod extends Uppercase<keyof TEndpoint & string> | undefined,
+    TRoute extends InternalRouteSchema = Extract<
+      TEndpoint[Extract<
+        undefined extends TMethod ? 'GET' | 'get' : TMethod | Lowercase<TMethod & string>,
+        keyof TEndpoint
+      >],
+      InternalRouteSchema
+    >,
+    TOptions = EdenFetchOptions<TMethod, TRoute>,
+  >(
+    path: TPath,
+    ...args: [
+      ...({} extends TOptions
+        ? [
+            options?: EdenFetchOptions<TMethod, TRoute>,
+            config?: EdenResolverConfig<TElysia, TConfig>,
+          ]
+        : [
+            options: EdenFetchOptions<TMethod, TRoute>,
+            config?: EdenResolverConfig<TElysia, TConfig>,
+          ]),
+    ]
+  ) => EdenQueryOptions<
+    EdenRouteSuccess<TRoute>,
+    EdenRouteError<TRoute>,
+    EdenRouteSuccess<TRoute>,
+    [Split<TEndpoint>, { options: ExtendedEdenRouteOptions; type: 'infinite-query' }],
+    TOptions extends { query: { cursor?: any } } ? TOptions['query']['cursor'] : never
+  >
+
   mutationOptions: /**
    * @template TMethod The uppercase HTTP method.
    *   IMPORTANT: will not work with mixed-case custom methods.
@@ -221,6 +265,22 @@ export function edenFetchTanstackQuery<
       }
 
       return queryOptions as any
+    },
+    infiniteQueryOptions(...argArray: any[]) {
+      const [path, options] = argArray as [string, EdenRequestOptions, EdenResolverConfig]
+
+      const paths = path
+        .split('/')
+        .filter((p) => p !== 'index')
+        .filter(Boolean)
+
+      const queryKey = [paths, { options, type: 'infinite-query' }]
+
+      const queryOptions = this.queryOptions(...(argArray as [any, any]))
+
+      const infiniteQueryOptions = { ...queryOptions, queryKey }
+
+      return infiniteQueryOptions as any
     },
     mutationOptions: (...argArray: any[]) => {
       const [path, options] = argArray as [string, EdenRequestOptions]

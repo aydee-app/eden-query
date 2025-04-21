@@ -1,5 +1,6 @@
 import {
   type EdenConfig,
+  type EdenRequestOptions,
   type EdenResolverConfig,
   type EdenRouteBody,
   type EdenRouteError,
@@ -16,7 +17,7 @@ import {
   type ParameterFunctionArgs,
   type WebSocketClientOptions,
 } from '@ap0nia/eden'
-import { type EdenTreatyTanstackQuery,edenTreatyTanstackQuery } from '@ap0nia/eden-tanstack-query'
+import { type EdenTreatyTanstackQuery, edenTreatyTanstackQuery } from '@ap0nia/eden-tanstack-query'
 import {
   createInfiniteQuery,
   type CreateInfiniteQueryOptions,
@@ -327,16 +328,16 @@ function edenTreatySvelteQueryProxy<
 
         const pathsWithParams = [...paths, `:${pathParam.key}`]
 
-        const nextRoot = { ...root }
-
-        nextRoot.treaty = (nextRoot.treaty as any)(...argArray)
+        const nextRoot = { ...root, treaty: (root.treaty as any)(...argArray) }
 
         return edenTreatySvelteQueryProxy(nextRoot, config, pathsWithParams, allPathParams)
       }
 
-      if (isHook) {
-        return root.hooks[hook as 'createQuery'](root.treaty, pathsCopy, argArray)
+      if (!isHook) {
+        throw new Error(`Unknown hook: ${hook}`)
       }
+
+      return root.hooks[hook as 'createQuery'](root.treaty, pathsCopy, argArray)
     },
   })
 
@@ -369,9 +370,11 @@ export function edenTreatySvelteQuery<
       return query
     },
     createInfiniteQuery: (treaty, paths, argArray) => {
-      const { eden, ...userOptions } = argArray[1] ?? {}
+      const [options, userOptionsAndEden = {}] = argArray as [EdenRequestOptions, any]
 
-      const baseQueryOptions = tanstack.hooks.queryOptions(treaty, paths, [argArray[0], eden])
+      const { eden, ...userOptions } = userOptionsAndEden
+
+      const baseQueryOptions = tanstack.hooks.infiniteQueryOptions(treaty, paths, [options, eden])
 
       const infiniteQueryOptions = { ...baseQueryOptions, ...userOptions }
 

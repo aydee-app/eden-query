@@ -304,12 +304,12 @@ export function edenFetchSvelteQuery<
     types: (types) => {
       return edenFetchSvelteQuery(domain, { ...config, types } as any) as any
     },
-    createQuery: (path, ...args) => {
-      const argArray: any[] = args
+    createQuery: (path, ...argArray) => {
+      const [options, userOptionsAndEden = {}] = argArray as [any, any]
 
-      const { eden, ...userOptions } = (argArray[1] ?? {}) as any
+      const { eden, ...userOptions } = userOptionsAndEden
 
-      const baseQueryOptions = tanstack.queryOptions(path, argArray[0], eden)
+      const baseQueryOptions = tanstack.queryOptions(path, options, eden)
 
       const queryOptions = { ...baseQueryOptions, ...userOptions }
 
@@ -317,12 +317,12 @@ export function edenFetchSvelteQuery<
 
       return query as any
     },
-    createInfiniteQuery: (path, ...args) => {
-      const argArray: any[] = args
+    createInfiniteQuery: (path, ...argArray) => {
+      const [options, userOptionsAndEden = {}] = argArray as [any, any]
 
-      const { eden, ...userOptions } = (argArray[1] ?? {}) as any
+      const { eden, ...userOptions } = userOptionsAndEden
 
-      const baseQueryOptions = tanstack.queryOptions(path, argArray[0], eden)
+      const baseQueryOptions = tanstack.infiniteQueryOptions(path, options, eden)
 
       const infiniteQueryOptions = { ...baseQueryOptions, ...userOptions }
 
@@ -330,12 +330,12 @@ export function edenFetchSvelteQuery<
 
       return infiniteQuery as any
     },
-    createMutation: (path, ...args) => {
-      const argArray: any[] = args
+    createMutation: (path, ...argArray) => {
+      const [options, userOptionsAndEden = {}] = argArray as [any, any]
 
-      const { eden, ...userOptions } = (argArray[1] ?? {}) as any
+      const { eden, ...userOptions } = userOptionsAndEden
 
-      const baseMutationOptions = tanstack.mutationOptions(path, argArray[0], eden)
+      const baseMutationOptions = tanstack.mutationOptions(path, options, eden)
 
       const mutationOptions = { ...baseMutationOptions, ...userOptions }
 

@@ -33,6 +33,12 @@ export interface EdenTreatyTanstackQueryHooks<
     argArray: any[],
   ) => EdenQueryOptions
 
+  infiniteQueryOptions: (
+    treaty: EdenTreaty<TElysia, TConfig>,
+    paths: string[],
+    argArray: any[],
+  ) => EdenQueryOptions
+
   mutationOptions: (
     treaty: EdenTreaty<TElysia, TConfig>,
     paths: string[],
@@ -246,10 +252,6 @@ export function edenTreatyTanstackQueryProxy<
 
       const resolvedArgs = [optionsWithParams, configOrWsOptions]
 
-      const maybeMethod = pathsCopy.at(-1)?.toUpperCase()
-
-      if (HTTP_METHODS.includes(maybeMethod as any)) pathsCopy.pop()
-
       return root.hooks[hook as keyof typeof root.hooks](root.treaty, pathsCopy, resolvedArgs)
     },
   })
@@ -270,7 +272,13 @@ export function edenTreatyTanstackQuery<
 
       const resolvedConfig = { ...config, ...conf }
 
-      const queryKey = [paths, { options, type: 'query' }]
+      const pathsNoMethod = [...paths]
+
+      const maybeMethod = paths.at(-1)?.toUpperCase()
+
+      if (HTTP_METHODS.includes(maybeMethod as any)) pathsNoMethod.pop()
+
+      const queryKey = [pathsNoMethod, { options, type: 'query' }]
 
       const queryOptions: EdenQueryOptions = {
         queryKey,
@@ -289,6 +297,17 @@ export function edenTreatyTanstackQuery<
       }
 
       return queryOptions
+    },
+    infiniteQueryOptions(treaty, paths, argArray) {
+      const queryOptions = this.queryOptions(treaty, paths, argArray)
+
+      const [options] = argArray as [EdenRequestOptions, EdenResolverConfig]
+
+      const queryKey = [queryOptions.queryKey[0], { options, type: 'infinite-query' }]
+
+      const infiniteQueryOptions = { ...queryOptions, queryKey }
+
+      return infiniteQueryOptions as any
     },
     mutationOptions: (treaty, paths, argArray) => {
       const [options, conf] = argArray as [EdenRequestOptions, EdenResolverConfig]
