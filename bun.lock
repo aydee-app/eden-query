@@ -129,6 +129,15 @@
         "vite-plugin-solid": "^2.11.6",
       },
     },
+    "packages/tests": {
+      "name": "@ap0nia/eden-query-tests",
+      "version": "0.0.0",
+      "dependencies": {
+        "@ap0nia/eden": "workspace:^",
+        "@ap0nia/eden-svelte-query": "workspace:^",
+        "@ap0nia/eden-tanstack-query": "workspace:^",
+      },
+    },
   },
   "packages": {
     "@adobe/css-tools": ["@adobe/css-tools@4.4.2", "", {}, "sha512-baYZExFpsdkBNuvGKTKWCwKH57HRZLVtycZS05WTQNVOiXVSeAki3nU35zlRbToeMW8aHlJfyS+1C4BOv27q0A=="],
@@ -140,6 +149,8 @@
     "@angular/core": ["@angular/core@19.2.6", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "rxjs": "^6.5.3 || ^7.4.0", "zone.js": "~0.15.0" } }, "sha512-tmtdONYMg3PvhuCUlTHX17P7MZTLrbDNWpiTyZNRGDbRzQqc5fxK8IrZJXm7TWxx8imDrBZn+wvwCYNDmMD81g=="],
 
     "@ap0nia/eden": ["@ap0nia/eden@workspace:packages/eden"],
+
+    "@ap0nia/eden-query-tests": ["@ap0nia/eden-query-tests@workspace:packages/tests"],
 
     "@ap0nia/eden-svelte-query": ["@ap0nia/eden-svelte-query@workspace:packages/svelte-query"],
 
