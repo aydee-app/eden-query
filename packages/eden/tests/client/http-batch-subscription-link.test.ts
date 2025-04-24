@@ -115,7 +115,7 @@ describe('httpBatchSubscriptionLink', () => {
       results.forEach((result) => {
         expect(result.status).toBe('rejected')
         assert(result.status === 'rejected')
-        expect(result.reason).toBeInstanceOf(BatchInputTooLargeError)
+        expect(result.reason.cause).toBeInstanceOf(BatchInputTooLargeError)
       })
     })
   })
@@ -236,7 +236,7 @@ describe('httpBatchSubscriptionLink', () => {
         const notFoundError = {
           value: 'NOT_FOUND',
           status: 404,
-          name: 'Error',
+          name: 'EdenClientError',
           message: 'NOT_FOUND',
         } satisfies EdenFetchError
 
@@ -287,7 +287,7 @@ describe('httpBatchSubscriptionLink', () => {
         const notFoundError = {
           value: 'NOT_FOUND',
           status: 404,
-          name: 'Error',
+          name: 'EdenClientError',
           message: 'NOT_FOUND',
         } satisfies EdenFetchError
 

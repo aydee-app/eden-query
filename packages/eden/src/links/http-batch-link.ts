@@ -5,7 +5,7 @@ import { serializeBatchPostParams } from '../batch/serializers/post'
 import { BATCH_ENDPOINT, HTTP_SUBSCRIPTION_ERROR, type HTTPMethod } from '../constants'
 import type { EdenRequestOptions } from '../core/config'
 import type { EdenFetchResult } from '../core/dto'
-import type { EdenError } from '../core/error'
+import { EdenClientError, EdenFetchError } from '../core/error'
 import { processHeaders } from '../core/headers'
 import type { HTTPHeaders } from '../core/http'
 import { defaultOnResult, resolveEdenRequest } from '../core/resolve'
@@ -195,7 +195,7 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
     return resolvedParams
   }
 
-  const batchLoader: BatchLoader<Operation, EdenFetchResult<any, EdenError>> = {
+  const batchLoader: BatchLoader<Operation, EdenFetchResult<any, EdenClientError>> = {
     async validate(batchOps) {
       // If not a GET request, then we don't care about size limits.
       if (options.method !== 'GET') return true
@@ -288,7 +288,7 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
 
       const result = await resolveEdenRequest(resolvedParams)
 
-      if (result.type !== 'data') return []
+      if (result.type !== 'data') throw result.error
 
       const contentType = result.response.headers.get('content-type')
 
@@ -320,7 +320,28 @@ export function httpBatchLink<TElysia extends InternalElysia, const TConfig>(
             }
           })
           .catch((err) => {
-            observer.error(err)
+            const error = EdenClientError.from(err)
+
+            if (error.status !== 404) {
+              observer.error(error)
+              return
+            }
+
+            // TRPC returns 400 BAD_REQUEST if batching is disabled.
+            // For Eden, batching is disabled if no batch plugin was added.
+            // If the endpoint is not found, assume batch plugin was missing and batching disabled.
+            const badRequestError = new EdenFetchError(403, 'BAD_REQUEST', {
+              ...error,
+              message: 'Batching is not enabled on the server',
+              code: -32600,
+              data: {
+                ...error.data,
+                code: 'BAD_REQUEST',
+                status: 400,
+              },
+            })
+
+            observer.error(badRequestError)
           })
       })
     }

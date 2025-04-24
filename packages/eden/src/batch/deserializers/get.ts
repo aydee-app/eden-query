@@ -14,7 +14,7 @@ import type { BatchDeserializerConfig } from './config'
 export async function deserializeBatchGetParams<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
->(context: InternalContext, _config?: BatchDeserializerConfig) {
+>(context: InternalContext, config?: BatchDeserializerConfig) {
   const options: Array<InternalEdenRequestOptions> = []
 
   const request = context.request
@@ -24,7 +24,7 @@ export async function deserializeBatchGetParams<
   /**
    * Headers that do not start with `${number}.` will be added to headers for all requests.
    */
-  const globalHeaders = new Headers()
+  const globalHeaders = new Headers(config?.headers)
 
   /**
    * Query parameters that do not start with `${number}.` will be added to query for all requests.

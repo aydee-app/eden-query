@@ -1,5 +1,5 @@
 import type { EdenWebSocketIncomingMessage, EdenWebSocketOutgoingMessage } from '../core/dto'
-import type { EdenError } from '../core/error'
+import type { EdenClientError } from '../core/error'
 import type { JSONRPC2 } from '../core/json-rpc'
 import type { Observer } from '../observable'
 import { withResolvers } from '../utils/promise'
@@ -8,7 +8,7 @@ type MessageId = string
 
 type MessageIdLike = JSONRPC2.RequestId
 
-export type WebSocketRequestCallbacks = Observer<EdenWebSocketIncomingMessage, EdenError>
+export type WebSocketRequestCallbacks = Observer<EdenWebSocketIncomingMessage, EdenClientError>
 
 /**
  * Represents a WebSocket request managed by the RequestManager.

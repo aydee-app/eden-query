@@ -1,4 +1,4 @@
-import type { EdenError } from '../core/error'
+import type { EdenClientError } from '../core/error'
 import type { InternalElysia } from '../core/types'
 import { Observable, type Unsubscribable } from '../observable'
 import { inputWithTrackedEventId } from './shared'
@@ -20,7 +20,7 @@ interface RetryFnOptions<T extends InternalElysia> {
   /**
    * The error that occurred
    */
-  error: EdenError<T>
+  error: EdenClientError<T>
 
   /**
    * The number of attempts that have been made (including the first call)

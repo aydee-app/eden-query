@@ -3,9 +3,20 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "scripts": {
+    "build": "rslib build",
+    "test": "ATTEST_skipTypes=1 vitest",
+    "test:types": "vitest test-d"
+  },
   "dependencies": {
     "@ap0nia/eden": "workspace:^",
     "@ap0nia/eden-svelte-query": "workspace:^",
     "@ap0nia/eden-tanstack-query": "workspace:^"
+  },
+  "devDependencies": {
+    "@arktype/attest": "^0.46.0",
+    "elysia": "^1.2.25",
+    "msw": "^2.7.5",
+    "vitest": "^3.1.2"
   }
 }

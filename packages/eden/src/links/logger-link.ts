@@ -1,4 +1,4 @@
-import type { EdenError } from '../core/error'
+import type { EdenClientError } from '../core/error'
 import type { InternalElysia } from '../core/types'
 import { Observable, tap } from '../observable'
 import type { EdenLink, Operation, OperationLink, OperationLinkResult } from './types'
@@ -17,7 +17,7 @@ type ConsoleEsque = {
 type EnableFnOptions<T extends InternalElysia> =
   | {
       direction: 'down'
-      result: OperationLinkResult<unknown, EdenError<T>> | EdenError<T>
+      result: OperationLinkResult<unknown, EdenClientError<T>> | EdenClientError<T>
     }
   | (Operation & {
       direction: 'up'
@@ -38,7 +38,7 @@ type LoggerLinkFnOptions<T extends InternalElysia> = Operation &
          * Request result
          */
         direction: 'down'
-        result: OperationLinkResult<unknown, EdenError<T>> | EdenError<T>
+        result: OperationLinkResult<unknown, EdenClientError<T>> | EdenClientError<T>
         elapsedMs: number
       }
     | {
@@ -226,7 +226,7 @@ export function loggerLink<T extends InternalElysia>(options?: LoggerLinkOptions
   const logResult = (
     op: Operation,
     requestStartTime: number,
-    result: OperationLinkResult<unknown, EdenError<T>> | EdenError<T>,
+    result: OperationLinkResult<unknown, EdenClientError<T>> | EdenClientError<T>,
   ) => {
     const elapsedMs = Date.now() - requestStartTime
 

@@ -1,6 +1,6 @@
 import type { EdenRequestOptions } from '../core/config'
 import type { EdenResult, Procedure } from '../core/dto'
-import type { EdenError } from '../core/error'
+import type { EdenClientError } from '../core/error'
 import type { InternalElysia } from '../core/types'
 import type { Observable } from '../observable'
 
@@ -16,8 +16,8 @@ export type OperationLinkResult<TOutput = any, TError = any> = {
  * @internal
  */
 export type OperationLinkResultObservable<TElysia extends InternalElysia, TOutput> = Observable<
-  OperationLinkResult<TOutput, EdenError<TElysia>>,
-  EdenError<TElysia>
+  OperationLinkResult<TOutput, EdenClientError<TElysia>>,
+  EdenClientError<TElysia>
 >
 
 /**

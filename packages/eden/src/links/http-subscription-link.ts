@@ -1,7 +1,7 @@
 import { type EventSourceLike, sseStreamConsumer } from '@trpc/server/unstable-core-do-not-import'
 
 import type { EdenResult, EdenWebSocketState } from '../core/dto'
-import { EdenError } from '../core/error'
+import { EdenClientError } from '../core/error'
 import { EDEN_SERVER_ERROR_CODES } from '../core/error-codes'
 import { resolveEdenFetchPath } from '../core/resolve'
 import { resolveTransformer } from '../core/transform'
@@ -75,7 +75,7 @@ export function httpSubscriptionLink<
         type TConsumerConfig = {
           EventSource: TEventSource
           data: Partial<{ id?: string; data: unknown }>
-          error: EdenError
+          error: EdenClientError
         }
 
         const eventSourceStream = sseStreamConsumer<TConsumerConfig>({
@@ -98,7 +98,7 @@ export function httpSubscriptionLink<
           EventSource,
         })
 
-        const connectionState = behaviorSubject<EdenWebSocketState<EdenError>>({
+        const connectionState = behaviorSubject<EdenWebSocketState<EdenClientError>>({
           type: 'state',
           state: 'connecting',
           error: undefined,
@@ -161,7 +161,7 @@ export function httpSubscriptionLink<
               }
 
               case 'serialized-error': {
-                const error = EdenError.from({ error: chunk.error })
+                const error = EdenClientError.from({ error: chunk.error })
 
                 if (error.code && internalServerErrorCodes.includes(error.code)) {
                   connectionState.next({ type: 'state', state: 'connecting', error })
@@ -176,7 +176,7 @@ export function httpSubscriptionLink<
               case 'connecting': {
                 const lastState = connectionState.get()
 
-                const error = chunk.event && EdenError.from(chunk.event)
+                const error = chunk.event && EdenClientError.from(chunk.event)
 
                 if (error || lastState.state === 'connecting') {
                   connectionState.next({ type: 'state', state: 'connecting', error })
@@ -188,7 +188,7 @@ export function httpSubscriptionLink<
               case 'timeout': {
                 const message = `Timeout of ${chunk.ms}ms reached while waiting for a response`
 
-                const error = new EdenError({ message })
+                const error = new EdenClientError(message)
 
                 connectionState.next({ type: 'state', state: 'connecting', error })
               }
@@ -203,7 +203,7 @@ export function httpSubscriptionLink<
         }
 
         run().catch((err: any) => {
-          const error = EdenError.from(err)
+          const error = EdenClientError.from(err)
           observer.error(error)
         })
 

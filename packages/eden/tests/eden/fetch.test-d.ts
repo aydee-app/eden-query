@@ -13,7 +13,7 @@ describe('edenFetch', () => {
 
     useApp(app)
 
-    const fetch = edenFetch<typeof app>(domain)
+    const fetch = edenFetch<typeof app>(domain, { fetcher: () => '' as any })
 
     fetch('/index')
   })
@@ -23,7 +23,7 @@ describe('edenFetch', () => {
 
     useApp(app)
 
-    const fetch = edenFetch<typeof app>(domain)
+    const fetch = edenFetch<typeof app>(domain, { fetcher: () => '' as any })
 
     fetch('/index', { method: 'GET' })
   })
@@ -33,7 +33,7 @@ describe('edenFetch', () => {
 
     useApp(app)
 
-    const fetch = edenFetch<typeof app>(domain)
+    const fetch = edenFetch<typeof app>(domain, { fetcher: () => '' as any })
 
     attest(() => {
       // @ts-expect-error Testing unregistered method.
@@ -57,7 +57,7 @@ describe('edenFetch', () => {
 
     useApp(app)
 
-    const fetch = edenFetch<typeof app>(domain)
+    const fetch = edenFetch<typeof app>(domain, { fetcher: () => '' as any })
 
     attest(() => {
       // @ts-expect-error Testing invalid number of arguments.
@@ -70,7 +70,7 @@ describe('edenFetch', () => {
 
     useApp(app)
 
-    const fetch = edenFetch<typeof app>(domain)
+    const fetch = edenFetch<typeof app>(domain, { fetcher: () => '' as any })
 
     fetch('/index', { method: 'SUBSCRIBE' }, {})
   })

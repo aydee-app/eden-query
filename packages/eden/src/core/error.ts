@@ -2,37 +2,8 @@ import type { EDEN_ERROR_CODE, EDEN_ERROR_CODE_NUMBER } from './error-codes'
 import type { EdenRootConfig, InternalElysia } from './types'
 
 /**
- * Matches the error object specified by JSON-RPC.
- *
- * @see https://www.jsonrpc.org/specification#error_object
  */
-export interface EdenServerError<T extends EdenServerErrorData = EdenServerErrorData> {
-  /**
-   * Actual error object. Only defined if accessed at same environment of origin.
-   * For example, errors thrown by server will exist in `clause` on the server, but will
-   * probably be lost returned in the response.
-   */
-  cause?: unknown
-
-  /**
-   * Numeric error code as specified by JSON-RPC. Will be in the range -32768 to -32000.
-   *
-   * @see https://www.jsonrpc.org/specification#error_object
-   */
-  code?: EDEN_ERROR_CODE_NUMBER
-
-  /**
-   */
-  message?: string
-
-  /**
-   */
-  data?: T
-}
-
-/**
- */
-export interface EdenServerErrorData {
+export interface EdenErrorData {
   /**
    * String representing the error code.
    */
@@ -56,9 +27,30 @@ export interface EdenServerErrorData {
 
 /**
  */
-export interface EdenErrorOptions<T extends EdenServerErrorData = EdenServerErrorData>
-  extends EdenServerError<T>,
-    EdenRootConfig {
+export interface EdenClientErrorOptions<T extends EdenErrorData = EdenErrorData>
+  extends EdenRootConfig {
+  /**
+   * Actual error object. Only defined if accessed at same environment of origin.
+   * For example, errors thrown by server will exist in `clause` on the server, but will
+   * probably be lost returned in the response.
+   */
+  cause?: unknown
+
+  /**
+   * Numeric error code as specified by JSON-RPC. Will be in the range -32768 to -32000.
+   *
+   * @see https://www.jsonrpc.org/specification#error_object
+   */
+  code?: EDEN_ERROR_CODE_NUMBER
+
+  /**
+   */
+  message?: string
+
+  /**
+   */
+  data?: T
+
   /**
    */
   meta?: Record<string, unknown>
@@ -86,9 +78,9 @@ export interface EdenErrorOptions<T extends EdenServerErrorData = EdenServerErro
  * Therefore, the error will will not have properties like `result` with the response information.
  * The error will be part of the result itself, and thus contain the error data directly from the server.
  */
-export class EdenError<
+export class EdenClientError<
   _TElysa extends InternalElysia = InternalElysia,
-  TData extends EdenServerErrorData = EdenServerErrorData,
+  TData extends EdenErrorData = EdenErrorData,
 > extends Error {
   /**
    * Additional information captured by TRPCClientError.
@@ -131,43 +123,46 @@ export class EdenError<
    */
   value?: unknown
 
-  constructor(options?: EdenErrorOptions<TData>) {
-    super(options?.message, options)
+  override name = 'EdenClientError'
 
+  public override readonly cause?: Error
+
+  public readonly options?: EdenClientErrorOptions<TData>
+
+  constructor(message?: string, options?: EdenClientErrorOptions<TData>) {
+    super(message, options)
+
+    this.options = options
     this.meta = options?.meta
     this.data = options?.data
     this.code = options?.code
-
-    if (options?.development) {
-      const error = (options?.cause instanceof Error && options.cause) || this
-      this.data = { ...(this.data as any), stack: error.stack }
-    }
+    this.cause = options?.cause as any
   }
 
   public static from<TElysa extends InternalElysia = InternalElysia>(
     cause: unknown,
-    options?: EdenErrorOptions,
-  ): EdenError<TElysa> {
+    options?: EdenClientErrorOptions,
+  ): EdenClientError<TElysa> {
     if (this.isEdenError(cause)) {
       cause.meta = { ...cause.meta, ...options?.meta }
       return cause
     }
 
     const message = getMessageFromUnknownError(cause) || 'Unknown error'
-    return new EdenError({ ...options, message, cause })
+    return new EdenClientError(message, { ...options, cause })
   }
 
   /**
    * @see https://github.com/trpc/trpc/blob/7d10d7b028f1d85f6523e995ee7deb17dc886874/packages/client/src/TRPCClientError.ts#L22
    */
-  public static isEdenError(cause: unknown): cause is EdenError {
-    if (cause instanceof EdenError) return true
+  public static isEdenError(cause: unknown): cause is EdenClientError {
+    if (cause instanceof EdenClientError) return true
 
     /**
      * @deprecated
      * Delete in next major
      */
-    if (cause instanceof Error && cause.name === EdenError.name) return true
+    if (cause instanceof Error && cause.name === EdenClientError.name) return true
 
     return false
   }
@@ -176,19 +171,60 @@ export class EdenError<
 /**
  * @see https://github.com/elysiajs/eden/blob/7b4e3d90f9f69bc79ca108da4f514ee845c7d9d2/src/errors.ts#L1
  */
-export class EdenFetchError<TStatus extends number = number, TValue = unknown> extends EdenError {
+export class EdenFetchError<
+  TStatus extends number = number,
+  TValue = unknown,
+> extends EdenClientError {
   public override status: TStatus
 
   public override value: TValue
 
-  constructor(status: TStatus, value: TValue, options?: EdenErrorOptions) {
-    const message = value + ''
+  constructor(status: TStatus, value: TValue, options?: EdenClientErrorOptions) {
+    const message = options?.message || value + ''
 
-    super({ message, ...options })
+    super(message, { ...options })
 
     this.status = status
     this.value = value
   }
+}
+
+export interface EdenServerErrorOptions extends EdenRootConfig {
+  message?: string
+  code: EDEN_ERROR_CODE
+  cause?: unknown
+}
+
+/**
+ * Matches the error object specified by JSON-RPC.
+ *
+ * @see https://www.jsonrpc.org/specification#error_object
+ */
+export class EdenServerError extends Error {
+  public override readonly cause?: Error
+
+  public readonly code: EDEN_ERROR_CODE
+
+  public override name = 'EdenServerError'
+
+  constructor(options: EdenServerErrorOptions) {
+    const cause = getCauseFromUnknown(options.cause)
+
+    const message = options.message ?? cause?.message ?? options.code
+
+    super(message, { cause })
+
+    this.code = options.code
+
+    if (!this.cause) {
+      // < ES2022 / < Node 16.9.0 compatability
+      this.cause = cause
+    }
+  }
+}
+
+class UnknownCauseError extends Error {
+  [key: string]: unknown
 }
 
 /**
@@ -204,4 +240,65 @@ function getMessageFromUnknownError(err: unknown) {
   }
 
   return
+}
+
+export function getEdenErrorFromUnknown(cause: unknown): EdenServerError {
+  if (cause instanceof EdenServerError) {
+    return cause
+  }
+
+  if (cause instanceof Error && cause.name === 'TRPCError') {
+    // https://github.com/trpc/trpc/pull/4848
+    return cause as EdenServerError
+  }
+
+  const error = new EdenServerError({
+    code: 'INTERNAL_SERVER_ERROR',
+    cause,
+  })
+
+  // Inherit stack from error
+  if (cause instanceof Error && cause.stack) {
+    error.stack = cause.stack
+  }
+
+  return error
+}
+
+export function getCauseFromUnknown(cause: unknown): Error | undefined {
+  if (cause instanceof Error) {
+    return cause
+  }
+
+  const type = typeof cause
+  if (type === 'undefined' || type === 'function' || cause === null) {
+    return undefined
+  }
+
+  // Primitive types just get wrapped in an error
+  if (type !== 'object') {
+     
+    return new Error(String(cause))
+  }
+
+  // If it's an object, we'll create a synthetic error
+  if (isObject(cause)) {
+    const error = new UnknownCauseError()
+
+    for (const key in cause) {
+      error[key] = cause[key]
+    }
+
+    return error
+  }
+
+  return undefined
+}
+
+/**
+ * Check that value is object
+ * @internal
+ */
+export function isObject(value: unknown): value is Record<string, unknown> {
+  return !!value && !Array.isArray(value) && typeof value === 'object'
 }

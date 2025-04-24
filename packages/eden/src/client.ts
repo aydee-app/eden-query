@@ -1,6 +1,6 @@
 import type { EdenRequestOptions } from './core/config'
 import type { EdenResult, EdenWebSocketState } from './core/dto'
-import type { EdenError } from './core/error'
+import type { EdenClientError } from './core/error'
 import type { InternalElysia } from './core/types'
 import { createChain } from './links/shared'
 import type {
@@ -95,7 +95,7 @@ export interface EdenClientOptions<T extends InternalElysia> extends EdenClientR
  * @internal
  */
 export interface EdenClientSubscriptionOptions<TData = unknown>
-  extends Partial<EdenSubscriptionObserver<TData, EdenError<InternalElysia>>>,
+  extends Partial<EdenSubscriptionObserver<TData, EdenClientError<InternalElysia>>>,
     EdenClientRequestOptions {}
 
 /**

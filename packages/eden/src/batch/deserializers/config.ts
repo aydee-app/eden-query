@@ -18,6 +18,13 @@ export interface BatchDeserializerConfig {
    * @default true.
    */
   method?: MaybeArray<HTTPMethod | true | (string & {})>
+
+  /**
+   * Headers to apply to all batched requests.
+   *
+   * This is used in testing to distinguish batched requests from their encapsulating batch request.
+   */
+  headers?: HeadersInit
 }
 
 /**

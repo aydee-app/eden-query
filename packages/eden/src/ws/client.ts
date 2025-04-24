@@ -5,7 +5,7 @@ import type {
   EdenWebSocketOutgoingMessage,
   EdenWebSocketState,
 } from '../core/dto'
-import { EdenError } from '../core/error'
+import { EdenClientError } from '../core/error'
 import { type AnyDataTransformer, matchTransformer } from '../core/transform'
 import type { Operation, OperationLinkResult } from '../links/types'
 import { type BehaviorSubject, behaviorSubject, Observable } from '../observable'
@@ -84,7 +84,7 @@ export interface WebSocketRequestOptions {
   lastEventId?: string
 }
 
-export type WebSocketConnectionState = EdenWebSocketState<EdenError>
+export type WebSocketConnectionState = EdenWebSocketState<EdenClientError>
 
 export const WEBSOCKET_CONNECTION_STATES = {
   CONNECTING: {
@@ -196,8 +196,7 @@ export class WebSocketClient {
     }
 
     const result = await this.activeConnection.open().catch((cause) => {
-      const error = new EdenError({
-        message: 'Initialization error',
+      const error = new EdenClientError('Initialization error', {
         code: -32502,
         cause,
         data: {
@@ -230,8 +229,7 @@ export class WebSocketClient {
       }
 
       if (request.state === 'outgoing') {
-        const error = new EdenError({
-          message: 'Closed before connection was established',
+        const error = new EdenClientError('Closed before connection was established', {
           code: -32500,
           data: {
             code: 'WEBSOCKET_CLOSED',
@@ -352,8 +350,7 @@ export class WebSocketClient {
 
       const error =
         cause ??
-        new EdenError({
-          message: 'WebSocket closed',
+        new EdenClientError('WebSocket closed', {
           code: -32500,
           cause,
           data: {
@@ -403,8 +400,7 @@ export class WebSocketClient {
       this.options.onClose?.(event)
 
       if (!this.lazyMode) {
-        const error = new EdenError({
-          message: 'WebSocket closed',
+        const error = new EdenClientError('WebSocket closed', {
           code: -32500,
           cause: event,
           data: {
@@ -421,8 +417,7 @@ export class WebSocketClient {
 
       this.options.onError?.(event)
 
-      const error = new EdenError({
-        message: 'WebSocket closed',
+      const error = new EdenClientError('WebSocket closed', {
         code: -32500,
         cause: event,
         data: {
@@ -437,8 +432,7 @@ export class WebSocketClient {
   private handleResponseMessage = (message: EdenWebSocketIncomingMessage) => {
     // Special message that does not have an originating request.
     if (message.result?.type === 'reconnect') {
-      const error = new EdenError({
-        message: 'Server requested reconnect',
+      const error = new EdenClientError('Server requested reconnect', {
         code: -32503,
         data: {
           code: 'WEBSOCKET_RECONNECT',
