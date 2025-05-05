@@ -177,8 +177,7 @@ export class EdenClient<T extends InternalElysia = InternalElysia> {
       type: 'query',
       path,
       params,
-      context: options?.context,
-      signal: options?.signal,
+      ...options,
     })
     return promise
   }
@@ -191,8 +190,7 @@ export class EdenClient<T extends InternalElysia = InternalElysia> {
       type: 'mutation',
       path,
       params,
-      context: options?.context,
-      signal: options?.signal,
+      ...options,
     })
 
     return promise
@@ -235,8 +233,7 @@ export class EdenClient<T extends InternalElysia = InternalElysia> {
       type: 'subscription',
       path,
       params,
-      context: options?.context,
-      signal: options?.signal,
+      ...options,
     })
 
     const subscription = observable$.subscribe({
