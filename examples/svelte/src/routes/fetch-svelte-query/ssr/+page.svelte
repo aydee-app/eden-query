@@ -1,7 +1,7 @@
 <script lang="ts">
   import { hua } from '$lib/eden'
 
-  const query = hua.createQuery('/api/posts/:id', { params: { id: '2' } })
+  const query = hua.createQuery('/api/posts/:id', { params: { id: '1' } })
 </script>
 
 {$query.data?.id}

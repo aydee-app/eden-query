@@ -1,7 +1,7 @@
 <script lang="ts">
   import { hydrate, QueryClientProvider } from '@tanstack/svelte-query'
 
-  import { aponia, eden, hua,mobius } from '$lib/eden'
+  import { aponia, eden, hua, mobius } from '$lib/eden'
 
   import type { LayoutProps } from './$types'
 
@@ -45,9 +45,6 @@
 
       <nav>
         <ul>
-          <li>
-            <a href="/">Home</a>
-          </li>
           <li>
             <a href="/fetch-svelte-query/query-path-params">Query Path Params</a>
           </li>

@@ -25,4 +25,5 @@
 <p>{$query.data?.message}</p>
 
 <input type="text" bind:value />
+
 <button onclick={handleSubmit}>Submit</button>
