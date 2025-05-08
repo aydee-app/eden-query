@@ -1,3 +1,16 @@
+import { JSDOM } from 'jsdom'
+
+const dom = new JSDOM(undefined, {
+  /**
+   * @see https://github.com/jsdom/jsdom/issues/2319#issuecomment-855407924
+   */
+  url: 'http://localhost:3000',
+})
+
+// Happy-DOM XMLHttpRequest does not work with streamed responses for some reason...
+// It does not read any text until the response completes.
+global.XMLHttpRequest = dom.window.XMLHttpRequest
+
 import { setup } from '@ark/attest'
 import type { AnyElysia } from 'elysia'
 import { http } from 'msw'

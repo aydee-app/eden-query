@@ -8,7 +8,7 @@ import type { Observable } from '../observable'
  * An {@link OperationLink} attaches additional metadata to a returned {@link OperationResult}
  */
 export type OperationLinkResult<TOutput = any, TError = any> = {
-  context?: OperationContext
+  context: OperationContext
   result: EdenResult<TOutput, TError>
 }
 

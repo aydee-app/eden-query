@@ -10,3 +10,6 @@ export function httpBatchSubscriptionLink<TElysia extends InternalElysia, const 
 ): HTTPBatchLinkResult<TElysia, TConfig> {
   return httpBatchLink({ ...options, stream: true })
 }
+
+// Oops, maybe misnamed.
+export const httpBatchStreamLink = httpBatchSubscriptionLink

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "rslib build",
-    "test": "ATTEST_skipTypes=1 vitest",
+    "test": "ATTEST_skipTypes=1 vitest http-subscription",
     "test:types": "vitest test-d"
   },
   "dependencies": {
@@ -16,7 +16,9 @@
   "devDependencies": {
     "@arktype/attest": "^0.46.0",
     "elysia": "^1.2.25",
+    "event-source-polyfill": "^1.0.31",
     "msw": "^2.7.5",
+    "superjson": "^2.2.2",
     "vitest": "^3.1.2"
   }
 }

@@ -14,7 +14,8 @@ export function isAsyncIterable<TValue>(value: unknown): value is AsyncIterable<
  */
 export async function* mapAsyncIterable<T>(generator: AsyncIterable<T>, map: (data: T) => any) {
   for await (const data of generator) {
-    const mapped = await map(data)
+    const mapped = typeof data === 'string' ? data : await map(data)
+    // console.log({ mapped })
     yield mapped
   }
 }

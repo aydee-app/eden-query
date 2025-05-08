@@ -18,6 +18,10 @@ export const EDEN_SERVER_ERROR_CODES = {
   ...EDEN_INTERNAL_SERVER_ERROR_CODES,
   FORBIDDEN: -32003, // 403
   NOT_FOUND: -32004, // 404
+
+  // Implementation specific errors
+
+  UNAUTHORIZED: -32001, // 401
 } as const
 
 /**
@@ -72,6 +76,7 @@ export const EDEN_ERROR_CODES_BY_NUMBER: InvertKeyValue<typeof EDEN_ERROR_CODES>
   [-32003]: 'FORBIDDEN',
   [-32004]: 'NOT_FOUND',
   [-32600]: 'BAD_REQUEST',
+  [-32001]: 'UNAUTHORIZED',
 }
 
 export type EDEN_ERROR_CODE_NUMBER = ValueOf<typeof EDEN_ERROR_CODES>

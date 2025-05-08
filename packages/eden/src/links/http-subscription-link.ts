@@ -23,8 +23,8 @@ const internalServerErrorCodes: number[] = Object.values(EDEN_SERVER_ERROR_CODES
 
 type HTTPSubscriptionLinkOptions<
   TElysia extends InternalElysia,
-  TEventSource extends EventSourceLike.AnyConstructor = typeof EventSource,
   TConfig = undefined,
+  TEventSource extends EventSourceLike.AnyConstructor = typeof EventSource,
 > = HTTPLinkBaseOptions<TElysia, TConfig> & {
   /**
    * EventSource ponyfill.
@@ -45,9 +45,14 @@ type HTTPSubscriptionLinkOptions<
  */
 export function httpSubscriptionLink<
   TElysia extends InternalElysia,
+  const TConfig,
   TEventSource extends EventSourceLike.AnyConstructor,
->(options: HTTPSubscriptionLinkOptions<NoInfer<TElysia>, TEventSource>): EdenLink<TElysia> {
-  const transformer = resolveTransformer(options.transformer)
+>(
+  options: HTTPSubscriptionLinkOptions<NoInfer<TElysia>, TConfig, TEventSource>,
+): EdenLink<TElysia> {
+  const internalOptions = options as HTTPSubscriptionLinkOptions<any>
+
+  const transformer = resolveTransformer(internalOptions.transformer)
 
   const EventSource = options.EventSource ?? (globalThis.EventSource as any)
 
@@ -65,6 +70,8 @@ export function httpSubscriptionLink<
         const resolvedParams = { path, ...params }
 
         const resolvedPath = resolveEdenFetchPath(resolvedParams)
+
+        // const resolvedOptions = resolveFetchOptions(resolvedParams)
 
         let lastEventId: string
 
@@ -92,7 +99,13 @@ export function httpSubscriptionLink<
 
             return options.url + pathWithQuery
           },
-          init: resolveCallbackOrValue.bind(null, options.eventSourceOptions, op),
+          init: () => {
+            const eventSourceOptions = resolveCallbackOrValue(options.eventSourceOptions, op)
+
+            // resolvedOptions
+
+            return { ...eventSourceOptions }
+          },
           signal,
           deserialize: transformer?.output.deserialize,
           EventSource,
@@ -106,7 +119,7 @@ export function httpSubscriptionLink<
 
         const connectionSub = connectionState.subscribe({
           next(state) {
-            observer.next({ result: state })
+            observer.next({ result: state, context: op.context })
           },
         })
 
@@ -195,7 +208,7 @@ export function httpSubscriptionLink<
             }
           }
 
-          observer.next({ result: { type: 'stopped' } })
+          observer.next({ result: { type: 'stopped' }, context: op.context })
 
           connectionState.next({ type: 'state', state: 'idle', error: undefined })
 
@@ -220,3 +233,5 @@ export function httpSubscriptionLink<
 
   return link
 }
+
+export { sseStreamConsumer, sseStreamProducer } from '@trpc/server/unstable-core-do-not-import'
