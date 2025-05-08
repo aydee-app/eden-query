@@ -7,7 +7,7 @@ import { BODY_KEYS } from '../shared'
 /**
  * Get the parameters for a batch GET request.
  *
- * If using GET request to batch, the request data will be encoded in query parameters.
+ * The request data will be encoded in query parameters.
  * This is only possible if all requests are GET requests.
  *
  * The query will look like this

@@ -5,6 +5,13 @@ import { BODY_KEYS, BODY_TYPES } from '../shared'
 import type { BatchDeserializerConfig } from './config'
 import { deserializeBatchGetParams } from './get'
 
+/**
+ * Similar logic to the batch request parser implemented by tRPC.
+ *
+ * @see https://github.com/trpc/trpc/blob/main/packages/server/src/unstable-core-do-not-import/http/contentType.ts#L65
+ *
+ * @returns Array of options that can each be passed to the Eden request resolver.
+ */
 export async function deserializeBatchPostParams<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,

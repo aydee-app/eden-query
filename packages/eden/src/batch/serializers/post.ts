@@ -3,14 +3,32 @@ import { resolveFetchOptions } from '../../core/resolve'
 import type { InternalElysia, TypeConfig } from '../../core/types'
 import { extractFiles } from '../../utils/file'
 import { BODY_KEYS, BODY_TYPES } from '../shared'
+import { serializeBatchGetParams } from './get'
 
+/**
+ * Get the parameters for a batch POST request.
+ *
+ * The request data will be stored in the FormData body..
+ * This can accommodate any request HTTP method.
+ *
+ * The body will look like this
+ *
+ * // PATCH request to /api/b?name=elysia, i.e. query of name=elysia, with body = ["Hello"]
+ *
+ * {
+ *   '0.method': 'PATCH',
+ *   '0.path': '/api/b?name=elysia',
+ *   '0.body_type': 'json',
+ *   '0.body': '["Hello"]'
+ * }
+ */
 export async function serializeBatchPostParams<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends TypeConfig = undefined,
 >(batchParams: EdenRequestOptions<TElysia, TConfig>[]) {
   const body = new FormData()
 
-  const headers = new Headers()
+  const { headers } = await serializeBatchGetParams(batchParams)
 
   const operations = batchParams.map(async (params, index) => {
     const { path, query, fetchInit } = await resolveFetchOptions(params)
@@ -20,14 +38,6 @@ export async function serializeBatchPostParams<
     }
 
     body.append(`${index}.${BODY_KEYS.path}`, `${path}${query ? '?' : ''}${query}`)
-
-    const requestHeaders = new Headers(fetchInit?.headers)
-
-    for (const [key, value] of requestHeaders) {
-      if (value) {
-        headers.append(`${index}.${key}`, value)
-      }
-    }
 
     if (fetchInit?.body == null) return
 
@@ -40,6 +50,8 @@ export async function serializeBatchPostParams<
 
       return
     }
+
+    const requestHeaders = new Headers(fetchInit?.headers)
 
     const contentType = requestHeaders.get('content-type')?.split(';')[0]
 
