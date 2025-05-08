@@ -1,0 +1,176 @@
+/**
+ * https://github.com/saadeghi/daisyui/issues/3643
+ * https://github.com/saadeghi/daisyui/issues/3622
+ * https://github.com/tailwindlabs/tailwindcss/issues/17057#issuecomment-2708189005
+ */
+
+@utility btn-disabled {
+  @layer components {
+    &:not(.btn-link, .btn-ghost) {
+      background-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
+      box-shadow: none;
+    }
+
+    pointer-events: none;
+    --btn-border: #0000;
+    --btn-noise: none;
+    --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
+        pointer-events: none;
+        --btn-border: #0000;
+        --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
+      }
+    }
+  }
+}
+
+@utility btn-active {
+  &.btn {
+    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
+    --btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0);
+    isolation: isolate;
+  }
+
+  &.btn-link {
+    text-decoration-line: underline;
+    --btn-border: #0000;
+    --btn-bg: #0000;
+  }
+}
+
+@utility menu-disabled {
+  &:has(+ li),
+  &:is(li),
+  &:is(button) {
+    pointer-events: none;
+    color: color-mix(in oklab, var(--color-base-content) 20%, transparent);
+  }
+}
+
+@utility menu-active {
+  &:not(ul, details, .menu-title):not(.menu-active, :active, .btn) {
+    color: var(--menu-active-fg);
+    background-color: var(--menu-active-bg);
+    background-size: auto, calc(var(--noise) * 100%);
+    background-image: none, var(--fx-noise);
+  }
+
+  /**
+   * bits-ui inserts spans that take up no space, effectively invisible. Daisyui .menu 
+   * will apply padding to these elements. Ensure that at least the last one stays unpadded.
+   */
+  & ~ span {
+    @apply p-0;
+  }
+
+  /**
+   * Use keyboard navigation to select a menu item, hit enter, and the focused mode should match the active.
+   *
+   * Issue: in light mode, hitting "Enter" on a menu item will cause its text to become black,
+   * and applying .menu-active will turn the background black. Force the color to be the active color.
+   *
+   * Not needed anymore, preserved as CSS reference.
+   */
+
+  /*
+  &:has(+ li) {
+    & > :not(ul, details, .menu-title):not(.menu-active, :active, .btn) &:focus-visible  {
+      color: var(--menu-active-fg);
+      background-color: var(--menu-active-bg);
+      background-size: auto, calc(var(--noise) * 100%);
+      background-image: none, var(--fx-noise);
+    }
+  }
+  */
+}
+
+@utility menu-focus {
+  &:not(ul, details, .menu-title):not(.menu-active, :active, .btn) {
+    cursor: pointer;
+    background-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
+    color: var(--color-base-content);
+    outline-style: none;
+
+    @media (forced-colors: active) : {
+      outline: 2px solid transparent;
+      outline-offset: '2px';
+    }
+  }
+
+  /**
+   * bits-ui inserts spans that take up no space, effectively invisible. Daisyui .menu 
+   * will apply padding to these elements. Ensure that at least the last one stays unpadded.
+   */
+  & ~ span {
+    @apply p-0;
+  }
+}
+
+/*
+.steps.steps-vertical {
+  display: block;
+  border-left: 4px solid color-mix(in oklab, var(--color-base-content) 10%, transparent);
+  overflow-x: visible;
+  overflow-y: visible;
+  padding-left: 0;
+
+  .step {
+    text-align: left;
+    display: block;
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .step:before {
+    display: none;
+  }
+
+  .step:after {
+    position: absolute;
+    top: 0;
+    left: -18px;
+    width: 32px;
+    height: 32px;
+  }
+}
+*/
+
+@utility step {
+  @apply relative;
+  counter-increment: step;
+
+  &:before {
+    @apply badge absolute -left-[67px] size-9 text-center font-mono text-base font-medium;
+    content: counter(step);
+  }
+}
+
+.toast {
+  @apply flex-row;
+}
+
+.collapse-open {
+  > .collapse-content {
+    visibility: visible;
+    min-height: fit-content;
+    padding-bottom: 1rem;
+    transition:
+      padding 0.2sease -out,
+      background-color 0.2sease -out;
+  }
+}
+
+.collapse-close {
+  > .collapse-content {
+    max-height: 0;
+    visibility: hidden;
+    min-height: 0;
+    padding-bottom: 0;
+    transition:
+      padding 0.2sease -out,
+      background-color 0.2sease -out;
+  }
+}

@@ -1,0 +1,161 @@
+.vp-doc [class*='language-'],
+pre.shiki {
+  code {
+    display: block;
+    padding: 0 24px;
+    width: fit-content;
+    min-width: 100%;
+    line-height: var(--vp-code-line-height);
+    font-size: var(--vp-code-font-size);
+    color: var(--vp-code-block-color);
+    transition: color 0.5s;
+  }
+}
+
+/**
+ * Copy the CSS for shiki transformers from vitepress and synchronize the colors with daisyui theme.
+ * https://github.com/vuejs/vitepress/blob/9d0145d32dd72bfcc6964afb7c5016668fb57a40/src/client/theme-default/styles/components/vp-doc.css#L345C1-L418C1
+ */
+:root {
+  --vp-code-line-highlight-color: var(--color-base-content);
+  --vp-code-line-highlight-bg-color: var(--color-base-300);
+
+  --vp-code-line-warning-color: var(--color-warning-content);
+  --vp-code-line-warning-bg-color: var(--color-warning);
+
+  --vp-code-line-error-color: var(--color-error-content);
+  --vp-code-line-error-bg-color: var(--color-error);
+
+  --vp-code-line-diff-remove-color: var(--color-error);
+  --vp-code-line-diff-add-color: var(--color-success);
+  --vp-code-line-diff-remove-symbol-color: var(--color-error-content);
+  --vp-code-line-diff-add-symbol-color: var(--color-success-content);
+}
+
+.vp-doc [class*='language-'] code .highlighted {
+  color: var(--vp-code-line-highlight-color);
+  background-color: var(--vp-code-line-highlight-bg-color);
+  transition: background-color 0.5s;
+  margin: 0 -24px;
+  padding: 0 24px;
+  width: calc(100% + 2 * 24px);
+  display: inline-block;
+}
+
+.vp-doc [class*='language-'] code .highlighted.error {
+  color: var(--vp-code-line-error-color);
+  background-color: var(--vp-code-line-error-bg-color);
+}
+
+.vp-doc [class*='language-'] code .highlighted.warning {
+  color: var(--vp-code-line-warning-color);
+  background-color: var(--vp-code-line-warning-bg-color);
+}
+
+.vp-doc [class*='language-'] code .diff {
+  transition: background-color 0.5s;
+  margin: 0 -24px;
+  padding: 0 24px;
+  width: calc(100% + 2 * 24px);
+  display: inline-block;
+}
+
+.vp-doc [class*='language-'] code .diff::before {
+  position: absolute;
+  left: 10px;
+}
+
+.vp-doc [class*='language-'] .has-focused .line:not(.focused) {
+  filter: blur(0.095rem);
+  opacity: 0.4;
+  transition:
+    filter 0.35s,
+    opacity 0.35s;
+}
+
+.vp-doc [class*='language-'] .has-focused .line:not(.focused) {
+  opacity: 0.7;
+  transition:
+    filter 0.35s,
+    opacity 0.35s;
+}
+
+.vp-doc [class*='language-']:hover .has-focused .line:not(.focused) {
+  filter: blur(0);
+  opacity: 1;
+}
+
+.vp-doc [class*='language-'] code .diff.remove {
+  background-color: var(--vp-code-line-diff-remove-color);
+  opacity: 0.7;
+}
+
+.vp-doc [class*='language-'] code .diff.remove::before {
+  content: '-';
+  color: var(--vp-code-line-diff-remove-symbol-color);
+}
+
+.vp-doc [class*='language-'] code .diff.add {
+  background-color: var(--vp-code-line-diff-add-color);
+}
+
+.vp-doc [class*='language-'] code .diff.add::before {
+  content: '+';
+  color: var(--vp-code-line-diff-add-symbol-color);
+}
+
+.vp-doc div[class*='language-'].line-numbers-mode {
+  /*rtl:ignore*/
+  padding-left: 32px;
+}
+
+/**
+ * https://github.com/shikijs/shiki/blob/f8ef446af3f5f3910131b692e0c81ce032754ffa/docs/.vitepress/theme/transformers.css#L19
+ */
+.vp-code .tab,
+.vp-code .space {
+  position: relative;
+}
+
+/*
+.vp-code .tab::before {
+  content: '⇥';
+  position: absolute;
+  opacity: 0.3;
+}
+
+.vp-code .space::before {
+  content: '·';
+  position: absolute;
+  opacity: 0.3;
+}
+*/
+
+.vp-code .highlighted-word {
+  /**
+   * background-color: var(--vp-c-bg-soft);
+   * border: 1px solid var(--vp-c-border);
+   * padding: 1px 3px;
+   * margin: -1px -3px;
+   * border-radius: 4px;
+   */
+
+  color: var(--color-neutral, var(--color-base-content));
+
+  background-color: color-mix(
+    in oklab,
+    var(--badge-color, var(--color-base-content)) 8%,
+    var(--color-base-100)
+  );
+
+  border-color: color-mix(
+    in oklab,
+    var(--color-neutral, var(--color-base-content)) 10%,
+    var(--color-base-100)
+  );
+
+  border-radius: var(--radius-selector);
+
+  padding-inline: calc(0.25rem * 3 - var(--border));
+  padding-block: var(--border);
+}

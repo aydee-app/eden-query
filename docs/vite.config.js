@@ -3,7 +3,7 @@
 import { defineConfig } from 'vite'
 import { groupIconVitePlugin } from 'vitepress-plugin-group-icons'
 
-import { paraglideVitePlugin } from '@inlang/paraglide-js'
+// import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -13,11 +13,11 @@ const config = defineConfig({
 
     groupIconVitePlugin(),
 
-    paraglideVitePlugin({
-      project: './project.inlang',
-      outdir: './src/lib/paraglide',
-      strategy: ['url', 'baseLocale'],
-    }),
+    // paraglideVitePlugin({
+    //   project: './project.inlang',
+    //   outdir: './src/lib/paraglide',
+    //   strategy: ['url', 'baseLocale'],
+    // }),
 
     tailwindcss(),
   ],

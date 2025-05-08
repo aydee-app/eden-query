@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@shikijs/vitepress-twoslash/style.css';
+
+@import './styles/animation.css';
+@import './styles/code.css';
+@import './styles/daisyui.css';
+@import './styles/milkdown.css';
+@import './styles/twoslash.css';
+@import './styles/vitepress-code.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@plugin "@tailwindcss/typography";
+
+@plugin "@iconify/tailwind4";
+
+@plugin 'daisyui' {
+  themes: all;
+}
+
+@plugin "daisyui/theme" {
+  name: light;
+}
+
+/** Propagate the name of the data-theme as a CSS variable. */
+html {
+  --data-theme: attr(data-theme);
+}

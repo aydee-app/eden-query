@@ -1,0 +1,36 @@
+/**
+ * Adaptation of Vitepress styling for headers.
+ * https://github.com/vuejs/vitepress/blob/7d9448192079e59493aa5c1e86cdf6d6deae8e36/src/client/theme-default/styles/components/vp-doc.css#L5
+ */
+
+:root {
+  --vp-header-anchor-symbol: '# ';
+}
+
+.vp-doc .header-anchor:before {
+  content: var(--vp-header-anchor-symbol);
+}
+
+.vp-doc h1:hover .header-anchor,
+.vp-doc h1 .header-anchor:focus,
+.vp-doc h2:hover .header-anchor,
+.vp-doc h2 .header-anchor:focus,
+.vp-doc h3:hover .header-anchor,
+.vp-doc h3 .header-anchor:focus,
+.vp-doc h4:hover .header-anchor,
+.vp-doc h4 .header-anchor:focus,
+.vp-doc h5:hover .header-anchor,
+.vp-doc h5 .header-anchor:focus,
+.vp-doc h6:hover .header-anchor,
+.vp-doc h6 .header-anchor:focus {
+  opacity: 1;
+}
+
+.vp-doc .header-anchor {
+  margin-left: -0.87em;
+  opacity: 0;
+  text-decoration: none;
+  transition:
+    color 0.25s,
+    opacity 0.25s;
+}

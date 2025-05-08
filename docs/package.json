@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@inlang/paraglide-js": "^2.0.12",
+    "@lucide/svelte": "^0.508.0",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^3.2.0"
+    "mode-watcher": "^1.0.6",
+    "tailwind-merge": "^3.2.0",
+    "tw-animate-css": "^1.2.9"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.336",
@@ -49,7 +52,6 @@
     "svelte2tsx": "^0.7.37",
     "tailwind-variants": "^1.0.0",
     "tailwindcss": "^4.1.5",
-    "tailwindcss-animate": "^1.0.7",
     "twoslash": "^0.3.1",
     "twoslash-protocol": "^0.3.1",
     "typescript": "^5.8.3",
