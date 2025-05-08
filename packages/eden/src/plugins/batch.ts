@@ -197,3 +197,5 @@ export function batchPlugin<const T extends BatchPluginConfig>(config: T = {} as
 
   return plugin
 }
+
+export const batch = batchPlugin

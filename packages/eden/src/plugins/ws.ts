@@ -133,3 +133,5 @@ async function handleWsFetchRequest(
 
   return incomingMessage
 }
+
+export const ws = wsPlugin

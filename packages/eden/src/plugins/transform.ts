@@ -175,3 +175,5 @@ export function transformPlugin<const T extends TransformerPluginConfig>(config:
 
   return plugin
 }
+
+export const transform = transformPlugin
