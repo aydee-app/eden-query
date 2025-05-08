@@ -98,7 +98,8 @@
   class="v-popper {className}"
 >
   {@render children?.()}
-</div><Portal><div
+</div>
+<Portal><div
     aria-hidden={!shown}
     data-popper-placement={floating.placement.split('-')[0]}
     class="v-popper v-popper__popper {popperClass} {themeClasses.join(' ')}"
