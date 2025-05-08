@@ -1,0 +1,11 @@
+{
+  "extends": ["../tsconfig.json", "./.svelte-kit/tsconfig.json"],
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "typescript-svelte-plugin"
+      }
+    ]
+  },
+  "include": ["**/*.js", "**/*.ts", "**/*.svelte"]
+}
