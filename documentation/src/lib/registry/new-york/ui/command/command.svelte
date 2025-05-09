@@ -1,0 +1,22 @@
+<script lang="ts">
+  import { Command as CommandPrimitive } from 'bits-ui'
+
+  import { cn } from '$lib/utils/cn'
+
+  let {
+    value = $bindable(''),
+    ref = $bindable(null),
+    class: className,
+    ...restProps
+  }: CommandPrimitive.RootProps = $props()
+</script>
+
+<CommandPrimitive.Root
+  class={cn(
+    'bg-base-100 flex h-full w-full flex-col overflow-hidden rounded-lg border shadow',
+    className,
+  )}
+  bind:ref
+  bind:value
+  {...restProps}
+/>

@@ -1,0 +1,17 @@
+<script lang="ts">
+  import { Command as CommandPrimitive } from 'bits-ui'
+
+  import { cn } from '$lib/utils/cn'
+
+  let {
+    ref = $bindable(null),
+    class: className,
+    ...restProps
+  }: CommandPrimitive.SeparatorProps = $props()
+</script>
+
+<CommandPrimitive.Separator
+  bind:ref
+  class={cn('bg-base-200 -mx-1 h-px', className)}
+  {...restProps}
+/>

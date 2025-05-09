@@ -4,15 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prepare": "svelte-kit sync",
-    "test": "vitest",
-    "dev": "vite"
+    "postinstall": "paraglide-js compile --project project.inlang --outdir src/lib/paraglide && svelte-kit sync",
+    "check": "svelte-check",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "format": "prettier --write .",
+    "lint": "eslint --fix",
+    "translate": "inlang machine translate --project project.inlang && paraglide-js compile --outdir src/lib/paraglide",
+    "build:lang": "paraglide-js compile --outdir src/lib/paraglide"
   },
   "dependencies": {
     "@inlang/paraglide-js": "^2.0.12",
     "@lucide/svelte": "^0.508.0",
     "clsx": "^2.1.1",
+    "flexsearch": "0.7.43",
     "mode-watcher": "^1.0.6",
+    "svelte-sonner": "^0.3.28",
     "tailwind-merge": "^3.2.0",
     "tw-animate-css": "^1.2.9"
   },
@@ -20,6 +28,7 @@
     "@iconify/json": "^2.2.336",
     "@iconify/tailwind4": "^1.0.6",
     "@jridgewell/sourcemap-codec": "^1.5.0",
+    "@rspress/theme-default": "^1.43.13",
     "@shikijs/rehype": "^3.4.0",
     "@shikijs/transformers": "^3.4.0",
     "@shikijs/twoslash": "^3.4.0",

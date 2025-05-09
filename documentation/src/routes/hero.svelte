@@ -44,7 +44,7 @@
   }
 </script>
 
-<div class="flex w-full flex-col gap-12" style="min-height: calc(100dvh - var(--rp-nav-height))">
+<div class="flex h-0 w-full grow flex-col gap-12">
   <Ray class="pointer-events-none -top-16 h-[60vh] opacity-[.35] dark:opacity-50" />
 
   <div class="flex w-full grow flex-col items-center justify-center gap-8 p-4">
