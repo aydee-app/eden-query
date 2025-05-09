@@ -8,13 +8,16 @@ export function backTrackHeaders(rawHeaders: Header[], index: number): Header[] 
   let current = rawHeaders[index]
   let currentIndex = index
 
-  const res: Header[] = [current]
+  const res: Header[] = current ? [current] : []
+
   while (current && current.depth > 2) {
     // If there is no parent header, we will stop the loop
     let matchedParent = false
+
     for (let i = currentIndex - 1; i >= 0; i--) {
       const header = rawHeaders[i]
-      if (header.depth > 1 && header.depth === current.depth - 1) {
+
+      if (header && header.depth > 1 && header.depth === current.depth - 1) {
         current = header
         currentIndex = i
         res.unshift(current)
@@ -36,15 +39,12 @@ export function formatText(text: string) {
 export function normalizeTextCase(text: string | number) {
   const textNormalized = text.toString().toLowerCase().normalize('NFD')
 
-  if (cyrillicRegex.test(String(text))) {
-    return textNormalized.normalize('NFC')
-  }
+  if (cyrillicRegex.test(String(text))) return textNormalized.normalize('NFC')
 
-  // biome-ignore lint/suspicious/noMisleadingCharacterClass: temporarily ignore
   const resultWithoutAccents = textNormalized.replace(/[\u0300-\u036f]/g, '')
-  if (kRegex.test(String(text))) {
-    return resultWithoutAccents.normalize('NFC')
-  }
+
+  if (kRegex.test(String(text))) return resultWithoutAccents.normalize('NFC')
+
   return resultWithoutAccents
 }
 
@@ -54,6 +54,7 @@ export function removeDomain(url: string) {
 
 function getCharByteCount(char: string) {
   const charCode = char.charCodeAt(0)
+
   if (charCode > 255) {
     // Chinese character
     return 3
@@ -78,12 +79,12 @@ export const normalizeSearchIndexes = (
 export function substrByBytes(str: string, start: number, len: number): string {
   let resultStr = ''
   let bytesCount = 0
-  const strLength = str.length
-  for (let i = 0; i < strLength; i++) {
+
+  for (let i = 0; i < str.length; i++) {
     bytesCount += getCharByteCount(str.charAt(i))
-    if (bytesCount > start + len) {
-      break
-    }
+
+    if (bytesCount > start + len) break
+
     if (bytesCount > start) {
       resultStr += str.charAt(i)
     }
@@ -96,12 +97,9 @@ export function byteToCharIndex(str: string, byteIndex: number): number {
   let byteCount = 0
 
   for (let i = 0; i < str.length; i++) {
-    if (byteCount >= byteIndex) {
-      break
-    }
+    if (byteCount >= byteIndex) break
 
     byteCount += getCharByteCount(str.charAt(i))
-
     charIndex++
   }
 
