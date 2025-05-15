@@ -1,5 +1,11 @@
 # @ap0nia/eden-tanstack-query
 
+## 1.0.0-next.7
+
+### Patch Changes
+
+- 8eefa7a: fix: bundle external
+
 ## 1.0.0-next.6
 
 ### Patch Changes

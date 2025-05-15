@@ -1,5 +1,14 @@
 # @ap0nia/eden-query-tests
 
+## 0.0.1-next.7
+
+### Patch Changes
+
+- Updated dependencies [8eefa7a]
+  - @ap0nia/eden-tanstack-query@1.0.0-next.7
+  - @ap0nia/eden-svelte-query@0.1.0-next.7
+  - @ap0nia/eden@1.0.0-next.7
+
 ## 0.0.1-next.6
 
 ### Patch Changes
