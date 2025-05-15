@@ -1,5 +1,14 @@
 # @ap0nia/eden
 
+## 1.0.0-next.2
+
+### Patch Changes
+
+- 5b42a77: fix: try release again
+- 4d663dd: fix: remove private
+- 4b79d74: fix: build
+- 4d663dd: fix: turbo build command
+
 ## 1.0.0-next.1
 
 ### Patch Changes

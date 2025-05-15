@@ -9,5 +9,13 @@
     "@ap0nia/eden-tanstack-query": "0.0.0",
     "@ap0nia/eden-query-tests": "0.0.0"
   },
-  "changesets": ["real-singers-appear", "sixty-eggs-march", "stupid-owls-spend"]
+  "changesets": [
+    "famous-schools-rhyme",
+    "quick-lights-clean",
+    "real-jeans-take",
+    "real-singers-appear",
+    "sixty-eggs-march",
+    "some-hornets-exist",
+    "stupid-owls-spend"
+  ]
 }
