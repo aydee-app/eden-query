@@ -22,7 +22,7 @@ export async function deserializeBatchPostParams<
 
   const formData = await request.formData()
 
-  const formDataEntries = formData.entries().toArray()
+  const formDataEntries = [...formData.entries()]
 
   formDataEntries.forEach(([key, value]) => {
     const [maybeIndex, property = ''] = key.split('.')
