@@ -1,5 +1,11 @@
 # @ap0nia/eden-tanstack-query
 
+## 1.0.0-next.8
+
+### Minor Changes
+
+- e679e17: feat: accommodate new Elysia.js routes property
+
 ## 1.0.0-next.7
 
 ### Patch Changes
