@@ -1,5 +1,11 @@
 # @ap0nia/eden
 
+## 1.0.0-next.6
+
+### Patch Changes
+
+- 4e54c30: fix: remove gitignore from individual packages
+
 ## 1.0.0-next.5
 
 ### Patch Changes

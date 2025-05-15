@@ -1,5 +1,13 @@
 # @ap0nia/eden-tanstack-query
 
+## 1.0.0-next.6
+
+### Patch Changes
+
+- 4e54c30: fix: remove gitignore from individual packages
+- Updated dependencies [4e54c30]
+  - @ap0nia/eden@1.0.0-next.6
+
 ## 1.0.0-next.5
 
 ### Patch Changes
