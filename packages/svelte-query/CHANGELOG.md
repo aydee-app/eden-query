@@ -1,5 +1,14 @@
 # @ap0nia/eden-svelte-query
 
+## 0.1.0-next.3
+
+### Patch Changes
+
+- 037e9e9: fix: switch to pnpm for releasing
+- Updated dependencies [037e9e9]
+  - @ap0nia/eden-tanstack-query@1.0.0-next.3
+  - @ap0nia/eden@1.0.0-next.3
+
 ## 0.1.0-next.2
 
 ### Patch Changes
