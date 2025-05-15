@@ -23,6 +23,7 @@ const config = defineConfig({
       },
       dts: true,
       format: 'esm',
+      autoExternal: false,
     },
     {
       bundle: true,
@@ -33,6 +34,7 @@ const config = defineConfig({
       },
       dts: true,
       format: 'cjs',
+      autoExternal: false,
     },
   ],
 })
