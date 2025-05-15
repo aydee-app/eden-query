@@ -359,16 +359,16 @@ importers:
 
   packages/svelte-query:
     dependencies:
+      '@tanstack/svelte-query':
+        specifier: ^5.72.2
+        version: 5.76.0(svelte@5.30.1)
+    devDependencies:
       '@ap0nia/eden':
         specifier: workspace:^
         version: link:../eden
       '@ap0nia/eden-tanstack-query':
         specifier: workspace:^
         version: link:../tanstack-query
-      '@tanstack/svelte-query':
-        specifier: ^5.72.2
-        version: 5.76.0(svelte@5.30.1)
-    devDependencies:
       '@ark/attest':
         specifier: ^0.45.6
         version: 0.45.11(typescript@5.8.3)
@@ -395,11 +395,10 @@ importers:
         version: 5.8.3
 
   packages/tanstack-query:
-    dependencies:
+    devDependencies:
       '@ap0nia/eden':
         specifier: workspace:^
         version: link:../eden
-    devDependencies:
       '@ark/attest':
         specifier: ^0.45.6
         version: 0.45.11(typescript@5.8.3)

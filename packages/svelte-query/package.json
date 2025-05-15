@@ -29,11 +29,11 @@
     "test:types": "vitest test-d"
   },
   "dependencies": {
-    "@ap0nia/eden": "workspace:^",
-    "@ap0nia/eden-tanstack-query": "workspace:^",
     "@tanstack/svelte-query": "^5.72.2"
   },
   "devDependencies": {
+    "@ap0nia/eden": "workspace:^",
+    "@ap0nia/eden-tanstack-query": "workspace:^",
     "@ark/attest": "^0.45.6",
     "@rslib/core": "^0.6.2",
     "devalue": "^5.1.1",

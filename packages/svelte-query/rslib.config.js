@@ -23,7 +23,9 @@ const config = defineConfig({
       },
       dts: true,
       format: 'esm',
-      autoExternal: false,
+      autoExternal: {
+        devDependencies: false,
+      },
     },
     {
       bundle: true,
@@ -34,7 +36,9 @@ const config = defineConfig({
       },
       dts: true,
       format: 'cjs',
-      autoExternal: false,
+      autoExternal: {
+        devDependencies: false,
+      },
     },
   ],
 })

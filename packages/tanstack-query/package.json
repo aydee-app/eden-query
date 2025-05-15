@@ -28,10 +28,8 @@
     "test": "ATTEST_skipTypes=1 vitest",
     "test:types": "vitest test-d"
   },
-  "dependencies": {
-    "@ap0nia/eden": "workspace:^"
-  },
   "devDependencies": {
+    "@ap0nia/eden": "workspace:^",
     "@ark/attest": "^0.45.6",
     "@rslib/core": "^0.6.2",
     "@solidjs/testing-library": "^0.8.10",
