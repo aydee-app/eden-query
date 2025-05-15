@@ -1,5 +1,11 @@
 # @ap0nia/eden
 
+## 1.0.0-next.1
+
+### Patch Changes
+
+- 3685d79: fix: publish config
+
 ## 1.0.0-next.0
 
 ### Major Changes

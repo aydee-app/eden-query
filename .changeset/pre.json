@@ -9,5 +9,5 @@
     "@ap0nia/eden-tanstack-query": "0.0.0",
     "@ap0nia/eden-query-tests": "0.0.0"
   },
-  "changesets": ["real-singers-appear", "sixty-eggs-march"]
+  "changesets": ["real-singers-appear", "sixty-eggs-march", "stupid-owls-spend"]
 }

@@ -1,5 +1,13 @@
 # @ap0nia/eden-tanstack-query
 
+## 1.0.0-next.1
+
+### Patch Changes
+
+- 3685d79: fix: publish config
+- Updated dependencies [3685d79]
+  - @ap0nia/eden@1.0.0-next.1
+
 ## 1.0.0-next.0
 
 ### Major Changes
