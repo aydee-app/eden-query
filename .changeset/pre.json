@@ -2,7 +2,12 @@
   "mode": "pre",
   "tag": "next",
   "initialVersions": {
-    "@ap0nia/eden": "0.0.0"
+    "@ap0nia/eden": "0.0.0",
+    "@elysia.js/documentation": "0.1.0",
+    "@examples/svelte": "0.0.0",
+    "@ap0nia/eden-svelte-query": "0.0.0",
+    "@ap0nia/eden-tanstack-query": "0.0.0",
+    "@ap0nia/eden-query-tests": "0.0.0"
   },
-  "changesets": []
+  "changesets": ["real-singers-appear", "sixty-eggs-march"]
 }
