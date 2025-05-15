@@ -265,7 +265,7 @@ export class WebSocketClient {
   public request(options: WebSocketRequestOptions) {
     const { op, lastEventId } = options
 
-    const { id, type, params, signal, path } = op
+    const { id, type, params, signal, path, context } = op
 
     const transformer = matchTransformer(params.transformers, params.transformer)
 
@@ -298,7 +298,7 @@ export class WebSocketClient {
             if (event.error) {
               observer.error(event.error)
             } else {
-              observer.next(event)
+              observer.next({ ...event, context })
             }
           },
         },
