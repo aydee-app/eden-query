@@ -63,5 +63,8 @@
   },
   "peerDependencies": {
     "elysia": "^1.2.25"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

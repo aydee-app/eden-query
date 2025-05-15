@@ -43,5 +43,8 @@
     "svelte": "^5.25.11",
     "typescript": "^5.8.2",
     "vite-plugin-solid": "^2.11.6"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
