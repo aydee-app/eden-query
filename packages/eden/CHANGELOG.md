@@ -1,5 +1,11 @@
 # @ap0nia/eden
 
+## 1.0.0-next.3
+
+### Patch Changes
+
+- 037e9e9: fix: switch to pnpm for releasing
+
 ## 1.0.0-next.2
 
 ### Patch Changes
