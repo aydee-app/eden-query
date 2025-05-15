@@ -3,18 +3,14 @@
   "version": "1.0.0-next.4",
   "description": "Fully type-safe Elysia.js client",
   "license": "MIT",
-  "scripts": {
-    "build": "rslib build",
-    "test": "ATTEST_skipTypes=1 vitest",
-    "test:types": "vitest test-d"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ap0nia/eden-query",
     "directory": "packages/eden2"
   },
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     "./prod": {
       "types": "./src/index.ts",
@@ -44,6 +40,21 @@
       "require": "./dist/plugins.cjs",
       "default": "./dist/plugins.js"
     }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "./*": [
+        "./dist/*.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "rslib build",
+    "test": "ATTEST_skipTypes=1 vitest",
+    "test:types": "vitest test-d"
   },
   "devDependencies": {
     "@ark/attest": "^0.45.6",
