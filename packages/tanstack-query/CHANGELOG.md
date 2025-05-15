@@ -1,5 +1,13 @@
 # @ap0nia/eden-tanstack-query
 
+## 1.0.0-next.5
+
+### Patch Changes
+
+- b9e0294: fix: add dist and types versions to all packages
+- Updated dependencies [b9e0294]
+  - @ap0nia/eden@1.0.0-next.5
+
 ## 1.0.0-next.4
 
 ### Patch Changes

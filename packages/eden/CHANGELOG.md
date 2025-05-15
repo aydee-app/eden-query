@@ -1,5 +1,11 @@
 # @ap0nia/eden
 
+## 1.0.0-next.5
+
+### Patch Changes
+
+- b9e0294: fix: add dist and types versions to all packages
+
 ## 1.0.0-next.4
 
 ### Patch Changes
