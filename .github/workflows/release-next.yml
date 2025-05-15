@@ -27,6 +27,9 @@ jobs:
       - name: 🕺 Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-and-pnpm
 
+      - name: 🕺 Setup bun
+        uses: oven-sh/setup-bun@v2
+
       - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile
 
