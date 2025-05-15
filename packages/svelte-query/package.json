@@ -1,6 +1,5 @@
 {
   "name": "@ap0nia/eden-svelte-query",
-  "private": true,
   "version": "0.1.0-next.1",
   "type": "module",
   "main": "./src/index.ts",
