@@ -17,28 +17,28 @@
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
-    ".": {
+    "./prod": {
       "types": "./src/index.ts",
       "import": "./src/index.ts",
       "node": "./src/index.ts",
       "require": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./plugins": {
+    "./plugins-prod": {
       "types": "./src/plugins/index.ts",
       "import": "./src/plugins/index.ts",
       "node": "./src/plugins/index.ts",
       "require": "./src/plugins/index.ts",
       "default": "./src/plugins/index.ts"
     },
-    "./prod": {
+    ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "node": "./dist/index.js",
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
-    "./plugins-prod": {
+    "./plugins": {
       "types": "./dist/plugins/index.d.ts",
       "import": "./dist/plugins.js",
       "node": "./dist/plugins.js",
