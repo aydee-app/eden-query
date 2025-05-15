@@ -12,11 +12,14 @@ node_modules/
 ## TypeScript compiler (tsc) output.
 dist/
 
+## ArkType types cache.
+.attest/
+
 ## Nx cache.
 .nx/
 
 ## Turborepo cache.
-.turbo
+.turbo/
 
 ## Vitest coverage output
 coverage/
