@@ -1,5 +1,11 @@
 # @ap0nia/eden
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- 7aae292: chore: re-release
+
 ## 1.0.0-next.3
 
 ### Patch Changes

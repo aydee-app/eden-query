@@ -1,5 +1,14 @@
 # @ap0nia/eden-svelte-query
 
+## 0.1.0-next.4
+
+### Patch Changes
+
+- 7aae292: chore: re-release
+- Updated dependencies [7aae292]
+  - @ap0nia/eden-tanstack-query@1.0.0-next.4
+  - @ap0nia/eden@1.0.0-next.4
+
 ## 0.1.0-next.3
 
 ### Patch Changes

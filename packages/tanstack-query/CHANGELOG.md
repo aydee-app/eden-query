@@ -1,5 +1,13 @@
 # @ap0nia/eden-tanstack-query
 
+## 1.0.0-next.4
+
+### Patch Changes
+
+- 7aae292: chore: re-release
+- Updated dependencies [7aae292]
+  - @ap0nia/eden@1.0.0-next.4
+
 ## 1.0.0-next.3
 
 ### Patch Changes
