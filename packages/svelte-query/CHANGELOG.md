@@ -1,5 +1,11 @@
 # @ap0nia/eden-svelte-query
 
+## 0.1.0-next.7
+
+### Patch Changes
+
+- 8eefa7a: fix: bundle external
+
 ## 0.1.0-next.6
 
 ### Patch Changes
