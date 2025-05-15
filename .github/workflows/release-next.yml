@@ -25,13 +25,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🕺 Setup Node.js and pnpm
-        uses: oven-sh/setup-bun@v2
+        uses: ./.github/actions/setup-node-and-pnpm
 
       - name: 📦 Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: 🔨 Build
-        run: bun turbo build --filter '!*documentation' --filter '!*tests'
+        run: pnpm turbo build --filter '!*documentation' --filter '!*tests'
 
       - name: ✏️ Generate commit message
         id: devmoji
@@ -43,7 +43,7 @@ jobs:
         uses: changesets/action@v1
         id: changesets
         with:
-          publish: bun changeset publish
+          publish: pnpm changeset publish
           commit: ${{ steps.devmoji.outputs.MESSAGE }}
           title: ${{ steps.devmoji.outputs.MESSAGE }}
         env:
