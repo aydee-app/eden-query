@@ -19,6 +19,7 @@
     "@lucide/svelte": "^0.508.0",
     "@rspress/core": "^1.43.13",
     "@rspress/mdx-rs": "^0.6.6",
+    "acorn": "^8.14.1",
     "clsx": "^2.1.1",
     "flexsearch": "0.7.43",
     "hast-util-from-html": "^2.0.3",
