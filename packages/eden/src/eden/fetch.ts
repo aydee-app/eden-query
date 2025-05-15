@@ -3,7 +3,7 @@ import type { EdenRequestOptions, EdenResolverConfig } from '../core/config'
 import type { EdenFetchResult } from '../core/dto'
 import type { EdenRouteBody, EdenRouteError, EdenRouteInput, EdenRouteSuccess } from '../core/infer'
 import { resolveEdenRequest } from '../core/resolve'
-import type { InternalElysia, InternalRouteSchema } from '../core/types'
+import type { ExtractRoutes, InternalElysia, InternalRouteSchema } from '../core/types'
 import { toArray } from '../utils/array'
 import type { IsAny, Join, UnionToIntersection } from '../utils/types'
 import type { WebSocketClientOptions } from '../ws/client'
@@ -146,7 +146,7 @@ export type EdenFetchResponse<
 export type EdenFetch<
   TElysia extends InternalElysia,
   TConfig extends InternalEdenTypesConfig = {},
-> = EdenFetchRoot<TElysia> & EdenFetchRequester<TElysia, TElysia['_routes'], TConfig>
+> = EdenFetchRoot<TElysia> & EdenFetchRequester<TElysia, ExtractRoutes<TElysia>, TConfig>
 
 export function edenFetch<
   TElysia extends InternalElysia,

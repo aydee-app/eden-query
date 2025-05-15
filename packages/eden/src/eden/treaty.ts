@@ -4,7 +4,7 @@ import type { EdenRequestOptions, EdenResolverConfig } from '../core/config'
 import type { EdenFetchResult } from '../core/dto'
 import type { EdenRouteBody, EdenRouteError, EdenRouteInput, EdenRouteSuccess } from '../core/infer'
 import { resolveEdenRequest } from '../core/resolve'
-import type { InternalElysia, InternalRouteSchema } from '../core/types'
+import type { ExtractRoutes, InternalElysia, InternalRouteSchema } from '../core/types'
 import type { WebSocketClientOptions } from '../ws/client'
 import type { EdenConfig, InternalEdenTypesConfig } from './config'
 import {
@@ -30,7 +30,7 @@ export type EdenTreatyRoot<
    */
   types<U extends InternalEdenTypesConfig>(
     types?: U,
-  ): EdenTreatyProxy<TElysia, TElysia['_routes'], U>
+  ): EdenTreatyProxy<TElysia, ExtractRoutes<TElysia>, U>
 
   config(config?: EdenConfig<TElysia, TConfig>): EdenTreaty<TElysia, TConfig>
 
@@ -192,7 +192,7 @@ export type EdenTreatySubscriptionRoute<
 export type EdenTreatyInferInput<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends InternalEdenTypesConfig = {},
-  TRoutes = TElysia['_routes'],
+  TRoutes = ExtractRoutes<TElysia>,
 > = {
   [K in keyof TRoutes]: TRoutes[K] extends InternalRouteSchema
     ? Uppercase<K & string> extends 'GET'
@@ -204,7 +204,7 @@ export type EdenTreatyInferInput<
 export type EdenTreatyInferOutput<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends InternalEdenTypesConfig = {},
-  TRoutes = TElysia['_routes'],
+  TRoutes = ExtractRoutes<TElysia>,
 > = {
   [K in keyof TRoutes]: TRoutes[K] extends InternalRouteSchema
     ? EdenRouteSuccess<TRoutes[K]>
@@ -291,7 +291,7 @@ export function edenTreatyProxy<
 export type EdenTreaty<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends InternalEdenTypesConfig = {},
-> = EdenTreatyRoot<TElysia> & EdenTreatyProxy<TElysia, TElysia['_routes'], TConfig>
+> = EdenTreatyRoot<TElysia> & EdenTreatyProxy<TElysia, ExtractRoutes<TElysia>, TConfig>
 
 /**
  * @public

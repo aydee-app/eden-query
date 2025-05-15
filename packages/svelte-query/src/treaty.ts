@@ -9,6 +9,7 @@ import {
   type EdenTreaty,
   edenTreaty,
   type EdenWs,
+  type ExtractRoutes,
   type FormatParam,
   getPathParam,
   type InternalEdenTypesConfig,
@@ -87,7 +88,7 @@ export type EdenTreatySvelteQueryRoot<
    */
   types<U extends InternalEdenTypesConfig>(
     types?: U,
-  ): EdenTreatySvelteQueryProxy<TElysia, TElysia['_routes'], U>
+  ): EdenTreatySvelteQueryProxy<TElysia, ExtractRoutes<TElysia>, U>
 
   treaty: EdenTreaty<TElysia, TConfig>
 
@@ -289,7 +290,7 @@ export type EdenTreatySvelteQuery<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends InternalEdenTypesConfig = {},
 > = EdenTreatySvelteQueryRoot<TElysia> &
-  EdenTreatySvelteQueryProxy<TElysia, TElysia['_routes'], TConfig>
+  EdenTreatySvelteQueryProxy<TElysia, ExtractRoutes<TElysia>, TConfig>
 
 function edenTreatySvelteQueryProxy<
   TElysia extends InternalElysia = any,

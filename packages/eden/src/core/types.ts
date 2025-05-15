@@ -23,6 +23,11 @@ export interface InternalElysia {
   _routes?: any // InternalRoutes
 
   /**
+   * New routes property.
+   */
+  '~Routes'?: any // InternalRoutes
+
+  /**
    * WinterCG, web-standard compliant request handler.
    * @see https://elysiajs.com/patterns/mount.html#mount-1
    */
@@ -32,6 +37,12 @@ export interface InternalElysia {
 export type InternalRoutes = {
   [K: string]: InternalRouteSchema | InternalRoutes
 }
+
+export type ExtractRoutes<T> = T extends { _routes?: infer TRoutes }
+  ? TRoutes
+  : T extends { '~Routes': infer TRoutes }
+    ? TRoutes
+    : InternalRoutes
 
 export interface InternalTypes {
   Definitions?: InternalDefinitions

@@ -10,6 +10,7 @@ import {
   type EdenTreaty,
   edenTreaty,
   type EdenWs,
+  type ExtractRoutes,
   type FormatParam,
   getPathParam,
   HTTP_METHODS,
@@ -63,7 +64,7 @@ export type EdenTreatyTanstackQueryRoot<
    */
   types<U extends InternalEdenTypesConfig>(
     types?: U,
-  ): EdenTreatyTanstackQueryProxy<TElysia, TElysia['_routes'], U>
+  ): EdenTreatyTanstackQueryProxy<TElysia, ExtractRoutes<TElysia>, U>
 
   treaty: EdenTreaty<TElysia, TConfig>
 
@@ -191,7 +192,7 @@ export type EdenTreatyTanstackQuery<
   TElysia extends InternalElysia = InternalElysia,
   TConfig extends InternalEdenTypesConfig = {},
 > = EdenTreatyTanstackQueryRoot<TElysia, TConfig> &
-  EdenTreatyTanstackQueryProxy<TElysia, TElysia['_routes'], TConfig>
+  EdenTreatyTanstackQueryProxy<TElysia, ExtractRoutes<TElysia>, TConfig>
 
 export function edenTreatyTanstackQueryProxy<
   TElysia extends InternalElysia = any,

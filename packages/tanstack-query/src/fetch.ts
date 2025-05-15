@@ -9,6 +9,7 @@ import {
   type EdenRouteError,
   type EdenRouteSuccess,
   type ExtendedEdenRouteOptions,
+  type ExtractRoutes,
   type FormatParam,
   type InternalEdenTypesConfig,
   type InternalElysia,
@@ -31,7 +32,7 @@ import type {
 export type EdenFetchTanstackQueryRoot<
   TElysia extends InternalElysia = {},
   TConfig extends InternalEdenTypesConfig = { separator: ':param' },
-  TEndpoints = EdenFetchEndpoints<TElysia, TElysia['_routes'], TConfig>,
+  TEndpoints = EdenFetchEndpoints<TElysia, ExtractRoutes<TElysia>, TConfig>,
   TQueryEndpoints = {
     [K in keyof TEndpoints as 'get' extends keyof TEndpoints[K] ? K : never]: Pick<
       TEndpoints[K],
@@ -196,7 +197,7 @@ export type EdenFetchTanstackQueryRoot<
 export type EdenFetchTanstackQuery<
   TElysia extends InternalElysia = {},
   TConfig extends InternalEdenTypesConfig = { separator: ':param' },
-  TEndpoints = EdenFetchEndpoints<TElysia, TElysia['_routes'], TConfig>,
+  TEndpoints = EdenFetchEndpoints<TElysia, ExtractRoutes<TElysia>, TConfig>,
 > = EdenFetchTanstackQueryRoot<TElysia, TConfig, TEndpoints> & EdenFetch<TElysia, TConfig>
 
 export type EdenFetchEndpoints<
