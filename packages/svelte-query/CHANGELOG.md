@@ -1,5 +1,11 @@
 # @ap0nia/eden-svelte-query
 
+## 0.1.0-next.8
+
+### Minor Changes
+
+- e679e17: feat: accommodate new Elysia.js routes property
+
 ## 0.1.0-next.7
 
 ### Patch Changes
