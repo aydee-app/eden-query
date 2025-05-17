@@ -43,19 +43,19 @@ const pluginDriver = new PluginDriver({}, true)
  * Escape JSX elements in code block to allow them to be searched
  * @link https://github.com/sindresorhus/escape-goat/blob/eab4a382fcf5c977f7195e20d92ab1b25e6040a7/index.js#L3
  */
-function encodeHtml(html: string): string {
-  return html.replace(
-    /<code>([\s\S]*?)<\/\s?code>/gm,
-    function (_match: string, innerContent: string) {
-      return `<code>${innerContent
-        .replace(/&/g, '&amp;') // Must happen first or else it will escape other just-escaped characters.
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')}</code>`
-    },
-  )
-}
+// function encodeHtml(html: string): string {
+//   return html.replace(
+//     /<code>([\s\S]*?)<\/\s?code>/gm,
+//     function(_match: string, innerContent: string) {
+//       return `<code>${innerContent
+//         .replace(/&/g, '&amp;') // Must happen first or else it will escape other just-escaped characters.
+//         .replace(/"/g, '&quot;')
+//         .replace(/'/g, '&#39;')
+//         .replace(/</g, '&lt;')
+//         .replace(/>/g, '&gt;')}</code>`
+//     },
+//   )
+// }
 
 export const load: LayoutServerLoad = async () => {
   const pages = await Promise.all(
@@ -180,7 +180,7 @@ export const load: LayoutServerLoad = async () => {
       const markdown = toMarkdown(mdast)
 
       const {
-        html: rawHtml,
+        // html: rawHtml,
         title,
         toc: rawToc,
         // languages,
@@ -191,9 +191,9 @@ export const load: LayoutServerLoad = async () => {
         root: '',
       })
 
-      const html = encodeHtml(String(rawHtml))
+      // const html = encodeHtml(String(rawHtml))
 
-      const content = htmlToText(html, {
+      const content = htmlToText(output.body, {
         // default value of decodeEntities is `true`, so that htmlToText can decode &lt; &gt;
         // decodeEntities: true,
         wordwrap: 80,
@@ -268,7 +268,7 @@ export const load: LayoutServerLoad = async () => {
   )
 
   // modify page index by plugins
-  await pluginDriver.modifySearchIndexData(pages)
+  // await pluginDriver.modifySearchIndexData(pages)
 
   const versioned = false
 
@@ -282,6 +282,7 @@ export const load: LayoutServerLoad = async () => {
 
     return `${version}###${lang}`
   })
+
   // remove the pages marked as noindex
   delete groupedPages['noindex']
 
@@ -327,9 +328,9 @@ export const load: LayoutServerLoad = async () => {
 
   await provider.init({ currentVersion: '', currentLang: '' }, pages)
 
-  const search = await searcher.match('Hello')
+  const search = await searcher.match('bye')
 
-  console.log(search, pages)
+  console.log(search)
 }
 
 // function deletePrivateField<T>(obj: T): T {
