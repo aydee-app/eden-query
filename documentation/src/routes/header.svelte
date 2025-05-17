@@ -2,12 +2,31 @@
   import Laptop from '@lucide/svelte/icons/laptop'
   import Moon from '@lucide/svelte/icons/moon'
   import Sun from '@lucide/svelte/icons/sun'
+  import type {
+    DefaultMatchResult,
+    DefaultMatchResultItem,
+    HighlightInfo,
+  } from '@rspress/theme-default'
   import { resetMode, setMode } from 'mode-watcher'
 
   import ThemeToggle from '$lib/components/theme-toggle.svelte'
+  import { PageSearcher } from '$lib/docs/search/page-searcher'
+  import type { MatchResult } from '$lib/docs/search/types'
+  import { getSlicedStrByByteLength } from '$lib/docs/search/utils'
   import * as Command from '$lib/registry/new-york/ui/command'
+  import { cn } from '$lib/utils/cn'
 
   let open = $state(false)
+
+  let value = $state('')
+
+  let tabIndex = $state(0)
+
+  let matched: MatchResult = $state([])
+
+  const suggestions = $derived(matched[tabIndex]?.result || []) as DefaultMatchResult['result']
+
+  const normalizedSuggestions = $derived(normalizeSuggestions(suggestions))
 
   function handleKeydown(e: KeyboardEvent) {
     if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
@@ -16,16 +35,87 @@
     }
   }
 
+  function normalizeSuggestions(
+    suggestions: DefaultMatchResult['result'],
+  ): Record<string, DefaultMatchResultItem[]> {
+    return suggestions.reduce(
+      (groups, item) => {
+        const group = item.title
+        if (!groups[group]) {
+          groups[group] = []
+        }
+        groups[group].push(item)
+        return groups
+      },
+      {} as Record<string, DefaultMatchResult['result']>,
+    )
+  }
+
   function runCommand(cmd: () => void) {
     open = false
     cmd()
+  }
+
+  const searcher = new PageSearcher({ currentLang: '', currentVersion: '' })
+
+  searcher.init()
+
+  function createDebounced<T extends any[]>(fn: (...args: T) => unknown, duration = 250) {
+    let timeout: ReturnType<typeof setTimeout>
+
+    return (...args: T) => {
+      clearTimeout(timeout)
+      timeout = setTimeout(() => fn(...args), duration)
+    }
+  }
+
+  async function handleSearch(value: string) {
+    const result = await searcher.match(value)
+    matched = result
+  }
+
+  const debouncedSearch = createDebounced(handleSearch)
+
+  $effect(() => {
+    debouncedSearch(value)
+  })
+
+  interface HighlightedFragment {
+    type?: 'highlighted' | 'raw'
+    value: string
+  }
+
+  const getHighlightedFragments = (rawText: string, highlights: HighlightInfo[]) => {
+    // Split raw text into several parts, and add styles.mark className to the parts that need to be highlighted.
+    // highlightInfoList is an array of objects, each object contains the start index and the length of the part that needs to be highlighted.
+    // For example, if the statement is "This is a statement", and the query is "is", then highlightInfoList is [{start: 2, length: 2}, {start: 5, length: 2}].
+    const fragmentList: HighlightedFragment[] = []
+
+    let lastIndex = 0
+
+    for (const highlightInfo of highlights) {
+      const { start, length } = highlightInfo
+      const prefix = rawText.slice(lastIndex, start)
+      const queryStr = getSlicedStrByByteLength(rawText, start, length)
+
+      fragmentList.push({ value: prefix })
+      fragmentList.push({ type: 'highlighted', value: queryStr })
+
+      lastIndex = start + queryStr.length
+    }
+
+    if (lastIndex < rawText.length) {
+      fragmentList.push({ value: rawText.slice(lastIndex) })
+    }
+
+    return fragmentList
   }
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
 
-<Command.Dialog bind:open>
-  <Command.Input placeholder="Type a command or search" />
+<Command.Dialog bind:open shouldFilter={false}>
+  <Command.Input placeholder="Type a command or search" bind:value />
   <Command.List>
     <Command.Empty>No results found.</Command.Empty>
 
@@ -58,6 +148,83 @@
       </Command.Group>
     {/each}
     -->
+    {#each Object.entries(normalizedSuggestions) as [group, suggestions], index (group)}
+      {#if index > 0}
+        <Command.Separator />
+      {/if}
+
+      <Command.Group>
+        {#each suggestions as suggestion, suggestionIndex (suggestionIndex)}
+          <!-- {@const accummulatedIndex = index + suggestionIndex} -->
+
+          <Command.LinkItem
+            href={suggestion.link}
+            class="h-auto text-left"
+            value={`${index},${suggestionIndex}`}
+          >
+            <div class="flex items-center">
+              <span
+                class={cn(
+                  'size-6',
+                  suggestion.type === 'title' && 'icon-[mdi--hashtag]',
+                  suggestion.type === 'header' && 'icon-[mdi--file]',
+                  suggestion.type === 'content' && 'icon-[mdi--file-eye]',
+                )}
+              >
+              </span>
+            </div>
+
+            {#if suggestion.type === 'header'}
+              {@const fragments = getHighlightedFragments(
+                suggestion.header,
+                suggestion.highlightInfoList,
+              )}
+
+              <div>
+                {#each fragments as fragment, index (index)}
+                  {#if fragment.type === 'highlighted'}
+                    <span class="text-primary">{fragment.value}</span>
+                  {:else}
+                    <span>{fragment.value}</span>
+                  {/if}
+                {/each}
+              </div>
+            {:else if suggestion.type === 'title'}
+              {@const fragments = getHighlightedFragments(
+                suggestion.title,
+                suggestion.highlightInfoList,
+              )}
+
+              <div>
+                {#each fragments as fragment, index (index)}
+                  {#if fragment.type === 'highlighted'}
+                    <span class="text-primary">{fragment.value}</span>
+                  {:else}
+                    <span>{fragment.value}</span>
+                  {/if}
+                {/each}
+              </div>
+            {:else if suggestion.type === 'content'}
+              {@const fragments = getHighlightedFragments(
+                suggestion.statement,
+                suggestion.highlightInfoList,
+              )}
+
+              <div>
+                {#each fragments as fragment, index (index)}
+                  {#if fragment.type === 'highlighted'}
+                    <span class="text-primary">{fragment.value}</span>
+                  {:else}
+                    <span>{fragment.value}</span>
+                  {/if}
+                {/each}
+                <p class="text-xs">{suggestion.title}</p>
+              </div>
+            {/if}
+          </Command.LinkItem>
+        {/each}
+      </Command.Group>
+    {/each}
 
     <Command.Separator />
 

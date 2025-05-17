@@ -68,17 +68,18 @@ export class LocalProvider implements Provider {
     /**
      * @todo
      */
-    const searchIndexHash: any = {}
+    // const searchIndexHash: any = {}
 
-    const searchIndexGroupID = `${version ?? ''}###${lang ?? ''}`
+    // const searchIndexGroupID = `${version ?? ''}###${lang ?? ''}`
 
-    const hash = searchIndexHash[searchIndexGroupID]
+    // const hash = searchIndexHash[searchIndexGroupID]
 
     // For example, in page-type-home fixture, there is only home index.md, so no search index is generated.
-    if (!hash) return []
+    // if (!hash) return []
 
     const searchIndexVersion = version ? version.replace('.', '_') : ''
-    const json = `${SEARCH_INDEX_NAME}${searchIndexVersion ? '.' : ''}${searchIndexVersion}${lang ? '.' : ''}${lang}.${hash}.json`
+    // const json = `${SEARCH_INDEX_NAME}${searchIndexVersion ? '.' : ''}${searchIndexVersion}${lang ? '.' : ''}${lang}.${hash}.json`
+    const json = `${SEARCH_INDEX_NAME}${searchIndexVersion ? '.' : ''}${searchIndexVersion}${lang ? '.' : ''}${lang}.json`
     const searchIndexURL = `${removeTrailingSlash(__WEBPACK_PUBLIC_PATH__)}/static/${json}`
 
     try {
