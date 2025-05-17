@@ -60,13 +60,13 @@ It can also use specific themes specified by the 'light' and 'dark' keys from lo
 <div data-tip={$messages.toggleTheme()} class={cn('tooltip tooltip-bottom', props.class)}>
   <button
     onclick={toggleTheme}
-    class="btn btn-sm btn-square ring-base-content ring-1"
+    class="btn btn-sm btn-square btn-outline"
     aria-label="Color scheme toggle"
   >
     <span class="swap swap-rotate" class:swap-active={mode === 'dark'}>
       <span
         class={cn(
-          'icon-[mdi--moon-waxing-crescent] swap-on size-5',
+          'icon-[mdi--moon-waxing-crescent] swap-on size-4',
 
           // $mode is undefined on the server and thus on mount.
           // Before it's mounted for the first time, force the dark icon to be static.
@@ -76,7 +76,7 @@ It can also use specific themes specified by the 'light' and 'dark' keys from lo
       <span
         class={cn(
           !globalMode.current && 'dark:opacity-0',
-          'icon-[mdi--weather-sunny] swap-off size-5',
+          'icon-[mdi--weather-sunny] swap-off size-4',
         )}
       ></span>
     </span>

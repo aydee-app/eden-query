@@ -1,4 +1,4 @@
-import { pluginContainerSyntax } from '@rspress/plugin-container-syntax'
+// import { pluginContainerSyntax } from '@rspress/plugin-container-syntax'
 import type { PageIndexInfo, RouteMeta, RspressPlugin, UserConfig } from '@rspress/shared'
 import { isDevDebugMode } from '@rspress/shared'
 
@@ -33,67 +33,67 @@ export class PluginDriver {
     // Clear RspressPlugins first, for the watch mode
     this.clearPlugins()
 
-    const config = this.#config
+    // const config = this.#config
 
-    const markdownConfig = config.markdown || {}
+    // const markdownConfig = config.markdown || {}
 
-    const themeConfig = config?.themeConfig || {}
+    // const themeConfig = config?.themeConfig || {}
 
-    const enableLastUpdated =
-      themeConfig?.lastUpdated || themeConfig?.locales?.some((locale) => locale.lastUpdated)
+    // const enableLastUpdated =
+    //   themeConfig?.lastUpdated || themeConfig?.locales?.some((locale) => locale.lastUpdated)
 
-    const mediumZoomConfig = config?.mediumZoom ?? true
+    // const mediumZoomConfig = config?.mediumZoom ?? true
 
-    const haveNavSidebarConfig =
-      themeConfig.nav ||
-      themeConfig.sidebar ||
-      themeConfig.locales?.[0]?.nav ||
-      themeConfig.locales?.[0]?.sidebar
+    // const haveNavSidebarConfig =
+    //   themeConfig.nav ||
+    //   themeConfig.sidebar ||
+    //   themeConfig.locales?.[0]?.nav ||
+    //   themeConfig.locales?.[0]?.sidebar
 
-    if (enableLastUpdated) {
-      const { pluginLastUpdated } = await import('@rspress/plugin-last-updated')
+    // if (enableLastUpdated) {
+    //   const { pluginLastUpdated } = await import('@rspress/plugin-last-updated')
 
-      this.addPlugin(pluginLastUpdated())
-    }
+    //   this.addPlugin(pluginLastUpdated())
+    // }
 
-    if (mediumZoomConfig) {
-      const { pluginMediumZoom } = await import('@rspress/plugin-medium-zoom')
+    // if (mediumZoomConfig) {
+    //   const { pluginMediumZoom } = await import('@rspress/plugin-medium-zoom')
 
-      this.addPlugin(
-        pluginMediumZoom(typeof mediumZoomConfig === 'object' ? mediumZoomConfig : undefined),
-      )
-    }
+    //   this.addPlugin(
+    //     pluginMediumZoom(typeof mediumZoomConfig === 'object' ? mediumZoomConfig : undefined),
+    //   )
+    // }
 
-    // Support the container syntax in markdown/mdx, such as :::tip
-    this.addPlugin(pluginContainerSyntax())
+    // // Support the container syntax in markdown/mdx, such as :::tip
+    // this.addPlugin(pluginContainerSyntax())
 
-    if (isDevDebugMode()) {
-      const SourceBuildPlugin = await import(
-        // @ts-ignore just for local dev, so we do not need type
-        '@rspress/theme-default/node/source-build-plugin.js'
-      ).then(
-        (r) => r.SourceBuildPlugin,
-        () => null as never,
-      )
+    // if (isDevDebugMode()) {
+    //   const SourceBuildPlugin = await import(
+    //     // @ts-ignore just for local dev, so we do not need type
+    //     '@rspress/theme-default/node/source-build-plugin.js'
+    //   ).then(
+    //     (r) => r.SourceBuildPlugin,
+    //     () => null as never,
+    //   )
 
-      if (SourceBuildPlugin) {
-        this.addPlugin(SourceBuildPlugin())
-      }
-    }
+    //   if (SourceBuildPlugin) {
+    //     this.addPlugin(SourceBuildPlugin())
+    //   }
+    // }
 
-    const { pluginShiki } = await import('@rspress/plugin-shiki')
+    // const { pluginShiki } = await import('@rspress/plugin-shiki')
 
-    ;(config.plugins || []).forEach((plugin) => {
-      this.addPlugin(plugin)
-    })
+    // ;(config.plugins || []).forEach((plugin) => {
+    //   this.addPlugin(plugin)
+    // })
 
-    this.addPlugin(pluginShiki(markdownConfig.shiki))
+    // this.addPlugin(pluginShiki(markdownConfig.shiki))
 
-    // read _meta.json in the final, allow user's plugin to modify _meta.json
-    if (!haveNavSidebarConfig) {
-      const { pluginAutoNavSidebar } = await import('@rspress/plugin-auto-nav-sidebar')
-      this.addPlugin(pluginAutoNavSidebar())
-    }
+    // // read _meta.json in the final, allow user's plugin to modify _meta.json
+    // if (!haveNavSidebarConfig) {
+    //   const { pluginAutoNavSidebar } = await import('@rspress/plugin-auto-nav-sidebar')
+    //   this.addPlugin(pluginAutoNavSidebar())
+    // }
   }
 
   addPlugin(plugin: RspressPlugin) {
@@ -122,31 +122,31 @@ export class PluginDriver {
     }
   }
 
-  async modifyConfig() {
-    let config = this.#config
+  // async modifyConfig() {
+  //   let config = this.#config
 
-    for (let i = 0; i < this.#plugins.length; i++) {
-      const plugin = this.#plugins[i]
-      if (typeof plugin.config === 'function') {
-        config = await plugin.config(
-          config || {},
-          {
-            addPlugin: this.addPlugin.bind(this),
-            removePlugin: (pluginName: string) => {
-              const index = this.#plugins.findIndex((item) => item.name === pluginName)
-              this.removePlugin(pluginName)
-              if (index <= i && index > 0) {
-                i--
-              }
-            },
-          },
-          this.#isProd,
-        )
-      }
-    }
-    this.#config = config
-    return this.#config
-  }
+  //   for (let i = 0; i < this.#plugins.length; i++) {
+  //     const plugin = this.#plugins[i]
+  //     if (typeof plugin.config === 'function') {
+  //       config = await plugin.config(
+  //         config || {},
+  //         {
+  //           addPlugin: this.addPlugin.bind(this),
+  //           removePlugin: (pluginName: string) => {
+  //             const index = this.#plugins.findIndex((item) => item.name === pluginName)
+  //             this.removePlugin(pluginName)
+  //             if (index <= i && index > 0) {
+  //               i--
+  //             }
+  //           },
+  //         },
+  //         this.#isProd,
+  //       )
+  //     }
+  //   }
+  //   this.#config = config
+  //   return this.#config
+  // }
 
   async beforeBuild() {
     return this._runParallelAsyncHook('beforeBuild', this.#config || {}, this.#isProd)

@@ -1,3 +1,7 @@
+<script lang="ts" module>
+  export const metadata = { hello: 'world' }
+</script>
+
 <script lang="ts">
   import Header from './header.svelte'
   import Hero from './hero.svelte'

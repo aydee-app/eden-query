@@ -109,8 +109,8 @@ export class LocalProvider implements Provider {
     return this.#fetchPromise
   }
 
-  async init(options: SearchOptions) {
-    const searchIndex = await this.fetchSearchIndex(options)
+  async init(options: SearchOptions, initialSearchIndex?: PageIndexInfo[]) {
+    const searchIndex = initialSearchIndex ?? (await this.fetchSearchIndex(options))
 
     const pagesForSearch: PageIndexForFlexSearch[] = searchIndex.map((page) => {
       return {
