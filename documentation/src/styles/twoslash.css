@@ -1,7 +1,7 @@
 /**
  * Derive the twoslash colors from the daisyui theme.
  *
- * Since we're importing the style sheet from @shikijs/vitepress-twoslash, 
+ * Since we're importing the style sheet from @shikijs/vitepress-twoslash,
  * we'll opt into their variable names.
  *
  * @see https://github.com/shikijs/shiki/blob/f8ef446af3f5f3910131b692e0c81ce032754ffa/packages/vitepress-twoslash/src/style.css#L1-L13
@@ -35,4 +35,17 @@
 
 .twoslash-popup-docs code:has(div[class*='vp-code']) {
   background: transparent !important;
+}
+
+.twoslash-popup-code {
+  div[class*='vp-code'] {
+    /* background: transparent !important; */
+    margin-block: 0;
+  }
+
+  /*
+  .peer\/actions {
+    opacity: 0% !important;
+  }
+  */
 }

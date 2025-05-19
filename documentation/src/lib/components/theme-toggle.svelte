@@ -22,6 +22,38 @@
 
   const messages = getMessages()
 
+  async function handleToggleTheme() {
+    if (!transitionsEnabled() || !window?.localStorage) {
+      await toggleTheme()
+    } else {
+      await animatedToggleTheme()
+    }
+  }
+
+  async function animatedToggleTheme() {
+    const previousSwitch = window.localStorage.getItem('theme-switch')
+
+    if (previousSwitch !== null && !isNaN(+previousSwitch)) {
+      const previousSwitchTime = +previousSwitch
+
+      if (Date.now() - previousSwitchTime > 3 * 60 * 1000) {
+        if (document.documentElement.classList.contains('-animated')) {
+          document.documentElement.classList.remove('-animated')
+        }
+      } else {
+        document.documentElement.classList.add('-animated')
+      }
+    }
+
+    window.localStorage.setItem('theme-switch', Date.now().toString())
+
+    if (document.startViewTransition === undefined) return
+
+    const transition = document.startViewTransition(toggleTheme)
+
+    await transition.ready
+  }
+
   async function toggleTheme() {
     const newMode = mode === 'dark' ? 'light' : 'dark'
 
@@ -37,6 +69,15 @@
       setMode(newMode)
       setTheme(newTheme)
     }
+  }
+
+  function transitionsEnabled() {
+    if (typeof document === 'undefined') return false
+
+    return (
+      'startViewTransition' in document &&
+      window.matchMedia('(prefers-reduced-motion: no-preference)').matches
+    )
   }
 
   $effect(() => {
@@ -59,14 +100,14 @@ It can also use specific themes specified by the 'light' and 'dark' keys from lo
 
 <div data-tip={$messages.toggleTheme()} class={cn('tooltip tooltip-bottom', props.class)}>
   <button
-    onclick={toggleTheme}
-    class="btn btn-sm btn-square btn-outline"
+    onclick={handleToggleTheme}
+    class="btn btn-sm btn-square ring-base-content ring-1"
     aria-label="Color scheme toggle"
   >
     <span class="swap swap-rotate" class:swap-active={mode === 'dark'}>
       <span
         class={cn(
-          'icon-[mdi--moon-waxing-crescent] swap-on size-4',
+          'icon-[mdi--moon-waxing-crescent] swap-on size-5',
 
           // $mode is undefined on the server and thus on mount.
           // Before it's mounted for the first time, force the dark icon to be static.
@@ -76,7 +117,7 @@ It can also use specific themes specified by the 'light' and 'dark' keys from lo
       <span
         class={cn(
           !globalMode.current && 'dark:opacity-0',
-          'icon-[mdi--weather-sunny] swap-off size-4',
+          'icon-[mdi--weather-sunny] swap-off size-5',
         )}
       ></span>
     </span>

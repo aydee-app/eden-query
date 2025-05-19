@@ -71,7 +71,7 @@
   const openingScriptTag = $derived(`<script ${nonceProp}>`)
 </script>
 
-<!-- 
+<!--
   @component
   Enhanced implementation of the default {@link ModeWatcher} component that also sets the initial
   theme and keeps it defined as long as {@link mode} is defined.

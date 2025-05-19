@@ -21,9 +21,141 @@
 
 @plugin "daisyui/theme" {
   name: light;
+  --color-primary: oklch(71.8% 0.202 349.761);
+}
+
+@plugin "daisyui/theme" {
+  name: dark;
+  --color-primary: oklch(71.8% 0.202 349.761);
+  --color-base-100: #0f172a;
 }
 
 /** Propagate the name of the data-theme as a CSS variable. */
 html {
   --data-theme: attr(data-theme);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* THEME SWITCH */
+
+:root {
+  --switch-duration: 1.75s;
+  --switch-name: scale;
+}
+
+.-animated {
+  --switch-duration: 1s;
+  --switch-name: scale-fast;
+}
+
+.-animated {
+  --switch-duration: 1s;
+  --switch-name: scale-fast;
+}
+
+::view-transition-group(root) {
+  animation-timing-function: var(--expo-in);
+  z-index: 100;
+}
+
+.dark::view-transition-new(root) {
+  z-index: 9999;
+}
+
+::view-transition-new(root) {
+  mask: url('/assets/shigure-ui.webp') center / 0 no-repeat;
+  animation: var(--switch-name) var(--switch-duration);
+}
+
+::view-transition-old(root),
+.dark::view-transition-old(root) {
+  animation: var(--switch-name) var(--switch-duration);
+}
+
+@keyframes scale {
+  0% {
+    mask-size: 0;
+  }
+
+  10% {
+    mask-size: 50vmax;
+  }
+
+  90% {
+    mask-size: 50vmax;
+  }
+
+  100% {
+    mask-size: 2000vmax;
+  }
+}
+
+@keyframes scale-fast {
+  0% {
+    mask-size: 0;
+  }
+
+  10% {
+    mask-size: 50vmax;
+  }
+
+  80% {
+    mask-size: 50vmax;
+  }
+
+  100% {
+    mask-size: 2000vmax;
+  }
+}
+
+/* END theme switch */
+
+.showcase {
+  @apply border bg-white sm:max-w-[30rem] dark:border-gray-700 dark:bg-gray-800;
+
+  box-shadow: 0 16px 40px rgba(0, 123, 255, 0.075);
+
+  background-image:
+    radial-gradient(closest-side at center, rgba(255, 255, 255, 1) 70%, transparent 150%),
+    radial-gradient(closest-side at center, rgba(255, 255, 255, 1) 90%, transparent 150%),
+    radial-gradient(at 9% 67%, hsla(223, 100%, 65%, 0.14) 0px, transparent 50%),
+    radial-gradient(at 22% 0%, hsla(210, 100%, 69%, 0.29) 0px, transparent 50%),
+    radial-gradient(at 97% 49%, hsla(240, 100%, 87%, 0.35) 0px, transparent 50%),
+    radial-gradient(at 100% 75%, hsla(280, 100%, 75%, 0.26) 0px, transparent 50%),
+    radial-gradient(at 75% 100%, hsla(22, 100%, 77%, 0.19) 0px, transparent 50%),
+    radial-gradient(at 40% 100%, hsla(240, 100%, 70%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 72% 0%, hsla(343, 100%, 76%, 0.17) 0px, transparent 50%);
+
+  html.dark & {
+    box-shadow: 0 16px 40px rgba(0, 123, 255, 0.15);
+
+    background-image:
+      radial-gradient(closest-side at center, theme(colors.gray.800) 35%, transparent 140%),
+      radial-gradient(at 9% 67%, hsla(223, 100%, 65%, 0.14) 0px, transparent 50%),
+      radial-gradient(at 22% 0%, hsla(210, 100%, 69%, 0.29) 0px, transparent 50%),
+      radial-gradient(at 97% 49%, hsla(240, 100%, 87%, 0.35) 0px, transparent 50%),
+      radial-gradient(at 100% 75%, hsla(280, 100%, 75%, 0.26) 0px, transparent 50%),
+      radial-gradient(at 75% 100%, hsla(22, 100%, 77%, 0.19) 0px, transparent 50%),
+      radial-gradient(at 40% 100%, hsla(240, 100%, 70%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 72% 0%, hsla(343, 100%, 76%, 0.17) 0px, transparent 50%);
+  }
+
+  div[class^='language-'] {
+    margin: 0;
+  }
+
+  & > div {
+    @apply !bg-transparent;
+
+    & > pre {
+      @apply !py-3.5;
+    }
+  }
+
+  &.mockup-code pre:before {
+    display: none;
+  }
 }

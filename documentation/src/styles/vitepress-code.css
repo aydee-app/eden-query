@@ -115,6 +115,7 @@ pre.shiki {
 .vp-code .tab,
 .vp-code .space {
   position: relative;
+  height: 0;
 }
 
 /*

@@ -17,7 +17,7 @@
   class={cn('p-0 text-sm', 'collapse-content', className)}
   {...restProps}
 >
-  <div class="pb-4 pt-0">
+  <div class="pt-0 pb-4">
     {@render children?.()}
   </div>
 </AccordionPrimitive.Content>

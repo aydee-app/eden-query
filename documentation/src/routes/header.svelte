@@ -1,19 +1,18 @@
 <script lang="ts">
-  import Laptop from '@lucide/svelte/icons/laptop'
-  import Moon from '@lucide/svelte/icons/moon'
-  import Sun from '@lucide/svelte/icons/sun'
   import type {
     DefaultMatchResult,
     DefaultMatchResultItem,
     HighlightInfo,
   } from '@rspress/theme-default'
-  import { resetMode, setMode } from 'mode-watcher'
+  import { mode, resetMode, setMode, setTheme, type SystemModeValue } from 'mode-watcher'
 
+  import ThemeSelect from '$lib/components/theme-select.svelte'
+  // import LanguageSelect from '$lib/components/language-select.svelte'
   import ThemeToggle from '$lib/components/theme-toggle.svelte'
   import { PageSearcher } from '$lib/docs/search/page-searcher'
   import type { MatchResult } from '$lib/docs/search/types'
   import { getSlicedStrByByteLength } from '$lib/docs/search/utils'
-  import * as Command from '$lib/registry/new-york/ui/command'
+  import * as Command from '$lib/registry/daisy-new-york/ui/command'
   import { cn } from '$lib/utils/cn'
 
   let open = $state(false)
@@ -51,11 +50,6 @@
     )
   }
 
-  function runCommand(cmd: () => void) {
-    open = false
-    cmd()
-  }
-
   const searcher = new PageSearcher({ currentLang: '', currentVersion: '' })
 
   searcher.init()
@@ -75,6 +69,24 @@
   }
 
   const debouncedSearch = createDebounced(handleSearch)
+
+  function setThemeMode(newMode: NonNullable<SystemModeValue>) {
+    /**
+     * See if a more specific theme can be found by using the current mode.
+     */
+    const newTheme = localStorage.getItem(newMode) || newMode
+
+    setMode(newMode)
+    setTheme(newTheme)
+  }
+
+  function resetThemeMode() {
+    resetMode()
+
+    if (mode.current) {
+      setThemeMode(mode.current)
+    }
+  }
 
   $effect(() => {
     debouncedSearch(value)
@@ -114,142 +126,117 @@
 
 <svelte:document onkeydown={handleKeydown} />
 
-<Command.Dialog bind:open shouldFilter={false}>
-  <Command.Input placeholder="Type a command or search" bind:value />
-  <Command.List>
-    <Command.Empty>No results found.</Command.Empty>
+{#snippet commandListOptions()}
+  <Command.Empty>No results found.</Command.Empty>
 
-    <!--
-    <Command.Group heading="Links">
-      {#each mainNav as navItem (navItem.title)}
-        <Command.LinkItem value={navItem.title} href={navItem.href} onSelect={() => (open = false)}>
-          <File class="mr-2 size-4" />
-          {navItem.title}
-        </Command.LinkItem>
-      {/each}
-    </Command.Group>
-    -->
+  {#each Object.entries(normalizedSuggestions) as [group, suggestions], index (group)}
+    {#if index > 0}
+      <Command.Separator />
+    {/if}
 
-    <!--
-    {#each sidebarNav as group (group.title)}
-      <Command.Group heading={group.title}>
-        {#each group.items as navItem (navItem.title)}
-          <Command.LinkItem
-            value={navItem.title}
-            href={navItem.href}
-            onSelect={() => (open = false)}
-          >
-            <div class="mr-2 flex size-4 items-center justify-center">
-              <Circle class="size-3" />
-            </div>
-            {navItem.title}
-          </Command.LinkItem>
-        {/each}
-      </Command.Group>
-    {/each}
-    -->
-    {#each Object.entries(normalizedSuggestions) as [group, suggestions], index (group)}
-      {#if index > 0}
-        <Command.Separator />
-      {/if}
+    <Command.Group heading={group}>
+      {#each suggestions as suggestion, suggestionIndex (suggestionIndex)}
+        <!-- {@const accummulatedIndex = index + suggestionIndex} -->
 
-      <Command.Group>
-        {#each suggestions as suggestion, suggestionIndex (suggestionIndex)}
-          <!-- {@const accummulatedIndex = index + suggestionIndex} -->
+        <Command.LinkItem
+          href={suggestion.link}
+          class="group h-16 h-auto gap-2 text-left"
+          value={`${index},${suggestionIndex}`}
+        >
+          <div class="flex items-center">
+            <span
+              class={cn(
+                'size-6',
+                suggestion.type === 'title' && 'icon-[mdi--hashtag]',
+                suggestion.type === 'header' && 'icon-[mdi--file]',
+                suggestion.type === 'content' && 'icon-[mdi--file-eye]',
+              )}
+            >
+            </span>
+          </div>
 
-          <Command.LinkItem
-            href={suggestion.link}
-            class="h-auto text-left"
-            value={`${index},${suggestionIndex}`}
-          >
-            <div class="flex items-center">
-              <span
-                class={cn(
-                  'size-6',
-                  suggestion.type === 'title' && 'icon-[mdi--hashtag]',
-                  suggestion.type === 'header' && 'icon-[mdi--file]',
-                  suggestion.type === 'content' && 'icon-[mdi--file-eye]',
-                )}
-              >
-              </span>
-            </div>
-
+          <div class="grow">
             {#if suggestion.type === 'header'}
               {@const fragments = getHighlightedFragments(
                 suggestion.header,
                 suggestion.highlightInfoList,
               )}
 
-              <div>
-                {#each fragments as fragment, index (index)}
-                  {#if fragment.type === 'highlighted'}
-                    <span class="text-primary">{fragment.value}</span>
-                  {:else}
-                    <span>{fragment.value}</span>
-                  {/if}
-                {/each}
-              </div>
+              {#each fragments as fragment, index (index)}
+                {#if fragment.type === 'highlighted'}
+                  <span class="text-primary group-hover:underline">{fragment.value}</span>
+                {:else}
+                  <span>{fragment.value}</span>
+                {/if}
+              {/each}
             {:else if suggestion.type === 'title'}
               {@const fragments = getHighlightedFragments(
                 suggestion.title,
                 suggestion.highlightInfoList,
               )}
 
-              <div>
-                {#each fragments as fragment, index (index)}
-                  {#if fragment.type === 'highlighted'}
-                    <span class="text-primary">{fragment.value}</span>
-                  {:else}
-                    <span>{fragment.value}</span>
-                  {/if}
-                {/each}
-              </div>
+              {#each fragments as fragment, index (index)}
+                {#if fragment.type === 'highlighted'}
+                  <span class="text-primary group-hover:underline">{fragment.value}</span>
+                {:else}
+                  <span>{fragment.value}</span>
+                {/if}
+              {/each}
             {:else if suggestion.type === 'content'}
               {@const fragments = getHighlightedFragments(
                 suggestion.statement,
                 suggestion.highlightInfoList,
               )}
 
-              <div>
-                {#each fragments as fragment, index (index)}
-                  {#if fragment.type === 'highlighted'}
-                    <span class="text-primary">{fragment.value}</span>
-                  {:else}
-                    <span>{fragment.value}</span>
-                  {/if}
-                {/each}
-                <p class="text-xs">{suggestion.title}</p>
-              </div>
+              {#each fragments as fragment, index (index)}
+                {#if fragment.type === 'highlighted'}
+                  <span class="text-primary group-hover:underline">{fragment.value}</span>
+                {:else}
+                  <span>{fragment.value}</span>
+                {/if}
+              {/each}
+              <p class="text-xs">{suggestion.title}</p>
             {/if}
-          </Command.LinkItem>
-        {/each}
-      </Command.Group>
-    {/each}
+          </div>
 
-    <Command.Separator />
-
-    <Command.Group heading="Theme">
-      <Command.Item value="light" onSelect={() => runCommand(() => setMode('light'))}>
-        <Sun class="mr-2 size-4" />
-        Light
-      </Command.Item>
-
-      <Command.Item value="dark" onSelect={() => runCommand(() => setMode('dark'))}>
-        <Moon class="mr-2 size-4" />
-        Dark
-      </Command.Item>
-
-      <Command.Item value="system" onSelect={() => runCommand(() => resetMode())}>
-        <Laptop class="mr-2 size-4" />
-        System
-      </Command.Item>
+          <div class="opacity-0 group-hover:opacity-100 group-aria-selected:opacity-100">
+            <span class="icon-[mdi--arrow-left-bottom] size-6"></span>
+          </div>
+        </Command.LinkItem>
+      {/each}
     </Command.Group>
+  {/each}
+
+  <Command.Separator />
+
+  <Command.Group heading="Theme">
+    <Command.Item value="light" onSelect={setThemeMode.bind(null, 'light')}>
+      <span class="icon-[mdi--weather-sunny] mr-2 size-4"></span>
+      <span>Light</span>
+    </Command.Item>
+
+    <Command.Item value="dark" onSelect={setThemeMode.bind(null, 'dark')}>
+      <span class="icon-[mdi--moon-waning-crescent] mr-2 size-4"></span>
+      <span>Dark</span>
+    </Command.Item>
+
+    <Command.Item value="system" onSelect={resetThemeMode}>
+      <span class="icon-[mdi--laptop] mr-2 size-4"></span>
+      <span>System</span>
+    </Command.Item>
+  </Command.Group>
+{/snippet}
+
+<Command.Dialog bind:open shouldFilter={false}>
+  <Command.Input placeholder="Type a command or search" bind:value />
+  <Command.List>
+    {@render commandListOptions()}
   </Command.List>
 </Command.Dialog>
 
 <header>
   <div class="navbar bg-base-100 shadow-sm">
-    <div class="navbar-start">
+    <div class="navbar-start grow">
       <div class="dropdown">
         <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
           <svg
@@ -274,54 +261,66 @@
         <span> Elysia.js</span>
       </a>
 
-      <label class="input">
-        <span class="icon-[mdi--search] size-8"></span>
-        <input type="search" class="grow" placeholder="Search" />
-        <kbd class="kbd kbd-sm">⌘</kbd>
-        <kbd class="kbd kbd-sm">K</kbd>
-      </label>
+      <Command.Root class="group relative w-fit overflow-visible" shouldFilter={false}>
+        <label class="input pl-0">
+          <div class="w-full grow">
+            <Command.Input type="search" placeholder="Search" bind:value />
+          </div>
+
+          <kbd class="kbd kbd-sm">⌘</kbd>
+          <kbd class="kbd kbd-sm">K</kbd>
+        </label>
+
+        <Command.List
+          class="bg-base-100 absolute top-11/10 left-0 h-fit w-max max-w-sm min-w-full rounded border opacity-0 group-has-[input:focus]:opacity-100"
+        >
+          {@render commandListOptions()}
+        </Command.List>
+      </Command.Root>
     </div>
 
-    <div class="navbar-center hidden lg:flex"></div>
-
-    <div class="navbar-end gap-4">
-      <ul class="menu menu-sm">
+    <div class="navbar-center hidden grow justify-end lg:flex">
+      <ul class="menu">
         <li>
           <a href="/guide/eden-query">Eden Query</a>
         </li>
       </ul>
+    </div>
 
-      <div class="flex items-center gap-4">
+    <div class="navbar-end w-auto gap-4">
+      <div class="flex shrink-0 gap-2">
         <ThemeToggle />
+        <ThemeSelect />
+        <!-- <LanguageSelect /> -->
+      </div>
 
-        <div class="space-x-1">
-          <a
-            href="https://github.com/ap0nia/eden-query"
-            target="_blank"
-            class="btn btn-sm btn-circle btn-ghost"
-            aria-label="X/Twitter link"
-          >
-            <span class="icon-[lineicons--github] size-6"></span>
-          </a>
+      <div class="shrink-0 space-x-1">
+        <a
+          href="https://github.com/ap0nia/eden-query"
+          target="_blank"
+          class="btn btn-sm btn-circle btn-ghost"
+          aria-label="X/Twitter link"
+        >
+          <span class="icon-[lineicons--github] size-6"></span>
+        </a>
 
-          <a
-            href="https://twitter.com/elysiajs"
-            target="_blank"
-            class="btn btn-sm btn-circle btn-ghost"
-            aria-label="X/Twitter link"
-          >
-            <span class="icon-[line-md--twitter-x] size-6"></span>
-          </a>
+        <a
+          href="https://twitter.com/elysiajs"
+          target="_blank"
+          class="btn btn-sm btn-circle btn-ghost"
+          aria-label="X/Twitter link"
+        >
+          <span class="icon-[line-md--twitter-x] size-6"></span>
+        </a>
 
-          <a
-            href="https://discord.gg/eaFJ2KDJck"
-            target="_blank"
-            class="btn btn-sm btn-circle btn-ghost"
-            aria-label="X/Twitter link"
-          >
-            <span class="icon-[lineicons--discord] size-6"></span>
-          </a>
-        </div>
+        <a
+          href="https://discord.gg/eaFJ2KDJck"
+          target="_blank"
+          class="btn btn-sm btn-circle btn-ghost"
+          aria-label="X/Twitter link"
+        >
+          <span class="icon-[lineicons--discord] size-6"></span>
+        </a>
       </div>
     </div>
   </div>

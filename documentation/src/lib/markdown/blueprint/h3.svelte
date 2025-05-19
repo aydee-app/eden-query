@@ -7,7 +7,10 @@
 </script>
 
 <h3
-  class={cn('font-heading mt-8 scroll-m-20 text-lg font-semibold tracking-tight', className)}
+  class={cn(
+    'font-heading scroll-m-20 text-lg font-semibold tracking-tight [&:not(:first-child)]:mt-8',
+    className,
+  )}
   {...restProps}
 >
   {@render children?.()}

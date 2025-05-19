@@ -3,9 +3,14 @@
 </script>
 
 <script lang="ts">
+  import BuiltWithLove from './built-with-love.svelte'
+  import Community from './community.svelte'
+  import Documentation from './documentation.svelte'
   import Header from './header.svelte'
   import Hero from './hero.svelte'
+  import Motivation from './motivation.svelte'
   import Note from './note.svelte'
+  import TypeSafety from './type-safety.svelte'
 </script>
 
 <main class="space-y-16 text-lg leading-normal text-gray-500/80 dark:text-gray-400/90">
@@ -29,4 +34,14 @@
   <div id="notes">
     <Note />
   </div>
+
+  <Motivation />
+
+  <TypeSafety />
+
+  <Documentation />
+
+  <Community />
+
+  <BuiltWithLove />
 </main>

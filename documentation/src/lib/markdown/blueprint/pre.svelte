@@ -16,6 +16,7 @@
 </script>
 
 <!-- The code inside may be subject to special white-space rules when rendering code blocks. -->
+<!-- prettier-ignore-start -->
 <div
   class={cn(
     restProps.lang && `language-${restProps.lang}`,
@@ -35,7 +36,6 @@
       <div>
         <span data-title={dedupedQuotesTitle}>{dedupedQuotesTitle}</span>
       </div>
-
       <div class="hover pointer-events-auto">
         <label class="btn btn-circle btn-xs swap">
           <input name="wrap" type="checkbox" />
@@ -45,18 +45,15 @@
         <CopyButton {ref} class="btn-xs" />
       </div>
     </div>
-  {/if}
-  <div class="relative">
+  {/if}<div class="relative">
     <div class="peer overflow-x-auto py-4">
       <pre
         {...restProps}
         class={cn(restProps.class, 'group-has-[[name=wrap]:checked]:whitespace-pre-wrap')}
         bind:this={ref}>{@render children?.()}</pre>
-    </div>
-
-    {#if !dedupedQuotesTitle}
+    </div>{#if !dedupedQuotesTitle}
       <div
-        class="peer/actions pointer-events-none absolute left-0 top-0 flex w-full justify-end p-2 opacity-0 transition-opacity hover:opacity-100 peer-hover:opacity-100"
+        class="peer/actions pointer-events-none absolute top-0 left-0 flex w-full justify-end p-2 opacity-0 transition-opacity peer-hover:opacity-100 hover:opacity-100"
       >
         <div class="hover pointer-events-auto">
           <label class="btn btn-circle swap">
@@ -66,9 +63,8 @@
           </label>
           <CopyButton {ref} />
         </div>
-      </div>
-      <div
-        class="pointer-events-none absolute left-0 top-0 flex w-full justify-end px-2 transition-opacity hover:opacity-0 peer-hover/actions:opacity-0 peer-hover:opacity-0"
+      </div><div
+        class="pointer-events-none absolute top-0 left-0 flex w-full justify-end px-2 transition-opacity peer-hover:opacity-0 peer-hover/actions:opacity-0 hover:opacity-0"
       >
         {#if restProps.lang}
           <span class={cn('text-xs')}>
@@ -79,3 +75,4 @@
     {/if}
   </div>
 </div>
+<!-- prettier-ignore-end -->

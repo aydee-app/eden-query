@@ -61,7 +61,7 @@
 
     <p>
       <span
-        class="bg-gradient-to-r from-sky-300 to-violet-400 bg-clip-text text-5xl font-bold leading-tight text-transparent md:text-center md:text-6xl"
+        class="bg-gradient-to-r from-sky-300 to-violet-400 bg-clip-text text-5xl leading-tight font-bold text-transparent md:text-center md:text-6xl"
       >
         Ergonomic Framework for Humans
       </span>
@@ -72,15 +72,13 @@
     <h3
       class="w-full max-w-2xl text-xl !leading-normal text-gray-500 md:text-center md:text-2xl dark:text-gray-400"
     >
-      <span>TypeScript with &nbsp;</span>
-
+      <span>TypeScript with</span>
       <span
         class="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text font-semibold text-transparent"
       >
         End-to-End Type Safety
-      </span>
-
-      <span>, type integrity, and exceptional developer experience. Supercharged by Bun.</span>
+      </span><span>,</span>
+      <span>type integrity, and exceptional developer experience. Supercharged by Bun.</span>
     </h3>
 
     <section class="flex flex-wrap items-center gap-4 md:justify-center">
@@ -88,9 +86,9 @@
         Get Started
       </a>
 
-      <div class="flex gap-4">
+      <div class="flex items-center gap-4">
         <code
-          class="bg-primary/25 whitespace-nowrap rounded-full px-6 py-2.5 font-mono text-lg font-medium"
+          class="bg-primary/25 rounded-full px-6 py-2.5 font-mono text-lg font-medium whitespace-nowrap"
         >
           {value}
         </code>

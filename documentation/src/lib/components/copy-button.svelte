@@ -8,7 +8,7 @@
     ref?: HTMLElement
   }
 
-  let { class: className, ref, value, ...restProps }: Props = $props()
+  let { children, class: className, ref, value, ...restProps }: Props = $props()
 
   let copied = $state(false)
 
