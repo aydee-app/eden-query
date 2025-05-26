@@ -1,5 +1,11 @@
 # @ap0nia/eden-svelte-query
 
+## 0.1.0-next.9
+
+### Patch Changes
+
+- 990adae: chore: update versions
+
 ## 0.1.0-next.8
 
 ### Minor Changes
