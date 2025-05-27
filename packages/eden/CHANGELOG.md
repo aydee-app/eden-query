@@ -1,5 +1,11 @@
 # @ap0nia/eden
 
+## 1.0.0-next.14
+
+### Patch Changes
+
+- 0587b01: fix: do not transform response if undefined
+
 ## 1.0.0-next.13
 
 ### Patch Changes
