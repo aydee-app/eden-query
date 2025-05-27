@@ -1,5 +1,11 @@
 # @ap0nia/eden
 
+## 1.0.0-next.13
+
+### Patch Changes
+
+- 06eaa83: fix: transform async iterable again - return nothing
+
 ## 1.0.0-next.12
 
 ### Patch Changes

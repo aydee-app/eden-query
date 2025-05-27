@@ -10,6 +10,7 @@
     "@ap0nia/eden-query-tests": "0.0.0"
   },
   "changesets": [
+    "better-guests-brake",
     "cool-webs-like",
     "famous-schools-rhyme",
     "itchy-pugs-behave",
