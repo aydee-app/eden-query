@@ -1,5 +1,11 @@
 # @ap0nia/eden-svelte-query
 
+## 0.1.0-next.11
+
+### Patch Changes
+
+- 80a8d31: chore: remove async iterable transformation
+
 ## 0.1.0-next.10
 
 ### Minor Changes
