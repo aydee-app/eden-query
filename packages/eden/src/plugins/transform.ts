@@ -157,7 +157,7 @@ export function transformPlugin<const T extends TransformerPluginConfig>(config:
         }
 
         if (isAsyncIterable(context.response)) {
-          return context.response as any
+          return
           // const transformed = mapAsyncIterable(context.response, transformer.output.serialize)
           // return transformed as any
         }
