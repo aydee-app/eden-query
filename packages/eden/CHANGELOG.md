@@ -1,5 +1,11 @@
 # @ap0nia/eden
 
+## 1.0.0-next.12
+
+### Patch Changes
+
+- 3609c33: fix: async iterable transform again
+
 ## 1.0.0-next.11
 
 ### Patch Changes
