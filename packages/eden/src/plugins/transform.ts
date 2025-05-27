@@ -13,7 +13,7 @@ import type {
   ResolveTypeConfig,
   TypeConfig,
 } from '../core/types'
-// import { isAsyncIterable, mapAsyncIterable } from '../utils/async-iterable'
+import { isAsyncIterable } from '../utils/async-iterable'
 import { set } from '../utils/set'
 
 /**
@@ -156,10 +156,11 @@ export function transformPlugin<const T extends TransformerPluginConfig>(config:
           })
         }
 
-        // if (isAsyncIterable(context.response)) {
-        //   const transformed = mapAsyncIterable(context.response, transformer.output.serialize)
-        //   return transformed as any
-        // }
+        if (isAsyncIterable(context.response)) {
+          return context.response as any
+          // const transformed = mapAsyncIterable(context.response, transformer.output.serialize)
+          // return transformed as any
+        }
 
         const serializedResponse = await transformer.output.serialize(context.response)
 
