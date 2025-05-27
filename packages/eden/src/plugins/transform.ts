@@ -133,6 +133,8 @@ export function transformPlugin<const T extends TransformerPluginConfig>(config:
         }
       })
       .mapResponse(async (context) => {
+        if (context.response == null) return
+
         const transformed = context.request.headers.get('transformed')
 
         const transformerId = context.request.headers.get('transformer-id')
