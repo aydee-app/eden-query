@@ -1,5 +1,11 @@
 # @ap0nia/eden-tanstack-query
 
+## 1.0.0-next.10
+
+### Minor Changes
+
+- 8ba0de3: chore: update dependencies
+
 ## 1.0.0-next.9
 
 ### Patch Changes
