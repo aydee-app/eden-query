@@ -1,5 +1,11 @@
 # @ap0nia/eden-svelte-query
 
+## 0.1.0-next.10
+
+### Minor Changes
+
+- 8ba0de3: chore: update dependencies
+
 ## 0.1.0-next.9
 
 ### Patch Changes
