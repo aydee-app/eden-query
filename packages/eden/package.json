@@ -1,6 +1,6 @@
 {
   "name": "@ap0nia/eden",
-  "version": "1.0.0-next.12",
+  "version": "1.0.0-next.13",
   "description": "Fully type-safe Elysia.js client",
   "license": "MIT",
   "repository": {

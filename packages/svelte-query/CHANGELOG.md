@@ -1,5 +1,11 @@
 # @ap0nia/eden-svelte-query
 
+## 0.1.0-next.13
+
+### Patch Changes
+
+- 06eaa83: fix: transform async iterable again - return nothing
+
 ## 0.1.0-next.12
 
 ### Patch Changes
