@@ -1,5 +1,11 @@
 # @ap0nia/eden-svelte-query
 
+## 0.1.0-next.14
+
+### Patch Changes
+
+- 0587b01: fix: do not transform response if undefined
+
 ## 0.1.0-next.13
 
 ### Patch Changes
