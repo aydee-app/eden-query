@@ -44,17 +44,15 @@ export function wsPlugin<const T extends WsPluginConfig>(config: T = {} as any) 
    * the batch methods are not intended to be invoked directly...
    */
   const plugin = (app: Elysia) => {
-    const appWithState = app.state((_state) => {
-      type TResolvedState = Record<TResolvedKey, { ws: T }>
+    type TResolvedState = Record<TResolvedKey, { ws: T }>
 
-      const result = {}
+    const result = {}
 
-      if (key) {
-        result[key as never] = { ws: config } as never
-      }
+    if (key) {
+      result[key as never] = { ws: config } as never
+    }
 
-      return result as TResolvedState
-    })
+    const appWithState = app.state(result as TResolvedState)
 
     const wsMessageHandler = handleWsMessage.bind(null, app)
 

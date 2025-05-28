@@ -180,17 +180,15 @@ export function batchPlugin<const T extends BatchPluginConfig>(config: T = {} as
       }
     })
 
-    const appWithState = app.state(() => {
-      type TResolvedState = Record<TResolvedKey, { batch: T }>
+    type TResolvedState = Record<TResolvedKey, { batch: T }>
 
-      const result = {}
+    const result = {}
 
-      if (key) {
-        result[key as never] = { batch: config } as never
-      }
+    if (key) {
+      result[key as never] = { batch: config } as never
+    }
 
-      return result as TResolvedState
-    })
+    const appWithState = app.state(result as TResolvedState)
 
     return appWithState
   }

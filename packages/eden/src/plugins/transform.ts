@@ -52,17 +52,16 @@ export function transformPlugin<const T extends TransformerPluginConfig>(config:
    * @todo Decide whether it is worth it to return an instance with strongly-typed batch routes.
    */
   const plugin = (app: Elysia) => {
-    const appWithState = app.state(() => {
-      type TResolvedState = Record<TResolvedKey, { transform: T }>
+    type TResolvedState = Record<TResolvedKey, { transform: T }>
 
-      const result = {}
+    const result = {}
 
-      if (key) {
-        result[key as never] = { transform: config } as never
-      }
+    if (key) {
+      result[key as never] = { transform: config } as never
+    }
 
-      return result as TResolvedState
-    })
+    // result as TResolvedState
+    const appWithState = app.state(result as TResolvedState)
 
     if (firstTransformer == null) return appWithState
 
