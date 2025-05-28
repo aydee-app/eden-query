@@ -1,5 +1,11 @@
 # @ap0nia/eden-tanstack-query
 
+## 1.0.0-next.15
+
+### Minor Changes
+
+- 3b4a35b: fix: do not override existing state with elysia.js plugins
+
 ## 1.0.0-next.14
 
 ### Patch Changes
