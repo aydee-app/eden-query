@@ -1,7 +1,6 @@
 import {
   type EdenFetch,
   type EdenFetchOptions,
-  type EdenResolverConfig,
   type EdenRouteBody,
   type EdenRouteError,
   type EdenRouteSuccess,
@@ -14,6 +13,7 @@ import {
   type IsAny,
   type Join,
   type Split,
+  type TypedEdenResolverConfig,
   type UnionToIntersection,
 } from '@ap0nia/eden'
 import {
@@ -105,7 +105,7 @@ export type EdenFetchSvelteQueryHooks<
                 [Split<TEndpoint>, { options: ExtendedEdenRouteOptions; type: 'query' }]
               >
             > & {
-              eden?: EdenResolverConfig<TElysia, TConfig>
+              eden?: TypedEdenResolverConfig<TElysia, TConfig>
             },
           ]
         : [
@@ -118,7 +118,7 @@ export type EdenFetchSvelteQueryHooks<
                 [Split<TEndpoint>, { options: ExtendedEdenRouteOptions; type: 'query' }]
               >
             > & {
-              eden?: EdenResolverConfig<TElysia, TConfig>
+              eden?: TypedEdenResolverConfig<TElysia, TConfig>
             },
           ]),
     ]
@@ -158,7 +158,7 @@ export type EdenFetchSvelteQueryHooks<
       >,
       'queryKey'
     > & {
-      eden?: EdenResolverConfig<TElysia, TConfig>
+      eden?: TypedEdenResolverConfig<TElysia, TConfig>
     },
   ) => CreateInfiniteQueryResult<InfiniteData<EdenRouteSuccess<TRoute>>, EdenRouteError<TRoute>>
 
@@ -201,7 +201,7 @@ export type EdenFetchSvelteQueryHooks<
                 TContext
               >
             > & {
-              eden?: EdenResolverConfig<TElysia, TConfig>
+              eden?: TypedEdenResolverConfig<TElysia, TConfig>
             },
           ]
         : [
@@ -214,7 +214,7 @@ export type EdenFetchSvelteQueryHooks<
                 TContext
               >
             > & {
-              eden?: EdenResolverConfig<TElysia, TConfig>
+              eden?: TypedEdenResolverConfig<TElysia, TConfig>
             },
           ]),
     ]

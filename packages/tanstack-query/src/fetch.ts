@@ -3,7 +3,6 @@ import {
   edenFetch,
   type EdenFetchOptions,
   type EdenRequestOptions,
-  type EdenResolverConfig,
   type EdenResult,
   type EdenRouteBody,
   type EdenRouteError,
@@ -18,6 +17,7 @@ import {
   type Join,
   linkAbortSignals,
   type Split,
+  type TypedEdenResolverConfig,
   type UnionToIntersection,
 } from '@ap0nia/eden'
 import type { MutationOptions } from '@tanstack/query-core'
@@ -79,11 +79,11 @@ export type EdenFetchTanstackQueryRoot<
       ...({} extends TOptions
         ? [
             options?: EdenFetchOptions<TMethod, TRoute>,
-            config?: EdenResolverConfig<TElysia, TConfig>,
+            config?: TypedEdenResolverConfig<TElysia, TConfig>,
           ]
         : [
             options: EdenFetchOptions<TMethod, TRoute>,
-            config?: EdenResolverConfig<TElysia, TConfig>,
+            config?: TypedEdenResolverConfig<TElysia, TConfig>,
           ]),
     ]
   ) => EdenQueryOptions<
@@ -123,11 +123,11 @@ export type EdenFetchTanstackQueryRoot<
       ...({} extends TOptions
         ? [
             options?: EdenFetchOptions<TMethod, TRoute>,
-            config?: EdenResolverConfig<TElysia, TConfig>,
+            config?: TypedEdenResolverConfig<TElysia, TConfig>,
           ]
         : [
             options: EdenFetchOptions<TMethod, TRoute>,
-            config?: EdenResolverConfig<TElysia, TConfig>,
+            config?: TypedEdenResolverConfig<TElysia, TConfig>,
           ]),
     ]
   ) => EdenQueryOptions<
@@ -240,7 +240,7 @@ export function edenFetchTanstackQuery<
       return edenFetchTanstackQuery(domain, { ...config, types } as any) as any
     },
     queryOptions: (...argArray: any[]) => {
-      const [path, options] = argArray as [string, EdenRequestOptions, EdenResolverConfig]
+      const [path, options] = argArray as [string, EdenRequestOptions, TypedEdenResolverConfig]
 
       const paths = path
         .split('/')
@@ -268,7 +268,7 @@ export function edenFetchTanstackQuery<
       return queryOptions as any
     },
     infiniteQueryOptions(...argArray: any[]) {
-      const [path, options] = argArray as [string, EdenRequestOptions, EdenResolverConfig]
+      const [path, options] = argArray as [string, EdenRequestOptions, TypedEdenResolverConfig]
 
       const paths = path
         .split('/')

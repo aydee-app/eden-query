@@ -220,3 +220,8 @@ export type InternalEdenRequestOptions<
     query?: URLSearchParams
     body_type?: string
   }
+
+export type TypedEdenResolverConfig<
+  TElysia extends InternalElysia = InternalElysia,
+  TConfig extends TypeConfig = undefined,
+> = EdenResolverTypeConfig<TElysia, TConfig> & EdenResolverConfig<TElysia, TConfig>

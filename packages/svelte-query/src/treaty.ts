@@ -1,7 +1,6 @@
 import {
   type EdenConfig,
   type EdenRequestOptions,
-  type EdenResolverConfig,
   type EdenRouteBody,
   type EdenRouteError,
   type EdenRouteInput,
@@ -16,6 +15,7 @@ import {
   type InternalElysia,
   type InternalRouteSchema,
   type ParameterFunctionArgs,
+  type TypedEdenResolverConfig,
   type WebSocketClientOptions,
 } from '@ap0nia/eden'
 import { type EdenTreatyTanstackQuery, edenTreatyTanstackQuery } from '@ap0nia/eden-tanstack-query'
@@ -170,7 +170,7 @@ export type EdenTreatySvelteQueryQueryRoute<
                 [TPaths, { options: EdenRouteInput; type: 'query' }]
               >
             > & {
-              eden?: EdenResolverConfig<TElysia, TConfig>
+              eden?: TypedEdenResolverConfig<TElysia, TConfig>
             },
           ]
         : [
@@ -183,7 +183,7 @@ export type EdenTreatySvelteQueryQueryRoute<
                 [TPaths, { options: EdenRouteInput; type: 'query' }]
               >
             > & {
-              eden?: EdenResolverConfig<TElysia, TConfig>
+              eden?: TypedEdenResolverConfig<TElysia, TConfig>
             },
           ]),
     ]
@@ -218,7 +218,7 @@ export type EdenTreatySvelteQueryInfiniteQueryRoute<
       >,
       'queryKey'
     > & {
-      eden?: EdenResolverConfig<TElysia, TConfig>
+      eden?: TypedEdenResolverConfig<TElysia, TConfig>
     },
   ) => CreateInfiniteQueryResult<InfiniteData<EdenRouteSuccess<TRoute>>, EdenRouteError<TRoute>>
 }
@@ -247,7 +247,7 @@ export type EdenTreatySvelteQueryMutationRoute<
                 TContext
               >
             > & {
-              eden?: EdenResolverConfig<TElysia, TConfig>
+              eden?: TypedEdenResolverConfig<TElysia, TConfig>
             },
           ]
         : [
@@ -260,7 +260,7 @@ export type EdenTreatySvelteQueryMutationRoute<
                 TContext
               >
             > & {
-              eden?: EdenResolverConfig<TElysia, TConfig>
+              eden?: TypedEdenResolverConfig<TElysia, TConfig>
             },
           ]),
     ]

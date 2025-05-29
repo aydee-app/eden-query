@@ -1,7 +1,6 @@
 import {
   type EdenConfig,
   type EdenRequestOptions,
-  type EdenResolverConfig,
   type EdenResult,
   type EdenRouteBody,
   type EdenRouteError,
@@ -19,6 +18,7 @@ import {
   type InternalRouteSchema,
   linkAbortSignals,
   type ParameterFunctionArgs,
+  type TypedEdenResolverConfig,
   type WebSocketClientOptions,
 } from '@ap0nia/eden'
 
@@ -134,8 +134,8 @@ export type EdenTreatyTanstackQueryQueryRoute<
   queryOptions: (
     ...args: [
       ...({} extends TFinalOptions
-        ? [options?: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]
-        : [options: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]),
+        ? [options?: TFinalOptions, config?: TypedEdenResolverConfig<TElysia, TConfig>]
+        : [options: TFinalOptions, config?: TypedEdenResolverConfig<TElysia, TConfig>]),
     ]
   ) => EdenQueryOptions<
     EdenRouteSuccess<TRoute>,
@@ -160,8 +160,8 @@ export type EdenTreatyTanstackQueryMutationRoute<
   mutationOptions: <TContext = unknown>(
     ...args: [
       ...({} extends TFinalOptions
-        ? [options?: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]
-        : [options: TFinalOptions, config?: EdenResolverConfig<TElysia, TConfig>]),
+        ? [options?: TFinalOptions, config?: TypedEdenResolverConfig<TElysia, TConfig>]
+        : [options: TFinalOptions, config?: TypedEdenResolverConfig<TElysia, TConfig>]),
     ]
   ) => EdenMutationOptions<EdenRouteSuccess<TRoute>, EdenRouteError<TRoute>, TBody, TContext>
 }
@@ -246,7 +246,7 @@ export function edenTreatyTanstackQueryProxy<
 
       const [options, configOrWsOptions] = argArray as [
         EdenRequestOptions,
-        EdenResolverConfig | Partial<WebSocketClientOptions>,
+        TypedEdenResolverConfig | Partial<WebSocketClientOptions>,
       ]
 
       const optionsWithParams = { ...options, params }
@@ -269,7 +269,7 @@ export function edenTreatyTanstackQuery<
 ): EdenTreatyTanstackQuery<TElysia, TConfig> {
   const hooks: EdenTreatyTanstackQueryHooks<TElysia, TConfig> = {
     queryOptions: (treaty, paths, argArray) => {
-      const [options, conf] = argArray as [EdenRequestOptions, EdenResolverConfig]
+      const [options, conf] = argArray as [EdenRequestOptions, TypedEdenResolverConfig]
 
       const resolvedConfig = { ...config, ...conf }
 
@@ -302,7 +302,7 @@ export function edenTreatyTanstackQuery<
     infiniteQueryOptions(treaty, paths, argArray) {
       const queryOptions = this.queryOptions(treaty, paths, argArray)
 
-      const [options] = argArray as [EdenRequestOptions, EdenResolverConfig]
+      const [options] = argArray as [EdenRequestOptions, TypedEdenResolverConfig]
 
       const queryKey = [queryOptions.queryKey[0], { options, type: 'infinite-query' }]
 
@@ -311,7 +311,7 @@ export function edenTreatyTanstackQuery<
       return infiniteQueryOptions as any
     },
     mutationOptions: (treaty, paths, argArray) => {
-      const [options, conf] = argArray as [EdenRequestOptions, EdenResolverConfig]
+      const [options, conf] = argArray as [EdenRequestOptions, TypedEdenResolverConfig]
 
       const resolvedConfig = { ...config, ...conf }
 
