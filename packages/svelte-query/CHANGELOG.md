@@ -1,5 +1,11 @@
 # @ap0nia/eden-svelte-query
 
+## 0.1.0-next.16
+
+### Patch Changes
+
+- e0d351d: fix: use EdenTypedResolverConfig with transformer options
+
 ## 0.1.0-next.15
 
 ### Minor Changes
