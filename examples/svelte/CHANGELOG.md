@@ -1,5 +1,14 @@
 # @examples/svelte
 
+## 0.0.1-next.17
+
+### Patch Changes
+
+- Updated dependencies [3efba16]
+  - @ap0nia/eden-tanstack-query@1.0.0-next.17
+  - @ap0nia/eden-svelte-query@0.1.0-next.17
+  - @ap0nia/eden@1.0.0-next.17
+
 ## 0.0.1-next.16
 
 ### Patch Changes
