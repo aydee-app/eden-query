@@ -1,5 +1,11 @@
 # @ap0nia/eden-svelte-query
 
+## 0.1.0-next.17
+
+### Patch Changes
+
+- 3efba16: feat: add datatag to tanstack-query
+
 ## 0.1.0-next.16
 
 ### Patch Changes
