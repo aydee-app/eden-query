@@ -21,6 +21,7 @@ import {
   type TypedEdenResolverConfig,
   type WebSocketClientOptions,
 } from '@ap0nia/eden'
+import type { DataTag } from '@tanstack/query-core'
 
 import type { EdenMutationOptions, EdenQueryOptions, EdenTanstackQueryConfig } from './shared'
 
@@ -141,7 +142,11 @@ export type EdenTreatyTanstackQueryQueryRoute<
     EdenRouteSuccess<TRoute>,
     EdenRouteError<TRoute>,
     EdenRouteSuccess<TRoute>,
-    [TPaths, { options: EdenRouteInput; type: 'query' }],
+    DataTag<
+      [TPaths, { options: EdenRouteInput; type: 'query' }],
+      EdenRouteSuccess<TRoute>,
+      EdenRouteSuccess<TRoute>
+    >,
     TOptions extends { query?: { cursor?: any } } ? NonNullable<TOptions['query']>['cursor'] : never
   >
 }
