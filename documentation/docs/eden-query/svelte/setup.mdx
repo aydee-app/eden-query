@@ -33,7 +33,7 @@ Make sure that the eden proxy and client are setup.
 
 ### 1. Install dependencies
 
-<PackageManagerTabs command="install @ap0nia/eden-svelte-query @tanstack/react-query" />
+<PackageManagerTabs command="install @aydee-app/eden-svelte-query @tanstack/react-query" />
 
 ### 2. Create Elysia server application
 
@@ -60,7 +60,7 @@ cache, preventing leaks.
 
 // @filename: +layout.ts
 // ---cut---
-import { httpBatchLink } from '@ap0nia/eden-svelte-query'
+import { httpBatchLink } from '@aydee-app/eden-svelte-query'
 import { QueryClient } from '@tanstack/svelte-query'
 import type { RequestEvent } from '@sveltejs/kit'
 import { eden } from '$lib/eden'

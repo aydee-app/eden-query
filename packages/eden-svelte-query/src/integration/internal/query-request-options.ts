@@ -1,4 +1,4 @@
-import type { EdenRequestOptions } from '@ap0nia/eden'
+import type { EdenRequestOptions } from '@aydee-app/eden'
 import type { DehydratedState, QueryClient, StoreOrVal } from '@tanstack/svelte-query'
 import type { AnyElysia, MaybePromise } from 'elysia'
 

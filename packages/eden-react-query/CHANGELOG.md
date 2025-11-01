@@ -1,4 +1,4 @@
-# @ap0nia/eden-react-query
+# @aydee-app/eden-react-query
 
 ## 1.6.1
 
@@ -6,7 +6,7 @@
 
 - 9672d8c: feat: canary changeset for primary packages
 - Updated dependencies [9672d8c]
-  - @ap0nia/eden@1.6.1
+  - @aydee-app/eden@1.6.1
 
 ## 1.6.1-canary.0
 
@@ -14,7 +14,7 @@
 
 - 9672d8c: feat: canary changeset for primary packages
 - Updated dependencies [9672d8c]
-  - @ap0nia/eden@1.6.1-canary.0
+  - @aydee-app/eden@1.6.1-canary.0
 
 ## 1.6.1-canary
 
@@ -22,7 +22,7 @@
 
 - 7e797df: testing canary workflow changes(1)
 - Updated dependencies [7e797df]
-  - @ap0nia/eden@1.6.1-canary
+  - @aydee-app/eden@1.6.1-canary
 
 ## 1.6.0
 
@@ -33,7 +33,7 @@
 ### Patch Changes
 
 - Updated dependencies [37ee3c0]
-  - @ap0nia/eden@1.6.0
+  - @aydee-app/eden@1.6.0
 
 ## 1.5.0
 
@@ -46,7 +46,7 @@
 - c9dbba8: fix: package.json exports
 - Updated dependencies [ef7456e]
 - Updated dependencies [c9dbba8]
-  - @ap0nia/eden@1.5.0
+  - @aydee-app/eden@1.5.0
 
 ## 1.4.1
 
@@ -55,7 +55,7 @@
 - 8de6067: fix: types for exposed client in context utils
 - 17ddc6e: fix(eden): treaty types
 - Updated dependencies [17ddc6e]
-  - @ap0nia/eden@1.4.1
+  - @aydee-app/eden@1.4.1
 
 ## 1.4.0
 
@@ -66,7 +66,7 @@
 ### Patch Changes
 
 - Updated dependencies [c76900c]
-  - @ap0nia/eden@1.4.0
+  - @aydee-app/eden@1.4.0
 
 ## 1.3.1
 
@@ -74,7 +74,7 @@
 
 - 17b99f2: fix(eden): infinite recursion with http-link
 - Updated dependencies [17b99f2]
-  - @ap0nia/eden@1.3.1
+  - @aydee-app/eden@1.3.1
 
 ## 1.3.0
 
@@ -85,7 +85,7 @@
 ### Patch Changes
 
 - Updated dependencies [3e231fd]
-  - @ap0nia/eden@1.3.0
+  - @aydee-app/eden@1.3.0
 
 ## 1.2.1
 
@@ -93,7 +93,7 @@
 
 - 25151e7: refactor(eden): make eden plugin unsafe by default
 - Updated dependencies [25151e7]
-  - @ap0nia/eden@1.2.1
+  - @aydee-app/eden@1.2.1
 
 ## 1.2.0
 
@@ -104,7 +104,7 @@
 ### Patch Changes
 
 - Updated dependencies [456df95]
-  - @ap0nia/eden@1.2.0
+  - @aydee-app/eden@1.2.0
 
 ## 1.1.0
 
@@ -115,7 +115,7 @@
 ### Patch Changes
 
 - Updated dependencies [5ff7808]
-  - @ap0nia/eden@1.1.0
+  - @aydee-app/eden@1.1.0
 
 ## 1.0.15
 
@@ -128,7 +128,7 @@
 ### Patch Changes
 
 - Updated dependencies [17424ac]
-  - @ap0nia/eden@1.0.13
+  - @aydee-app/eden@1.0.13
 
 ## 1.0.13
 
@@ -136,7 +136,7 @@
 
 - ec1fa09: fix(eden): do not initialize plugins multiple times
 - Updated dependencies [ec1fa09]
-  - @ap0nia/eden@1.0.12
+  - @aydee-app/eden@1.0.12
 
 ## 1.0.12
 
@@ -144,7 +144,7 @@
 
 - 31e305c: fix(eden): remove root headers from batch request
 - Updated dependencies [31e305c]
-  - @ap0nia/eden@1.0.11
+  - @aydee-app/eden@1.0.11
 
 ## 1.0.11
 
@@ -152,7 +152,7 @@
 
 - cd4cd2f: fix(eden-svelte-query): use correct query settings for proxy
 - Updated dependencies [cd4cd2f]
-  - @ap0nia/eden@1.0.10
+  - @aydee-app/eden@1.0.10
 
 ## 1.0.10
 
@@ -160,7 +160,7 @@
 
 - 49f9dc0: fix(eden): batch plugin forwarding query parameters
 - Updated dependencies [49f9dc0]
-  - @ap0nia/eden@1.0.9
+  - @aydee-app/eden@1.0.9
 
 ## 1.0.9
 
@@ -168,7 +168,7 @@
 
 - 8f46078: fix(eden): do not set default domain
 - Updated dependencies [8f46078]
-  - @ap0nia/eden@1.0.8
+  - @aydee-app/eden@1.0.8
 
 ## 1.0.8
 
@@ -178,7 +178,7 @@
 - eebaa36: fix: useMutation types
 - Updated dependencies [12e11ee]
 - Updated dependencies [eebaa36]
-  - @ap0nia/eden@1.0.7
+  - @aydee-app/eden@1.0.7
 
 ## 1.0.7
 
@@ -192,7 +192,7 @@
 
 - 9740961: chore: version bump
 - Updated dependencies [9740961]
-  - @ap0nia/eden@1.0.6
+  - @aydee-app/eden@1.0.6
 
 ## 1.0.5
 
@@ -200,7 +200,7 @@
 
 - fe4b6e1: fix: github actions release workflow
 - Updated dependencies [fe4b6e1]
-  - @ap0nia/eden@1.0.5
+  - @aydee-app/eden@1.0.5
 
 ## 1.0.4
 
@@ -208,7 +208,7 @@
 
 - af03b83: chore: version bump to test github actions release
 - Updated dependencies [af03b83]
-  - @ap0nia/eden@1.0.4
+  - @aydee-app/eden@1.0.4
 
 ## 1.0.3
 
@@ -216,7 +216,7 @@
 
 - 8e21adc: chore: version bump to test changeset github actions
 - Updated dependencies [8e21adc]
-  - @ap0nia/eden@1.0.3
+  - @aydee-app/eden@1.0.3
 
 ## 1.0.2
 
@@ -224,7 +224,7 @@
 
 - 6f20c0d: chore: version bump again
 - Updated dependencies [6f20c0d]
-  - @ap0nia/eden@1.0.2
+  - @aydee-app/eden@1.0.2
 
 ## 1.0.1
 
@@ -232,7 +232,7 @@
 
 - 5249305: chore: version bump
 - Updated dependencies [5249305]
-  - @ap0nia/eden@1.0.1
+  - @aydee-app/eden@1.0.1
 
 ## 1.0.0
 
@@ -243,7 +243,7 @@
 ### Patch Changes
 
 - Updated dependencies [3ff7160]
-  - @ap0nia/eden@1.0.0
+  - @aydee-app/eden@1.0.0
 
 ## 0.1.4
 
@@ -251,7 +251,7 @@
 
 - 125e0b3: feat: eden-next-query and fixed type exports
 - Updated dependencies [125e0b3]
-  - @ap0nia/eden@0.1.4
+  - @aydee-app/eden@0.1.4
 
 ## 0.1.3
 
@@ -259,7 +259,7 @@
 
 - c1a2ccf: fix: resolve route params
 - Updated dependencies [c1a2ccf]
-  - @ap0nia/eden@0.1.3
+  - @aydee-app/eden@0.1.3
 
 ## 0.1.2
 
@@ -267,7 +267,7 @@
 
 - 042b276: fix: do not add null query params to the url
 - Updated dependencies [042b276]
-  - @ap0nia/eden@0.1.2
+  - @aydee-app/eden@0.1.2
 
 ## 0.1.1
 
@@ -275,7 +275,7 @@
 
 - ac6a1cb: fix: type definitions
 - Updated dependencies [ac6a1cb]
-  - @ap0nia/eden@0.1.1
+  - @aydee-app/eden@0.1.1
 
 ## 0.1.0
 
@@ -286,7 +286,7 @@
 ### Patch Changes
 
 - Updated dependencies [21448fd]
-  - @ap0nia/eden@0.1.0
+  - @aydee-app/eden@0.1.0
 
 ## 0.0.3
 
@@ -294,7 +294,7 @@
 
 - 9bcc582: chore: update package versions
 - Updated dependencies [9bcc582]
-  - @ap0nia/eden@0.0.3
+  - @aydee-app/eden@0.0.3
 
 ## 0.0.2
 
@@ -302,7 +302,7 @@
 
 - c4bb304: refactor: reduce number of generics passed
 - Updated dependencies [c4bb304]
-  - @ap0nia/eden@0.0.2
+  - @aydee-app/eden@0.0.2
 
 ## 0.0.1
 
@@ -310,4 +310,4 @@
 
 - abdfe57: initial release
 - Updated dependencies [abdfe57]
-  - @ap0nia/eden@0.0.1
+  - @aydee-app/eden@0.0.1

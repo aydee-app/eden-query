@@ -42,7 +42,7 @@ Here's a visual representation of the link chain:
 </div>
 
 ```typescript twoslash
-import { createEdenTreatyReactQuery, httpLink, loggerLink } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery, httpLink, loggerLink } from '@aydee-app/eden-react-query'
 
 const eden = createEdenTreatyReactQuery()
 
@@ -90,7 +90,7 @@ export type App = typeof app
 
 // @filename: index.ts
 // ---cut---
-import { EdenLink, Observable } from '@ap0nia/eden-react-query'
+import { EdenLink, Observable } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 export const customLink: EdenLink<App> = () => {
@@ -126,7 +126,7 @@ export const customLink: EdenLink<App> = () => {
 
 If you need a more real reference for creating your custom link,
 you can check out some of the built-in links this Eden implementation provides at
-[GitHub](https://github.com/ap0nia/eden-query/tree/main/packages/eden/src/links).
+[GitHub](https://github.com/aydee-app/eden-query/tree/main/packages/eden/src/links).
 
 ## The terminating link
 

@@ -1,4 +1,4 @@
-import { components } from '@ap0nia/rspress-plugin-twoslash/theme'
+import { components } from '@aydee-app/rspress-plugin-twoslash/theme'
 import { usePageData } from 'rspress/runtime'
 import Theme from 'rspress/theme'
 

@@ -4,7 +4,7 @@ import type {
   InferRouteOptions,
   InferRouteOutput,
   ParsedPathAndMethod,
-} from '@ap0nia/eden'
+} from '@aydee-app/eden'
 import {
   type InfiniteData,
   type InfiniteQueryObserverSuccessResult,

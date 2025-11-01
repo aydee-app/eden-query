@@ -2,7 +2,7 @@ import {
   createEdenTreatyReactQuery,
   type InferTreatyQueryInput,
   type InferTreatyQueryOutput,
-} from '@ap0nia/eden-react-query'
+} from '@aydee-app/eden-react-query'
 
 import type { App } from '../../server'
 

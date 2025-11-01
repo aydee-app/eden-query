@@ -1,4 +1,4 @@
-# @ap0nia/eden
+# @aydee-app/eden
 
 ## 1.6.1
 

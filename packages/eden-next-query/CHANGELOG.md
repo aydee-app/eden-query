@@ -1,20 +1,20 @@
-# @ap0nia/eden-next-query
+# @aydee-app/eden-next-query
 
 ## 1.4.4
 
 ### Patch Changes
 
 - Updated dependencies [9672d8c]
-  - @ap0nia/eden-react-query@1.6.1
-  - @ap0nia/eden@1.6.1
+  - @aydee-app/eden-react-query@1.6.1
+  - @aydee-app/eden@1.6.1
 
 ## 1.4.4-canary.0
 
 ### Patch Changes
 
 - Updated dependencies [9672d8c]
-  - @ap0nia/eden-react-query@1.6.1-canary.0
-  - @ap0nia/eden@1.6.1-canary.0
+  - @aydee-app/eden-react-query@1.6.1-canary.0
+  - @aydee-app/eden@1.6.1-canary.0
 
 ## 1.4.4-canary
 
@@ -22,16 +22,16 @@
 
 - 7e797df: testing canary workflow changes(1)
 - Updated dependencies [7e797df]
-  - @ap0nia/eden-react-query@1.6.1-canary
-  - @ap0nia/eden@1.6.1-canary
+  - @aydee-app/eden-react-query@1.6.1-canary
+  - @aydee-app/eden@1.6.1-canary
 
 ## 1.4.3
 
 ### Patch Changes
 
 - Updated dependencies [37ee3c0]
-  - @ap0nia/eden-react-query@1.6.0
-  - @ap0nia/eden@1.6.0
+  - @aydee-app/eden-react-query@1.6.0
+  - @aydee-app/eden@1.6.0
 
 ## 1.4.2
 
@@ -39,8 +39,8 @@
 
 - Updated dependencies [ef7456e]
 - Updated dependencies [c9dbba8]
-  - @ap0nia/eden-react-query@1.5.0
-  - @ap0nia/eden@1.5.0
+  - @aydee-app/eden-react-query@1.5.0
+  - @aydee-app/eden@1.5.0
 
 ## 1.4.1
 
@@ -49,8 +49,8 @@
 - 17ddc6e: fix(eden): treaty types
 - Updated dependencies [8de6067]
 - Updated dependencies [17ddc6e]
-  - @ap0nia/eden-react-query@1.4.1
-  - @ap0nia/eden@1.4.1
+  - @aydee-app/eden-react-query@1.4.1
+  - @aydee-app/eden@1.4.1
 
 ## 1.4.0
 
@@ -61,8 +61,8 @@
 ### Patch Changes
 
 - Updated dependencies [c76900c]
-  - @ap0nia/eden-react-query@1.4.0
-  - @ap0nia/eden@1.4.0
+  - @aydee-app/eden-react-query@1.4.0
+  - @aydee-app/eden@1.4.0
 
 ## 1.3.1
 
@@ -71,8 +71,8 @@
 - 17b99f2: fix(eden): infinite recursion with http-link
 - Updated dependencies [17b99f2]
 - Updated dependencies [17b99f2]
-  - @ap0nia/eden@1.3.1
-  - @ap0nia/eden-react-query@1.3.1
+  - @aydee-app/eden@1.3.1
+  - @aydee-app/eden-react-query@1.3.1
 
 ## 1.3.0
 
@@ -83,8 +83,8 @@
 ### Patch Changes
 
 - Updated dependencies [3e231fd]
-  - @ap0nia/eden-react-query@1.3.0
-  - @ap0nia/eden@1.3.0
+  - @aydee-app/eden-react-query@1.3.0
+  - @aydee-app/eden@1.3.0
 
 ## 1.2.1
 
@@ -92,8 +92,8 @@
 
 - 25151e7: refactor(eden): make eden plugin unsafe by default
 - Updated dependencies [25151e7]
-  - @ap0nia/eden@1.2.1
-  - @ap0nia/eden-react-query@1.2.1
+  - @aydee-app/eden@1.2.1
+  - @aydee-app/eden-react-query@1.2.1
 
 ## 1.2.0
 
@@ -104,8 +104,8 @@
 ### Patch Changes
 
 - Updated dependencies [456df95]
-  - @ap0nia/eden@1.2.0
-  - @ap0nia/eden-react-query@1.2.0
+  - @aydee-app/eden@1.2.0
+  - @aydee-app/eden-react-query@1.2.0
 
 ## 1.1.0
 
@@ -116,23 +116,23 @@
 ### Patch Changes
 
 - Updated dependencies [5ff7808]
-  - @ap0nia/eden-react-query@1.1.0
-  - @ap0nia/eden@1.1.0
+  - @aydee-app/eden-react-query@1.1.0
+  - @aydee-app/eden@1.1.0
 
 ## 1.0.15
 
 ### Patch Changes
 
 - Updated dependencies [47d786f]
-  - @ap0nia/eden-react-query@1.0.15
+  - @aydee-app/eden-react-query@1.0.15
 
 ## 1.0.14
 
 ### Patch Changes
 
 - Updated dependencies [17424ac]
-  - @ap0nia/eden@1.0.13
-  - @ap0nia/eden-react-query@1.0.14
+  - @aydee-app/eden@1.0.13
+  - @aydee-app/eden-react-query@1.0.14
 
 ## 1.0.13
 
@@ -140,8 +140,8 @@
 
 - ec1fa09: fix(eden): do not initialize plugins multiple times
 - Updated dependencies [ec1fa09]
-  - @ap0nia/eden@1.0.12
-  - @ap0nia/eden-react-query@1.0.13
+  - @aydee-app/eden@1.0.12
+  - @aydee-app/eden-react-query@1.0.13
 
 ## 1.0.12
 
@@ -149,8 +149,8 @@
 
 - 31e305c: fix(eden): remove root headers from batch request
 - Updated dependencies [31e305c]
-  - @ap0nia/eden@1.0.11
-  - @ap0nia/eden-react-query@1.0.12
+  - @aydee-app/eden@1.0.11
+  - @aydee-app/eden-react-query@1.0.12
 
 ## 1.0.11
 
@@ -158,8 +158,8 @@
 
 - cd4cd2f: fix(eden-svelte-query): use correct query settings for proxy
 - Updated dependencies [cd4cd2f]
-  - @ap0nia/eden@1.0.10
-  - @ap0nia/eden-react-query@1.0.11
+  - @aydee-app/eden@1.0.10
+  - @aydee-app/eden-react-query@1.0.11
 
 ## 1.0.10
 
@@ -167,8 +167,8 @@
 
 - 49f9dc0: fix(eden): batch plugin forwarding query parameters
 - Updated dependencies [49f9dc0]
-  - @ap0nia/eden@1.0.9
-  - @ap0nia/eden-react-query@1.0.10
+  - @aydee-app/eden@1.0.9
+  - @aydee-app/eden-react-query@1.0.10
 
 ## 1.0.9
 
@@ -176,8 +176,8 @@
 
 - 8f46078: fix(eden): do not set default domain
 - Updated dependencies [8f46078]
-  - @ap0nia/eden@1.0.8
-  - @ap0nia/eden-react-query@1.0.9
+  - @aydee-app/eden@1.0.8
+  - @aydee-app/eden-react-query@1.0.9
 
 ## 1.0.8
 
@@ -187,8 +187,8 @@
 - eebaa36: fix: useMutation types
 - Updated dependencies [12e11ee]
 - Updated dependencies [eebaa36]
-  - @ap0nia/eden-react-query@1.0.8
-  - @ap0nia/eden@1.0.7
+  - @aydee-app/eden-react-query@1.0.8
+  - @aydee-app/eden@1.0.7
 
 ## 1.0.7
 
@@ -196,7 +196,7 @@
 
 - b3de133: feat: initial test suite implementation
 - Updated dependencies [b3de133]
-  - @ap0nia/eden-react-query@1.0.7
+  - @aydee-app/eden-react-query@1.0.7
 
 ## 1.0.6
 
@@ -204,8 +204,8 @@
 
 - 9740961: chore: version bump
 - Updated dependencies [9740961]
-  - @ap0nia/eden@1.0.6
-  - @ap0nia/eden-react-query@1.0.6
+  - @aydee-app/eden@1.0.6
+  - @aydee-app/eden-react-query@1.0.6
 
 ## 1.0.5
 
@@ -213,8 +213,8 @@
 
 - fe4b6e1: fix: github actions release workflow
 - Updated dependencies [fe4b6e1]
-  - @ap0nia/eden@1.0.5
-  - @ap0nia/eden-react-query@1.0.5
+  - @aydee-app/eden@1.0.5
+  - @aydee-app/eden-react-query@1.0.5
 
 ## 1.0.4
 
@@ -222,8 +222,8 @@
 
 - af03b83: chore: version bump to test github actions release
 - Updated dependencies [af03b83]
-  - @ap0nia/eden@1.0.4
-  - @ap0nia/eden-react-query@1.0.4
+  - @aydee-app/eden@1.0.4
+  - @aydee-app/eden-react-query@1.0.4
 
 ## 1.0.3
 
@@ -231,8 +231,8 @@
 
 - 8e21adc: chore: version bump to test changeset github actions
 - Updated dependencies [8e21adc]
-  - @ap0nia/eden@1.0.3
-  - @ap0nia/eden-react-query@1.0.3
+  - @aydee-app/eden@1.0.3
+  - @aydee-app/eden-react-query@1.0.3
 
 ## 1.0.2
 
@@ -240,8 +240,8 @@
 
 - 6f20c0d: chore: version bump again
 - Updated dependencies [6f20c0d]
-  - @ap0nia/eden@1.0.2
-  - @ap0nia/eden-react-query@1.0.2
+  - @aydee-app/eden@1.0.2
+  - @aydee-app/eden-react-query@1.0.2
 
 ## 1.0.1
 
@@ -249,8 +249,8 @@
 
 - 5249305: chore: version bump
 - Updated dependencies [5249305]
-  - @ap0nia/eden@1.0.1
-  - @ap0nia/eden-react-query@1.0.1
+  - @aydee-app/eden@1.0.1
+  - @aydee-app/eden-react-query@1.0.1
 
 ## 1.0.0
 
@@ -261,8 +261,8 @@
 ### Patch Changes
 
 - Updated dependencies [3ff7160]
-  - @ap0nia/eden-react-query@1.0.0
-  - @ap0nia/eden@1.0.0
+  - @aydee-app/eden-react-query@1.0.0
+  - @aydee-app/eden@1.0.0
 
 ## 0.1.4
 
@@ -270,5 +270,5 @@
 
 - 125e0b3: feat: eden-next-query and fixed type exports
 - Updated dependencies [125e0b3]
-  - @ap0nia/eden@0.1.4
-  - @ap0nia/eden-react-query@0.1.4
+  - @aydee-app/eden@0.1.4
+  - @aydee-app/eden-react-query@0.1.4

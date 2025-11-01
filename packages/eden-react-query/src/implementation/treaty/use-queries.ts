@@ -9,7 +9,7 @@ import {
   type InferRouteOptions,
   type InferRouteOutput,
   parsePathsAndMethod,
-} from '@ap0nia/eden'
+} from '@aydee-app/eden'
 import type {
   QueriesOptions,
   QueriesResults,

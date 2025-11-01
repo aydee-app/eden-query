@@ -1,11 +1,11 @@
 {
-  "name": "@ap0nia/eden-svelte-query",
+  "name": "@aydee-app/eden-svelte-query",
   "version": "1.6.1",
   "description": "elysia.js eden and svelte-query integration",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ap0nia/eden-query",
+    "url": "https://github.com/aydee-app/eden-query",
     "directory": "packages/eden-svelte-query"
   },
   "scripts": {
@@ -39,7 +39,7 @@
     }
   },
   "dependencies": {
-    "@ap0nia/eden": "workspace:^",
+    "@aydee-app/eden": "workspace:^",
     "@tanstack/svelte-query": "^5.51.15",
     "elysia": "^1.2.15"
   },

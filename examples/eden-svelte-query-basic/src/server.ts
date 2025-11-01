@@ -1,4 +1,4 @@
-import { batchPlugin, transformPlugin } from '@ap0nia/eden-svelte-query/server'
+import { batchPlugin, transformPlugin } from '@aydee-app/eden-svelte-query/server'
 import { Elysia, t } from 'elysia'
 import SuperJSON from 'superjson'
 

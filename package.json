@@ -5,17 +5,17 @@
   "description": "monorepo for eden, a fully type-safe Elysia.js client",
   "contributors": [
     {
-      "name": "ap0nia",
-      "email": "ap0nia.dev@gmail.com",
-      "url": "https://github.com/ap0nia"
+      "name": "aydee-app",
+      "email": "aydee-app.dev@gmail.com",
+      "url": "https://github.com/aydee-app"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ap0nia/eden-query"
+    "url": "https://github.com/aydee-app/eden-query"
   },
   "bugs": {
-    "url": "https://github.com/ap0nia/eden-query/issues"
+    "url": "https://github.com/aydee-app/eden-query/issues"
   },
   "keywords": [
     "elysia",

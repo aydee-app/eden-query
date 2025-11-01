@@ -3,7 +3,7 @@ import type {
   InferRouteError,
   InferRouteOptions,
   InferRouteOutput,
-} from '@ap0nia/eden'
+} from '@aydee-app/eden'
 import type {
   InfiniteData,
   UseSuspenseInfiniteQueryOptions,

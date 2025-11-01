@@ -6,8 +6,8 @@ import ci from 'ci-info'
 import { defineConfig } from 'rspress/config'
 import { ModuleResolutionKind } from 'typescript'
 
-import { rspressPluginTwoslash } from '@ap0nia/rspress-plugin-twoslash'
-import { createFileSystemTypesCache } from '@ap0nia/rspress-plugin-twoslash/cache-fs'
+import { rspressPluginTwoslash } from '@aydee-app/rspress-plugin-twoslash'
+import { createFileSystemTypesCache } from '@aydee-app/rspress-plugin-twoslash/cache-fs'
 import { pluginShiki } from '@rspress/plugin-shiki'
 
 import { repository } from '../package.json'
@@ -325,7 +325,7 @@ const config = defineConfig({
       ],
     },
     socialLinks: [
-      { icon: 'github', mode: 'link', content: 'https://github.com/ap0nia/eden-query' },
+      { icon: 'github', mode: 'link', content: 'https://github.com/aydee-app/eden-query' },
       { icon: 'X', mode: 'link', content: 'https://twitter.com/elysiajs' },
       { icon: 'discord', mode: 'link', content: 'https://discord.gg/eaFJ2KDJck' },
     ],

@@ -20,13 +20,13 @@ import { PackageManagerTabs } from '@theme';
 
 ### 1. Install dependencies
 
-<PackageManagerTabs command="install @ap0nia/eden-svelte-query @tanstack/react-query" />
+<PackageManagerTabs command="install @aydee-app/eden-svelte-query @tanstack/react-query" />
 
 ### 2. Create Elysia server application
 
 ```typescript twoslash include eq-react-setup-application title=server.ts
 import { Elysia, t } from 'elysia'
-import { edenPlugin } from '@ap0nia/eden-react-query/server'
+import { edenPlugin } from '@aydee-app/eden-react-query/server'
 
 const users = [
   {
@@ -82,7 +82,7 @@ Create a set of strongly-typed React hooks from your `App` type signature with `
 
 // @filename: eden.ts
 // ---cut---
-import { createEdenTreatyReactQuery } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 export const eden = createEdenTreatyReactQuery<App>()
@@ -106,7 +106,7 @@ you **should** re-use the `QueryClient` and `QueryClientProvider` you already ha
 
 // @filename: eden.ts
 // ---cut---
-import { createEdenTreatyReactQuery } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 export const eden = createEdenTreatyReactQuery<App>()
@@ -114,7 +114,7 @@ export const eden = createEdenTreatyReactQuery<App>()
 // @filename: index.tsx
 // ---cut---
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { httpBatchLink } from '@ap0nia/eden-react-query'
+import { httpBatchLink } from '@aydee-app/eden-react-query'
 import React, { useState } from 'react'
 import { eden } from './eden'
 
@@ -167,7 +167,7 @@ You can now use the eden-treaty React Query integration to call queries and muta
 
 // @filename: eden.ts
 // ---cut---
-import { createEdenTreatyReactQuery } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 export const eden = createEdenTreatyReactQuery<App>()

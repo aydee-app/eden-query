@@ -1,7 +1,7 @@
 import * as path from 'node:path'
 
-import { rspressPluginTwoslash } from '@ap0nia/rspress-plugin-twoslash'
-import { createFileSystemTypesCache } from '@ap0nia/rspress-plugin-twoslash/cache-fs'
+import { rspressPluginTwoslash } from '@aydee-app/rspress-plugin-twoslash'
+import { createFileSystemTypesCache } from '@aydee-app/rspress-plugin-twoslash/cache-fs'
 import { defineConfig } from 'rspress/config'
 import { ModuleResolutionKind } from 'typescript'
 

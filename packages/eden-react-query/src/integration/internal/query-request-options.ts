@@ -1,4 +1,4 @@
-import type { EdenRequestOptions } from '@ap0nia/eden'
+import type { EdenRequestOptions } from '@aydee-app/eden'
 import type { QueryClient } from '@tanstack/react-query'
 import type { AnyElysia, MaybePromise } from 'elysia'
 

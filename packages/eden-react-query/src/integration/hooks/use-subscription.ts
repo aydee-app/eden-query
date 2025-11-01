@@ -1,4 +1,4 @@
-import type { EdenRequestParams } from '@ap0nia/eden'
+import type { EdenRequestParams } from '@aydee-app/eden'
 import { hashKey, skipToken } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 

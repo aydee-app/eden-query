@@ -46,7 +46,7 @@ Let's say you're using `httpBatchLink` as the terminating link in your tRPC clie
 
 ```typescript twoslash include eq-links-split-application title=server.ts
 import { Elysia, t } from 'elysia'
-import { batchPlugin } from '@ap0nia/eden-react-query/server'
+import { batchPlugin } from '@aydee-app/eden-react-query/server'
 
 const posts = ['post 1', 'post 2', 'post 3']
 
@@ -74,7 +74,7 @@ import {
   httpBatchLink,
   httpLink,
   splitLink,
-} from '@ap0nia/eden-react-query'
+} from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 const domain = 'http://localhost:3000'
@@ -126,7 +126,7 @@ import {
   httpBatchLink,
   httpLink,
   splitLink,
-} from '@ap0nia/eden-react-query'
+} from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 const domain = 'http://localhost:3000'
@@ -154,7 +154,7 @@ export const client = eden.createClient({
 // ---cut---
 import React from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { httpBatchLink, httpLink, splitLink } from '@ap0nia/eden-react-query'
+import { httpBatchLink, httpLink, splitLink } from '@aydee-app/eden-react-query'
 import { client, eden } from './eden'
 
 const queryClient = new QueryClient()
@@ -197,7 +197,7 @@ The `splitLink` function takes an options object that has three properties:
 
 ```typescript
 import type { AnyElysia } from 'elysia'
-import type { EdenLink, Operation } from '@ap0nia/eden-react-query'
+import type { EdenLink, Operation } from '@aydee-app/eden-react-query'
 
 function splitLink<TElysia extends AnyElysia = AnyElysia>(options: {
   condition: (operation: Operation) => boolean;
@@ -217,4 +217,4 @@ function splitLink<TElysia extends AnyElysia = AnyElysia>(options: {
 ## Reference
 
 You can check out the source code for this link on
-[GitHub](https://github.com/ap0nia/eden-query/blob/main/packages/eden/src/links/split-link.ts).
+[GitHub](https://github.com/aydee-app/eden-query/blob/main/packages/eden/src/links/split-link.ts).

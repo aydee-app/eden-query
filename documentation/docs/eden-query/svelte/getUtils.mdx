@@ -19,7 +19,7 @@ import Client from '@/snippets/apps/svelte-client-1.mdx'
 
 # useUtils
 
-`useUtils` is a hook that gives you access to helpers that let you manage the cached data of the queries you execute via `@ap0nia/eden-svelte-query`.
+`useUtils` is a hook that gives you access to helpers that let you manage the cached data of the queries you execute via `@aydee-app/eden-svelte-query`.
 These helpers are actually thin wrappers around `@tanstack/svelte-query`'s
 [`queryClient`](https://tanstack.com/query/v5/docs/reference/QueryClient) methods.
 
@@ -236,7 +236,7 @@ import {
   createEdenTreatySvelteQuery,
   type InferTreatyQueryInput,
   type InferTreatyQueryOutput,
-} from '@ap0nia/eden-svelte-query'
+} from '@aydee-app/eden-svelte-query'
 import type { App } from '$server/index'
 
 export const eden = createEdenTreatySvelteQuery<App>({

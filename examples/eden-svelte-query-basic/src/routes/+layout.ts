@@ -1,4 +1,4 @@
-import { httpBatchLink } from '@ap0nia/eden-svelte-query'
+import { httpBatchLink } from '@aydee-app/eden-svelte-query'
 import { QueryClient } from '@tanstack/svelte-query'
 import SuperJSON from 'superjson'
 

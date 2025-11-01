@@ -3,7 +3,7 @@ import type {
   InferRouteBody,
   InferRouteOptions,
   InferRouteOutput,
-} from '@ap0nia/eden'
+} from '@aydee-app/eden'
 import type { AnyElysia, RouteSchema } from 'elysia'
 
 export type InferTreatyQueryIO<T extends AnyElysia> = T extends {

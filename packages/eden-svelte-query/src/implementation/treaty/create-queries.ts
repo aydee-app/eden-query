@@ -12,7 +12,7 @@ import {
   type InferRouteOutput,
   parsePathsAndMethod,
   type TypeError,
-} from '@ap0nia/eden'
+} from '@aydee-app/eden'
 import type {
   CreateQueryOptions,
   QueriesOptions,

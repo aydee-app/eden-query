@@ -14,12 +14,12 @@ asynchronous state management with [Tanstack Query](https://tanstack.com/query/l
 
 <Integration />
 
-The Eden-Query project is a collection of libraries that includes the RPC client, [`@ap0nia/eden`](/eden),
-and framework-specific integrations, such as [`@ap0nia/eden-react-query`](/eden-query/react) and
-[`@ap0nia/eden-svelte-query`](/eden-query/svelte) for React and Svelte respectively.
+The Eden-Query project is a collection of libraries that includes the RPC client, [`@aydee-app/eden`](/eden),
+and framework-specific integrations, such as [`@aydee-app/eden-react-query`](/eden-query/react) and
+[`@aydee-app/eden-svelte-query`](/eden-query/svelte) for React and Svelte respectively.
 
 > [!NOTE]
-> The [`@ap0nia/eden`](/eden) library is a distinct, but functionally identical implementation of the
+> The [`@aydee-app/eden`](/eden) library is a distinct, but functionally identical implementation of the
 > official [`@elysiajs/eden`](https://elysiajs.com/eden/overview.html) library.
 
 ## Why
@@ -28,7 +28,7 @@ Eden-Query is most valuable to ***frontend projects that connect to an Elysia.js
 The Elysia.js types may be exposed from a separate project within a monorepo, or within a
 single project that leverages a full-stack solution such as Next.js or SvelteKit.
 
-See the [`examples` directory](https://github.com/ap0nia/eden-query/tree/main/examples) for examples.
+See the [`examples` directory](https://github.com/aydee-app/eden-query/tree/main/examples) for examples.
 
 ## Features
 
@@ -146,7 +146,7 @@ A React client application cna use the hooks from Eden-Query to manage asynchron
 
 // @filename: index.ts
 // ---cut---
-import { createEdenTreatyReactQuery } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 /**
@@ -198,7 +198,7 @@ Read more about Eden-Query links [here](./links).
 This creates a basic eden client that resolves requests in the same way as the official eden implementation.
 
 ```typescript twoslash
-import { createEdenTreatyReactQuery, httpLink } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery, httpLink } from '@aydee-app/eden-react-query'
 
 const eden = createEdenTreatyReactQuery()
 
@@ -231,7 +231,7 @@ or `edenPlugin` with the `batch` property defined.
 
 ```typescript twoslash include eq-index-batch-application title=server.ts
 import { Elysia, t } from 'elysia'
-import { edenPlugin } from '@ap0nia/eden-react-query/server'
+import { edenPlugin } from '@aydee-app/eden-react-query/server'
 
 const app = new Elysia().use(edenPlugin({ batch: true }))
 
@@ -246,7 +246,7 @@ export type App = typeof app
 
 // @filename: index.ts
 // ---cut---
-import { createEdenTreatyReactQuery, httpBatchLink } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery, httpBatchLink } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 const eden = createEdenTreatyReactQuery<App>()

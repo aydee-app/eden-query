@@ -32,7 +32,7 @@ If you are using Next.js we recommend using [our integration with that](../nextj
 
 ```typescript twoslash include eq-react-index-application title=server.ts
 import { Elysia, t } from 'elysia'
-import { batchPlugin } from '@ap0nia/eden-react-query/server'
+import { batchPlugin } from '@aydee-app/eden-react-query/server'
 
 export const app = new Elysia()
   .use(batchPlugin())
@@ -58,7 +58,7 @@ export type App = typeof app
 
 ```typescript twoslash include eq-react-index-client title=eden.ts
 // @noErrors
-import { createEdenTreatyReactQuery, httpBatchLink } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery, httpBatchLink } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 export const eden = createEdenTreatyReactQuery<App>()

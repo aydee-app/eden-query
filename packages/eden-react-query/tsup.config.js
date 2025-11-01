@@ -9,7 +9,7 @@ const config = defineConfig({
   dts: true,
   sourcemap: 'inline',
   format: ['esm', 'cjs'],
-  noExternal: ['@ap0nia'],
+  noExternal: ['@aydee-app'],
 })
 
 export default config

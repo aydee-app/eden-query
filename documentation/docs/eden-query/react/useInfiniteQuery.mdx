@@ -30,7 +30,7 @@ head:
 
 ```typescript twoslash include eq-react-useInfiniteQuery-application title=server.ts
 import { Elysia, t } from 'elysia'
-import { batchPlugin } from '@ap0nia/eden-react-query/server'
+import { batchPlugin } from '@aydee-app/eden-react-query/server'
 
 let prisma: any
 
@@ -99,7 +99,7 @@ export type App = typeof app
 
 // @filename: eden.ts
 // ---cut---
-import { createEdenTreatyReactQuery } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 export const eden = createEdenTreatyReactQuery<App>()
@@ -114,7 +114,7 @@ export const eden = createEdenTreatyReactQuery<App>()
 
 // @filename: eden.ts
 // ---cut---
-import { createEdenTreatyReactQuery } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 export const eden = createEdenTreatyReactQuery<App>()
@@ -149,7 +149,7 @@ This helper gets the currently cached data from an existing infinite query
 
 // @filename: eden.ts
 // ---cut---
-import { createEdenTreatyReactQuery } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 export const eden = createEdenTreatyReactQuery<App>()
@@ -183,7 +183,7 @@ This helper allows you to update a query's cached data
 
 // @filename: eden.ts
 // ---cut---
-import { createEdenTreatyReactQuery } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 export const eden = createEdenTreatyReactQuery<App>()

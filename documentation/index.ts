@@ -98,7 +98,7 @@ const app = new Elysia()
     delete data[id]
   })
 
-import { createEdenTreatySvelteQuery, getQueryKey } from '@ap0nia/eden-svelte-query'
+import { createEdenTreatySvelteQuery, getQueryKey } from '@aydee-app/eden-svelte-query'
 
 export const eden = createEdenTreatySvelteQuery<typeof app>()
 

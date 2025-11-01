@@ -4,23 +4,23 @@
 
 <div align="center">
 
-![GitHub Release Workflow](https://img.shields.io/github/actions/workflow/status/ap0nia/eden-query/release.yml?style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/ap0nia/eden-query?style=flat-square)
-![GitHub last commit](https://img.shields.io/github/last-commit/ap0nia/eden-query?style=flat-square)
+![GitHub Release Workflow](https://img.shields.io/github/actions/workflow/status/aydee-app/eden-query/release.yml?style=flat-square)
+![GitHub Repo stars](https://img.shields.io/github/stars/aydee-app/eden-query?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/aydee-app/eden-query?style=flat-square)
 
 </div>
 
 <div align="center">
 
-![NPM Version](https://img.shields.io/npm/v/%40ap0nia%2Feden?style=flat-square)
-![NPM License](https://img.shields.io/npm/l/%40ap0nia%2Feden-svelte-query?style=flat-square)
-![NPM Downloads](https://img.shields.io/npm/dm/%40ap0nia%2Feden?style=flat-square)
+![NPM Version](https://img.shields.io/npm/v/%40aydee-app%2Feden?style=flat-square)
+![NPM License](https://img.shields.io/npm/l/%40aydee-app%2Feden-svelte-query?style=flat-square)
+![NPM Downloads](https://img.shields.io/npm/dm/%40aydee-app%2Feden?style=flat-square)
 
 </div>
 
 <div align="center">
 
-[![codecov](https://codecov.io/github/ap0nia/eden-query/branch/eden-tests/graph/badge.svg?token=PZD53QOA9D)](https://codecov.io/github/ap0nia/eden-query)
+[![codecov](https://codecov.io/github/aydee-app/eden-query/branch/eden-tests/graph/badge.svg?token=PZD53QOA9D)](https://codecov.io/github/aydee-app/eden-query)
 
 </div>
 
@@ -46,13 +46,13 @@ asynchronous state management from your frontend.
 
 ```sh
 # npm
-npm install elysia @ap0nia/eden-react-query
+npm install elysia @aydee-app/eden-react-query
 
 # yarn
-yarn add elysia @ap0nia/eden-react-query
+yarn add elysia @aydee-app/eden-react-query
 
 # pnpm
-pnpm add elysia @ap0nia/eden-react-query
+pnpm add elysia @aydee-app/eden-react-query
 ```
 
 ### Usage (React)
@@ -78,7 +78,7 @@ export function Products() {
 
 ```tsx
 import type { App } from './server'
-import { createEdenTreatyReactQuery } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery } from '@aydee-app/eden-react-query'
 
 export const eden = createEdenTreatyReactQuery<App>()
 ```
@@ -130,7 +130,7 @@ as the [officially documented one](https://elysiajs.com/eden/overview.html).
 
 ## 📖 Learn More
 
-To see more advanced examples and usage of the integration, read [the full documentation](ap0nia.github.io/eden-query).
+To see more advanced examples and usage of the integration, read [the full documentation](aydee-app.github.io/eden-query).
 
 ### Core Technologies
 
@@ -160,10 +160,10 @@ development environment, as well as architecture of the project.
 
 ## ⭐Star History
 
-<a href="https://star-history.com/#ap0nia/eden-query&Date">
+<a href="https://star-history.com/#aydee-app/eden-query&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=ap0nia/eden-query&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=ap0nia/eden-query&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=ap0nia/eden-query&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=aydee-app/eden-query&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=aydee-app/eden-query&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=aydee-app/eden-query&type=Date" />
  </picture>
 </a>

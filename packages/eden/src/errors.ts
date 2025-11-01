@@ -18,7 +18,7 @@ export class EdenFatalError extends Error {
 
   constructor() {
     super(
-      'Something went wrong. Please submit an issue at https://github.com/ap0nia/eden-query/issues/new',
+      'Something went wrong. Please submit an issue at https://github.com/aydee-app/eden-query/issues/new',
     )
   }
 }

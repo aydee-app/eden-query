@@ -8,7 +8,7 @@ import {
   type HTTPLinkOptions,
   type InferRouteOptions,
   parsePathsAndMethod,
-} from '@ap0nia/eden'
+} from '@aydee-app/eden'
 import {
   type SkipToken,
   useInfiniteQuery as __useInfiniteQuery,

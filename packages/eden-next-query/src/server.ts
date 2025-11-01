@@ -1,1 +1,1 @@
-export * from '@ap0nia/eden-react-query/server'
+export * from '@aydee-app/eden-react-query/server'

@@ -1,11 +1,11 @@
 {
-  "name": "@ap0nia/eden-react-query",
+  "name": "@aydee-app/eden-react-query",
   "version": "1.6.1",
   "description": "elysia.js eden and react-query integration",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ap0nia/eden-query",
+    "url": "https://github.com/aydee-app/eden-query",
     "directory": "packages/eden-react-query"
   },
   "scripts": {
@@ -39,19 +39,19 @@
     }
   },
   "dependencies": {
-    "@ap0nia/eden": "workspace:^",
+    "@aydee-app/eden": "workspace:^",
     "@tanstack/react-query": "^5.51.16",
     "elysia": "^1.2.15"
   },
   "devDependencies": {
-    "@types/react": "^18.3.3",
+    "@types/react": "^19.0.0",
     "tsup": "^8.2.3",
     "typescript": "^5.6.3"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.51.16",
     "elysia": "^1.2.15",
-    "react": "^18.0.0"
+    "react": "^18.0.0 || ^19.0.0"
   },
   "publishConfig": {
     "access": "public"

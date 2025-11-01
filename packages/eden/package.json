@@ -1,11 +1,11 @@
 {
-  "name": "@ap0nia/eden",
+  "name": "@aydee-app/eden",
   "version": "1.6.1",
   "description": "Fully type-safe Elysia.js client",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ap0nia/eden-query",
+    "url": "https://github.com/aydee-app/eden-query",
     "directory": "packages/eden"
   },
   "scripts": {

@@ -98,16 +98,16 @@ importers:
 
   documentation:
     dependencies:
-      '@ap0nia/eden':
+      '@aydee-app/eden':
         specifier: workspace:^
         version: link:../packages/eden
-      '@ap0nia/eden-react-query':
+      '@aydee-app/eden-react-query':
         specifier: workspace:^
         version: link:../packages/eden-react-query
-      '@ap0nia/eden-svelte-query':
+      '@aydee-app/eden-svelte-query':
         specifier: workspace:^
         version: link:../packages/eden-svelte-query
-      '@ap0nia/rspress-plugin-twoslash':
+      '@aydee-app/rspress-plugin-twoslash':
         specifier: workspace:^
         version: link:../packages/rspress-plugin-twoslash
       '@elysiajs/eden':
@@ -240,7 +240,7 @@ importers:
 
   examples/eden-react-query-basic:
     dependencies:
-      '@ap0nia/eden-react-query':
+      '@aydee-app/eden-react-query':
         specifier: workspace:^
         version: link:../../packages/eden-react-query
       '@elysiajs/cors':
@@ -286,7 +286,7 @@ importers:
 
   examples/eden-svelte-query-basic:
     dependencies:
-      '@ap0nia/eden-svelte-query':
+      '@aydee-app/eden-svelte-query':
         specifier: workspace:^
         version: link:../../packages/eden-svelte-query
       '@tanstack/svelte-query':
@@ -326,7 +326,7 @@ importers:
 
   examples/react-native:
     dependencies:
-      '@ap0nia/eden-react-query':
+      '@aydee-app/eden-react-query':
         specifier: workspace:^
         version: link:../../packages/eden-react-query
       '@expo/vector-icons':
@@ -433,7 +433,7 @@ importers:
         specifier: ^1.40.2
         version: 1.42.0(webpack@5.96.1)
     devDependencies:
-      '@ap0nia/rspress-plugin-twoslash':
+      '@aydee-app/rspress-plugin-twoslash':
         specifier: workspace:^
         version: link:../../packages/rspress-plugin-twoslash
       '@types/node':
@@ -473,10 +473,10 @@ importers:
 
   packages/eden-next-query:
     dependencies:
-      '@ap0nia/eden':
+      '@aydee-app/eden':
         specifier: workspace:^
         version: link:../eden
-      '@ap0nia/eden-react-query':
+      '@aydee-app/eden-react-query':
         specifier: workspace:^
         version: link:../eden-react-query
       '@tanstack/react-query':
@@ -501,7 +501,7 @@ importers:
 
   packages/eden-react-query:
     dependencies:
-      '@ap0nia/eden':
+      '@aydee-app/eden':
         specifier: workspace:^
         version: link:../eden
       '@tanstack/react-query':
@@ -526,7 +526,7 @@ importers:
 
   packages/eden-svelte-query:
     dependencies:
-      '@ap0nia/eden':
+      '@aydee-app/eden':
         specifier: workspace:^
         version: link:../eden
       '@tanstack/svelte-query':

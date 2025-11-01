@@ -58,7 +58,7 @@ within the request `query` or `params`, since these are sent as part of the URL.
 
 ```typescript twoslash include eq-transformers-application title=server.ts
 import { Elysia, t } from 'elysia'
-import { edenPlugin } from '@ap0nia/eden-react-query/server'
+import { edenPlugin } from '@aydee-app/eden-react-query/server'
 import SuperJSON from 'superjson'
 
 const app = new Elysia()
@@ -79,7 +79,7 @@ export type App = typeof app
 
 // @filename: index.ts
 // ---cut---
-import { createEdenTreatyReactQuery, httpLink } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery, httpLink } from '@aydee-app/eden-react-query'
 import SuperJSON from 'superjson'
 import type { App } from './server'
 
@@ -117,7 +117,7 @@ is a lot faster but insecure to use on the server.
 ```typescript twoslash include eq-transformers-custom-transformer title=transformer.ts
 import { uneval } from 'devalue'
 import SuperJSON from 'superjson'
-import type { DataTransformerOptions } from '@ap0nia/eden-react-query'
+import type { DataTransformerOptions } from '@aydee-app/eden-react-query'
 
 export const transformer: DataTransformerOptions = {
   input: SuperJSON,
@@ -137,7 +137,7 @@ export const transformer: DataTransformerOptions = {
 
 // @filename: index.ts
 // ---cut---
-import { createEdenTreatyReactQuery, httpLink } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery, httpLink } from '@aydee-app/eden-react-query'
 import { transformer } from './transformer'
 
 export const eden = createEdenTreatyReactQuery()
@@ -224,7 +224,7 @@ const transformedUrl = `${base}?transformed_query=${encodeURIComponent(JSON.stri
 ```
 
 ```typescript title=server.ts
-import { getDataTransformer, type DataTransformerOptions } from '@ap0nia/eden-react-query'
+import { getDataTransformer, type DataTransformerOptions } from '@aydee-app/eden-react-query'
 import { Elysia } from 'elysia'
 import SuperJSON from 'superjson'
 

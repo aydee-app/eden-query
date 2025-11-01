@@ -9,10 +9,10 @@
     "preview": "rspress preview"
   },
   "dependencies": {
-    "@ap0nia/eden": "workspace:^",
-    "@ap0nia/eden-react-query": "workspace:^",
-    "@ap0nia/eden-svelte-query": "workspace:^",
-    "@ap0nia/rspress-plugin-twoslash": "workspace:^",
+    "@aydee-app/eden": "workspace:^",
+    "@aydee-app/eden-react-query": "workspace:^",
+    "@aydee-app/eden-svelte-query": "workspace:^",
+    "@aydee-app/rspress-plugin-twoslash": "workspace:^",
     "@elysiajs/eden": "1.1.0",
     "@radix-ui/react-slot": "^1.1.2",
     "@rspress/theme-default": "1.41.3",
@@ -31,7 +31,7 @@
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
-    "@ap0nia/rspress-plugin-twoslash": "workspace:^",
+    "@aydee-app/rspress-plugin-twoslash": "workspace:^",
     "@iconify/json": "^2.2.306",
     "@iconify/tailwind": "^1.2.0",
     "@mdx-js/typescript-plugin": "^0.0.6",

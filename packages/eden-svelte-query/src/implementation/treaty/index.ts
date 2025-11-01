@@ -11,7 +11,7 @@ import type {
   HttpSubscriptionMethod,
   InferRouteOptions,
   TypeError,
-} from '@ap0nia/eden'
+} from '@aydee-app/eden'
 import type { StoreOrVal } from '@tanstack/svelte-query'
 import type { AnyElysia, RouteSchema } from 'elysia'
 import type { Prettify } from 'elysia/types'

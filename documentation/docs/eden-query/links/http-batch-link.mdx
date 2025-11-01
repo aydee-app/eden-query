@@ -28,7 +28,7 @@ to a batch endpoint.
 
 ```typescript twoslash include eq-links-batch-application title=server.ts
 import { Elysia, t } from 'elysia'
-import { batchPlugin } from '@ap0nia/eden-react-query/server'
+import { batchPlugin } from '@aydee-app/eden-react-query/server'
 
 export const app = new Elysia().use(batchPlugin()).get('/', () => 'Hello, World!')
 
@@ -43,7 +43,7 @@ You can import and add the `httpBatchLink` to the `links` array as such:
 
 // @filename: index.ts
 // ---cut---
-import { EdenClient, httpBatchLink } from '@ap0nia/eden-react-query'
+import { EdenClient, httpBatchLink } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 const client = new EdenClient<App>({
@@ -94,13 +94,13 @@ export interface HTTPLinkOptions {
 
   /**
    * Data transformer.
-   * @see https://ap0nia.github.io/eden-query/eden-query/transformers
+   * @see https://aydee-app.github.io/eden-query/eden-query/transformers
    **/
   transformer?: DataTransformerOptions
 
   /**
    * Headers to set on outgoing requests or a callback returns headers to set.
-   * @see https://ap0nia.github.io/eden-query/eden-query/headers
+   * @see https://aydee-app.github.io/eden-query/eden-query/headers
    */
   headers?: HTTPHeaders | ((opts: { opList: Operation[] }) => HTTPHeaders | Promise<HTTPHeaders>)
 }
@@ -123,7 +123,7 @@ The `maxURLLength` option will limit the number of requests that can be sent tog
 
 // @filename: index.ts
 // ---cut---
-import { EdenClient, httpBatchLink } from '@ap0nia/eden-react-query'
+import { EdenClient, httpBatchLink } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 const client = new EdenClient<App>({
@@ -146,7 +146,7 @@ const client = new EdenClient<App>({
 ### 2. Replace `httpBatchLink` with [`httpLink`](./http-link.md) in your Eden Client
 
 ```typescript title=index.ts
-import { EdenClient, httpLink } from '@ap0nia/eden-react-query'
+import { EdenClient, httpLink } from '@aydee-app/eden-react-query'
 
 const client = new EdenClient({
   links: [
@@ -163,7 +163,7 @@ There is no explicit Next.js support yet. This is an example of what it may look
 
 ```tsx
 import type { App } from '@/server/routers/app'
-import { createEdenNext, httpLink } from '@ap0nia/eden-next'
+import { createEdenNext, httpLink } from '@aydee-app/eden-next'
 
 export const eden = createEdenNext<App>({
   config() {

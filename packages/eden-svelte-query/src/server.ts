@@ -1,1 +1,1 @@
-export * from '@ap0nia/eden/server'
+export * from '@aydee-app/eden/server'

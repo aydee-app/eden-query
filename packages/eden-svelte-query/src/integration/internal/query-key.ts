@@ -1,4 +1,4 @@
-import { type InferRouteOptions, isHttpMethod } from '@ap0nia/eden'
+import { type InferRouteOptions, isHttpMethod } from '@aydee-app/eden'
 
 /**
  * A well-defined query type used when creating query keys for a specific type of operation.

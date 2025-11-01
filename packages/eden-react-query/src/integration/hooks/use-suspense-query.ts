@@ -3,7 +3,7 @@ import type {
   InferRouteError,
   InferRouteOptions,
   InferRouteOutput,
-} from '@ap0nia/eden'
+} from '@aydee-app/eden'
 import type { UseSuspenseQueryOptions, UseSuspenseQueryResult } from '@tanstack/react-query'
 import type { RouteSchema } from 'elysia'
 

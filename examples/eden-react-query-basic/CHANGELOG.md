@@ -5,28 +5,28 @@
 ### Patch Changes
 
 - Updated dependencies [9672d8c]
-  - @ap0nia/eden-react-query@1.6.1
+  - @aydee-app/eden-react-query@1.6.1
 
 ## 0.0.35-canary.0
 
 ### Patch Changes
 
 - Updated dependencies [9672d8c]
-  - @ap0nia/eden-react-query@1.6.1-canary.0
+  - @aydee-app/eden-react-query@1.6.1-canary.0
 
 ## 0.0.35-canary
 
 ### Patch Changes
 
 - Updated dependencies [7e797df]
-  - @ap0nia/eden-react-query@1.6.1-canary
+  - @aydee-app/eden-react-query@1.6.1-canary
 
 ## 0.0.34
 
 ### Patch Changes
 
 - Updated dependencies [37ee3c0]
-  - @ap0nia/eden-react-query@1.6.0
+  - @aydee-app/eden-react-query@1.6.0
 
 ## 0.0.33
 
@@ -34,7 +34,7 @@
 
 - Updated dependencies [ef7456e]
 - Updated dependencies [c9dbba8]
-  - @ap0nia/eden-react-query@1.5.0
+  - @aydee-app/eden-react-query@1.5.0
 
 ## 0.0.32
 
@@ -42,97 +42,97 @@
 
 - Updated dependencies [8de6067]
 - Updated dependencies [17ddc6e]
-  - @ap0nia/eden-react-query@1.4.1
+  - @aydee-app/eden-react-query@1.4.1
 
 ## 0.0.31
 
 ### Patch Changes
 
 - Updated dependencies [c76900c]
-  - @ap0nia/eden-react-query@1.4.0
+  - @aydee-app/eden-react-query@1.4.0
 
 ## 0.0.30
 
 ### Patch Changes
 
 - Updated dependencies [17b99f2]
-  - @ap0nia/eden-react-query@1.3.1
+  - @aydee-app/eden-react-query@1.3.1
 
 ## 0.0.29
 
 ### Patch Changes
 
 - Updated dependencies [3e231fd]
-  - @ap0nia/eden-react-query@1.3.0
+  - @aydee-app/eden-react-query@1.3.0
 
 ## 0.0.28
 
 ### Patch Changes
 
 - Updated dependencies [25151e7]
-  - @ap0nia/eden-react-query@1.2.1
+  - @aydee-app/eden-react-query@1.2.1
 
 ## 0.0.27
 
 ### Patch Changes
 
 - Updated dependencies [456df95]
-  - @ap0nia/eden-react-query@1.2.0
+  - @aydee-app/eden-react-query@1.2.0
 
 ## 0.0.26
 
 ### Patch Changes
 
 - Updated dependencies [5ff7808]
-  - @ap0nia/eden-react-query@1.1.0
+  - @aydee-app/eden-react-query@1.1.0
 
 ## 0.0.25
 
 ### Patch Changes
 
 - Updated dependencies [47d786f]
-  - @ap0nia/eden-react-query@1.0.15
+  - @aydee-app/eden-react-query@1.0.15
 
 ## 0.0.24
 
 ### Patch Changes
 
-- @ap0nia/eden-react-query@1.0.14
+- @aydee-app/eden-react-query@1.0.14
 
 ## 0.0.23
 
 ### Patch Changes
 
 - Updated dependencies [ec1fa09]
-  - @ap0nia/eden-react-query@1.0.13
+  - @aydee-app/eden-react-query@1.0.13
 
 ## 0.0.22
 
 ### Patch Changes
 
 - Updated dependencies [31e305c]
-  - @ap0nia/eden-react-query@1.0.12
+  - @aydee-app/eden-react-query@1.0.12
 
 ## 0.0.21
 
 ### Patch Changes
 
 - Updated dependencies [cd4cd2f]
-  - @ap0nia/eden-react-query@1.0.11
+  - @aydee-app/eden-react-query@1.0.11
 
 ## 0.0.20
 
 ### Patch Changes
 
 - Updated dependencies [49f9dc0]
-  - @ap0nia/eden-react-query@1.0.10
+  - @aydee-app/eden-react-query@1.0.10
 
 ## 0.0.19
 
 ### Patch Changes
 
 - Updated dependencies [8f46078]
-  - @ap0nia/eden-react-query@1.0.9
+  - @aydee-app/eden-react-query@1.0.9
 
 ## 0.0.18
 
@@ -140,116 +140,116 @@
 
 - Updated dependencies [12e11ee]
 - Updated dependencies [eebaa36]
-  - @ap0nia/eden-react-query@1.0.8
+  - @aydee-app/eden-react-query@1.0.8
 
 ## 0.0.17
 
 ### Patch Changes
 
 - Updated dependencies [b3de133]
-  - @ap0nia/eden-react-query@1.0.7
+  - @aydee-app/eden-react-query@1.0.7
 
 ## 0.0.16
 
 ### Patch Changes
 
 - Updated dependencies [9740961]
-  - @ap0nia/eden-react-query@1.0.6
+  - @aydee-app/eden-react-query@1.0.6
 
 ## 0.0.15
 
 ### Patch Changes
 
 - Updated dependencies [fe4b6e1]
-  - @ap0nia/eden-react-query@1.0.5
+  - @aydee-app/eden-react-query@1.0.5
 
 ## 0.0.14
 
 ### Patch Changes
 
 - Updated dependencies [af03b83]
-  - @ap0nia/eden-react-query@1.0.4
+  - @aydee-app/eden-react-query@1.0.4
 
 ## 0.0.13
 
 ### Patch Changes
 
 - Updated dependencies [8e21adc]
-  - @ap0nia/eden-react-query@1.0.3
+  - @aydee-app/eden-react-query@1.0.3
 
 ## 0.0.12
 
 ### Patch Changes
 
 - Updated dependencies [6f20c0d]
-  - @ap0nia/eden-react-query@1.0.2
+  - @aydee-app/eden-react-query@1.0.2
 
 ## 0.0.11
 
 ### Patch Changes
 
 - Updated dependencies [5249305]
-  - @ap0nia/eden-react-query@1.0.1
+  - @aydee-app/eden-react-query@1.0.1
 
 ## 0.0.10
 
 ### Patch Changes
 
 - Updated dependencies [3ff7160]
-  - @ap0nia/eden-react-query@1.0.0
+  - @aydee-app/eden-react-query@1.0.0
 
 ## 0.0.9
 
 ### Patch Changes
 
 - Updated dependencies [125e0b3]
-  - @ap0nia/eden-react-query@0.1.4
+  - @aydee-app/eden-react-query@0.1.4
 
 ## 0.0.8
 
 ### Patch Changes
 
 - Updated dependencies [c1a2ccf]
-  - @ap0nia/eden-react-query@0.1.3
+  - @aydee-app/eden-react-query@0.1.3
 
 ## 0.0.7
 
 ### Patch Changes
 
 - Updated dependencies [042b276]
-  - @ap0nia/eden-react-query@0.1.2
+  - @aydee-app/eden-react-query@0.1.2
 
 ## 0.0.6
 
 ### Patch Changes
 
 - Updated dependencies [ac6a1cb]
-  - @ap0nia/eden-react-query@0.1.1
+  - @aydee-app/eden-react-query@0.1.1
 
 ## 0.0.5
 
 ### Patch Changes
 
 - Updated dependencies [21448fd]
-  - @ap0nia/eden-react-query@0.1.0
+  - @aydee-app/eden-react-query@0.1.0
 
 ## 0.0.4
 
 ### Patch Changes
 
 - Updated dependencies [9bcc582]
-  - @ap0nia/eden-react-query@0.0.3
+  - @aydee-app/eden-react-query@0.0.3
 
 ## 0.0.3
 
 ### Patch Changes
 
 - Updated dependencies [c4bb304]
-  - @ap0nia/eden-react-query@0.0.2
+  - @aydee-app/eden-react-query@0.0.2
 
 ## 0.0.2
 
 ### Patch Changes
 
 - Updated dependencies [abdfe57]
-  - @ap0nia/eden-react-query@0.0.1
+  - @aydee-app/eden-react-query@0.0.1

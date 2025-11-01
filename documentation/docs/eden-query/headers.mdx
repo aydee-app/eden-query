@@ -28,7 +28,7 @@ If it's a function it will get called dynamically for every HTTP request.
 
 ```typescript twoslash include eq-headers-application title=server.ts
 import { Elysia } from 'elysia'
-import { edenPlugin } from '@ap0nia/eden-react-query/server'
+import { edenPlugin } from '@aydee-app/eden-react-query/server'
 
 export const app = new Elysia()
   .use(edenPlugin({ batch: true }))
@@ -49,7 +49,7 @@ export type App = typeof app
 // @filename: index.ts
 // ---cut---
 // Import the router type from your server file
-import { createEdenTreatyReactQuery, httpBatchLink } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery, httpBatchLink } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 let token: string

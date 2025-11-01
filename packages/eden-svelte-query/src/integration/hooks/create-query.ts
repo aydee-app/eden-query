@@ -5,7 +5,7 @@ import {
   type InferRouteOptions,
   type InferRouteOutput,
   type ParsedPathAndMethod,
-} from '@ap0nia/eden'
+} from '@aydee-app/eden'
 import {
   type CreateBaseQueryOptions,
   type CreateQueryOptions,

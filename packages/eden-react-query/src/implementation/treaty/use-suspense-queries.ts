@@ -6,7 +6,7 @@ import type {
   InferRouteError,
   InferRouteOptions,
   InferRouteOutput,
-} from '@ap0nia/eden'
+} from '@aydee-app/eden'
 import type { SuspenseQueriesOptions, UseSuspenseQueryResult } from '@tanstack/react-query'
 import type { AnyElysia, RouteSchema } from 'elysia'
 

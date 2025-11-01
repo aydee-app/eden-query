@@ -33,7 +33,7 @@ import Client from '@/snippets/apps/svelte-client-1.mdx'
 
 ```typescript twoslash include eq-svelte-createInfiniteQuery-application title=src/server/index.ts
 import { Elysia, t } from 'elysia'
-import { batchPlugin } from '@ap0nia/eden-svelte-query/server'
+import { batchPlugin } from '@aydee-app/eden-svelte-query/server'
 
 let prisma: any
 
@@ -98,7 +98,7 @@ export type App = typeof app
 
 // @filename: src/lib/eden.ts
 // ---cut---
-import { createEdenTreatySvelteQuery } from '@ap0nia/eden-svelte-query'
+import { createEdenTreatySvelteQuery } from '@aydee-app/eden-svelte-query'
 import type { App } from '$server/index'
 
 export const eden = createEdenTreatySvelteQuery<App>()

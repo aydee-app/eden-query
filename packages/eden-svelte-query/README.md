@@ -7,7 +7,7 @@
 1. Install this library.
 
 ```sh
-pnpm install @ap0nia/eden-svelte-query
+pnpm install @aydee-app/eden-svelte-query
 ```
 
 2. Initialize a new eden-svelte-query instance.
@@ -15,7 +15,7 @@ pnpm install @ap0nia/eden-svelte-query
 ```ts
 // src/lib/eden.ts
 
-import { createEdenTreatyQuery } from '@ap0nia/eden-query'
+import { createEdenTreatyQuery } from '@aydee-app/eden-query'
 import type { App } from '$lib/server'
 
 export const eden = createEdenTreatyQuery<App>()
@@ -372,7 +372,7 @@ from the IIFE function used by the official `@elysiajs/eden` [treaty implementat
 Using an HTTP Link.
 
 ```ts
-import { EdenClient, httpLink } from '@ap0nia/eden-svelte-query'
+import { EdenClient, httpLink } from '@aydee-app/eden-svelte-query'
 
 const client = new EdenClient({
   links: [httpLink()],

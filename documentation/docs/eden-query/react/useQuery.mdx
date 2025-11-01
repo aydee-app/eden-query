@@ -17,7 +17,7 @@ head:
 # useQuery
 
 :::info
-The hooks provided by `@ap0nia/eden-react-query` are a thin wrapper around @tanstack/react-query.
+The hooks provided by `@aydee-app/eden-react-query` are a thin wrapper around @tanstack/react-query.
 For in-depth information about options and usage patterns,
 refer to their docs on [queries](https://tanstack.com/query/v5/docs/framework/react/guides/queries).
 :::
@@ -58,7 +58,7 @@ You'll notice that you get autocompletion on the `input` based on what you have 
 
 ```typescript twoslash include eq-react-useQuery-application title=server.ts
 import { Elysia, t } from 'elysia'
-import { batchPlugin } from '@ap0nia/eden-react-query/server'
+import { batchPlugin } from '@aydee-app/eden-react-query/server'
 
 export const app = new Elysia().use(batchPlugin()).get(
   '/hello',
@@ -85,7 +85,7 @@ export type App = typeof app
 
 // @filename: eden.ts
 // ---cut---
-import { createEdenTreatyReactQuery } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 export const eden = createEdenTreatyReactQuery<App>()
@@ -98,7 +98,7 @@ export const eden = createEdenTreatyReactQuery<App>()
 
 // @filename: eden.ts
 // ---cut---
-import { createEdenTreatyReactQuery } from '@ap0nia/eden-react-query'
+import { createEdenTreatyReactQuery } from '@aydee-app/eden-react-query'
 import type { App } from './server'
 
 export const eden = createEdenTreatyReactQuery<App>()

@@ -48,7 +48,7 @@ export interface OnMessage<Data = unknown> extends MessageEvent {
  *
  * @example
  * ```ts
- * import { EdenWs } from '@ap0nia/eden'
+ * import { EdenWs } from '@aydee-app/eden'
  *
  * const edenWs = new EdenWS()
  *

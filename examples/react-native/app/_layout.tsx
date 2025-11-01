@@ -1,6 +1,6 @@
 import 'react-native-reanimated'
 
-import { httpLink } from '@ap0nia/eden-react-query'
+import { httpLink } from '@aydee-app/eden-react-query'
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import { QueryClient } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'

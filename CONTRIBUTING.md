@@ -32,7 +32,7 @@ in this monorepository. Alternatively, [`bun`](https://bun.sh) can also be used.
 1. Clone this repository and start working in the project's root directory.
 
 ```sh
-git clone https://github.com/ap0nia/eden-query
+git clone https://github.com/aydee-app/eden-query
 cd eden-query
 ```
 

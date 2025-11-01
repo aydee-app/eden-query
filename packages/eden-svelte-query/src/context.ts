@@ -3,7 +3,7 @@ import {
   type EdenClientError,
   type EdenRequestParams,
   parsePathsAndMethod,
-} from '@ap0nia/eden'
+} from '@aydee-app/eden'
 import type {
   CancelOptions,
   FetchQueryOptions,
