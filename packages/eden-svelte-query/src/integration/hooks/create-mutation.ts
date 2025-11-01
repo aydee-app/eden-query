@@ -192,16 +192,16 @@ export function edenCreateMutationOptions(
 
       return result.data
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data, variables, onMutateResult, context) => {
       const onSuccess = options?.onSuccess ?? defaultOptions.onSuccess
 
       if (config?.overrides?.useMutation?.onSuccess == null) {
-        return onSuccess?.(data, variables, context)
+        return onSuccess?.(data, variables, onMutateResult, context)
       }
 
       const meta: any = options?.meta ?? defaultOptions.meta
 
-      const originalFn = () => onSuccess?.(data, variables, context)
+      const originalFn = () => onSuccess?.(data, variables, onMutateResult, context)
 
       return config.overrides.useMutation.onSuccess({ meta, originalFn, queryClient })
     },

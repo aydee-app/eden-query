@@ -206,7 +206,7 @@ export type EdenProviderProps<TRouter extends AnyElysia, TSSRContext> = EdenCont
 
 export type EdenProvider<TRouter extends AnyElysia, TSSRContext> = (
   props: EdenProviderProps<TRouter, TSSRContext>,
-) => JSX.Element
+) => React.JSX.Element
 
 export type EdenContextProps<TRouter extends AnyElysia, TSSRContext> = EdenContextPropsBase<
   TRouter,
@@ -281,7 +281,7 @@ export function createUtilityFunctions<T extends AnyElysia>(
         ...queryOptions,
         queryKey,
         queryFn: async (queryFunctionContext) => {
-          let options: any = queryKey[1]?.input
+          const options: any = queryKey[1]?.input
 
           const params = {
             ...config,
@@ -439,7 +439,7 @@ export function createUtilityFunctions<T extends AnyElysia>(
         ...queryOptions,
         queryKey,
         queryFn: async () => {
-          let options: any = queryKey[1]?.input
+          const options: any = queryKey[1]?.input
 
           const params = {
             ...config,

@@ -1,7 +1,6 @@
 {
   "name": "elysiajs-eden",
   "version": "0.0.1",
-  "private": true,
   "description": "monorepo for eden, a fully type-safe Elysia.js client",
   "contributors": [
     {
@@ -24,7 +23,6 @@
     "tanstack-query"
   ],
   "workspaces": [
-    "documentation",
     "examples/*",
     "packages/*"
   ],
@@ -55,7 +53,6 @@
     "eslint-plugin-svelte": "^2.43.0",
     "globals": "^15.8.0",
     "lefthook": "^1.8.4",
-    "nx": "^19.5.7",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "svelte": "^4.2.18",

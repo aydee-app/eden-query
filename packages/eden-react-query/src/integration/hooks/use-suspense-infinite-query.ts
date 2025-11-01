@@ -18,14 +18,7 @@ import type { WithEdenQueryExtension } from '../internal/query-hook-extension'
 
 export interface EdenUseSuspenseInfiniteQueryOptions<TInput, TOutput, TError>
   extends DistributiveOmit<
-      UseSuspenseInfiniteQueryOptions<
-        TOutput,
-        TError,
-        TOutput,
-        TOutput,
-        any,
-        ExtractCursorType<TInput>
-      >,
+      UseSuspenseInfiniteQueryOptions<TOutput, TError, TOutput, any, ExtractCursorType<TInput>>,
       'queryKey' | 'initialPageParam'
     >,
     EdenQueryBaseOptions {

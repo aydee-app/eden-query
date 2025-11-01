@@ -27,14 +27,7 @@ import { getQueryKey } from '../internal/query-key'
 
 export interface EdenCreateInfiniteQueryOptions<TInput, TOutput, TError>
   extends DistributiveOmit<
-      CreateInfiniteQueryOptions<
-        TOutput,
-        TError,
-        TOutput,
-        TOutput,
-        any,
-        ExtractQueryCursor<TInput>
-      >,
+      CreateInfiniteQueryOptions<TOutput, TError, TOutput, any, ExtractQueryCursor<TInput>>,
       'queryKey' | 'initialPageParam'
     >,
     EdenQueryBaseOptions {

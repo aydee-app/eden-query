@@ -25,7 +25,7 @@ import { isServerQuery } from './use-query'
 
 export interface EdenUseInfiniteQueryOptions<TInput, TOutput, TError>
   extends DistributiveOmit<
-      UseInfiniteQueryOptions<TOutput, TError, TOutput, TOutput, any, ExtractQueryCursor<TInput>>,
+      UseInfiniteQueryOptions<TOutput, TError, TOutput, any, ExtractQueryCursor<TInput>>,
       'queryKey' | 'initialPageParam'
     >,
     EdenQueryBaseOptions {

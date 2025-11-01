@@ -277,7 +277,7 @@ export async function resolveEdenRequest<
 
   const headers = await processHeaders(params.headers, path, params.options?.headers)
 
-  let q = buildQueryString(params.options?.query)
+  const q = buildQueryString(params.options?.query)
 
   if (params.method === 'subscribe') {
     const domain = typeof params.domain === 'string' ? params.domain : DEMO_DOMAIN
@@ -302,7 +302,7 @@ export async function resolveEdenRequest<
     body: params.body as any,
     ...params.fetch,
     headers,
-  } satisfies FetchRequestInit
+  } satisfies BunFetchRequestInit
 
   fetchInit.headers = {
     ...headers,
