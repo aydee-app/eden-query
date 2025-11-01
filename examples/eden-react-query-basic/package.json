@@ -11,7 +11,7 @@
     "@aydee-app/eden-react-query": "workspace:^",
     "@elysiajs/cors": "^1.1.0",
     "@tanstack/react-query": "^5.51.16",
-    "elysia": "1.1.19",
+    "elysia": "^1.4.13",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.26.0",

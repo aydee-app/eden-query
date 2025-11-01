@@ -1,4 +1,4 @@
-/* eslint-disable no-dupe-class-members */
+ 
 
 import { type Noop, noop } from '../../utils/noop'
 
@@ -94,7 +94,7 @@ export class Subscribable<TValue = any, TError = any> {
     let unsubscribed = false
     let teardownImmediately = false
 
-    let unsubscribe = () => {
+    const unsubscribe = () => {
       if (unsubscribed) return
 
       if (teardownRef === null) {
